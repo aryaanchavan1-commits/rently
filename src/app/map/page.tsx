@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -33,6 +33,8 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [locationQuery, setLocationQuery] = useState("");
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
+  const [mapKey, setMapKey] = useState(0);
 
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
 
@@ -58,6 +60,24 @@ export default function MapPage() {
 
   const selectedProperty = selectedId ? properties.find((p) => p.id === selectedId) : null;
 
+  // Compute map center based on filtered properties or user location
+  const mapCenter = useMemo((): [number, number] => {
+    if (userCoords) return userCoords;
+    if (filtered.length > 0) {
+      const withCoords = filtered.filter((p) => p.lat && p.lng);
+      if (withCoords.length > 0) {
+        const avgLat = withCoords.reduce((s, p) => s + p.lat, 0) / withCoords.length;
+        const avgLng = withCoords.reduce((s, p) => s + p.lng, 0) / withCoords.length;
+        return [avgLat, avgLng];
+      }
+    }
+    return [18.5204, 73.8567]; // Pune default
+  }, [filtered, userCoords]);
+
+  const handleLocationFound = useCallback((lat: number, lng: number) => {
+    setUserCoords([lat, lng]);
+  }, []);
+
   return (
     <div className="app">
       <Navbar />
@@ -68,11 +88,11 @@ export default function MapPage() {
               🗺️ {t("Explore on Map", "नकाशावर शोधा", "नक्शे पर खोजें")}
             </h1>
             <p style={{ fontSize: 14, color: "#4b5675", marginTop: 4 }}>
-              {t("Click markers to see property details", "मालमत्तेचे तपशील पहण्यासाठी मार्कर दाबा", "प्रॉपर्टी विवरण देखने के लिए मार्कर पर क्लिक करें")}
+              {t("Click markers to see property details, or use your live location", "मालमत्तेचे तपशील पहण्यासाठी मार्कर दाबा, किंवा तुमचे लाइव्ह स्थान वापरा", "प्रॉपर्टी विवरण देखने के लिए मार्कर पर क्लिक करें, या अपना लाइव लोकेशन उपयोग करें")}
             </p>
           </div>
 
-          {/* Location search + city chips */}
+          {/* Location search + city chips + live location */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "center", flexWrap: "wrap" }}>
               <div style={{ position: "relative", flex: "1 1 200px" }}>
@@ -85,13 +105,32 @@ export default function MapPage() {
                   style={{ paddingLeft: 36 }}
                 />
               </div>
-              <button onClick={() => setLocationQuery("")} className={`btn ${!locationQuery ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px" }}>
+              <button
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        setUserCoords([pos.coords.latitude, pos.coords.longitude]);
+                        setLocationQuery("");
+                        setMapKey((k) => k + 1);
+                      },
+                      () => {},
+                      { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                  }
+                }}
+                className="btn btn-primary"
+                style={{ padding: "10px 16px", fontSize: 13, display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
+              >
+                📍 {t("My Location", "माझे स्थान", "मेरा स्थान")}
+              </button>
+              <button onClick={() => { setLocationQuery(""); setUserCoords(null); setMapKey((k) => k + 1); }} className={`btn ${!locationQuery && !userCoords ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px" }}>
                 {t("All", "सर्व", "सभी")}
               </button>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {uniqueCities.map((c) => (
-                <button key={c} onClick={() => setLocationQuery(c)} className={`btn ${locationQuery === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "6px 12px", fontSize: 12 }}>
+                <button key={c} onClick={() => { setLocationQuery(c); setUserCoords(null); setMapKey((k) => k + 1); }} className={`btn ${locationQuery === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "6px 12px", fontSize: 12 }}>
                   {c}
                 </button>
               ))}
@@ -104,9 +143,14 @@ export default function MapPage() {
             <div style={{ display: "grid", gridTemplateColumns: selectedId ? "1fr 340px" : "1fr", gap: 20, alignItems: "start" }} className="map-layout">
               <div>
                 <PropertyMap
+                  key={mapKey}
                   properties={filtered.map((p) => ({ ...p, images: p.images }))}
+                  center={mapCenter}
+                  zoom={userCoords ? 13 : 7}
                   height="500px"
                   onPropertyClick={(id) => setSelectedId(id)}
+                  showUserLocation={!userCoords}
+                  onLocationSelect={handleLocationFound}
                 />
               </div>
 

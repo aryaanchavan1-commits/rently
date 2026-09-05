@@ -12,17 +12,17 @@ interface LangCtx {
 }
 
 const LangContext = createContext<LangCtx>({
-  lang: "en",
+  lang: "mr",
   setLang: () => {},
-  t: translations.en,
+  t: translations.mr,
 });
 
 export function LangProvider({ children, defaultLang }: { children: ReactNode; defaultLang?: LangKey }) {
   const [lang, setLangState] = useState<LangKey>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("rently-lang") as LangKey) || defaultLang || "en";
+      return (localStorage.getItem("rently-lang") as LangKey) || defaultLang || "mr";
     }
-    return defaultLang || "en";
+    return defaultLang || "mr";
   });
 
   const setLang = useCallback((l: LangKey) => {
