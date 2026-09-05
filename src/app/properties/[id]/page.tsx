@@ -8,10 +8,12 @@ import AIChat from "@/components/AIChat";
 
 interface PropData {
   id: string; title: string; type: string; price: number; deposit: number;
+  maintenance: number; parking: number;
   address: string; area: string; city: string; bedrooms: number; bathrooms: number;
   furnishing: string; availableFrom: string; images: string[]; amenities: string[];
   rules: string; description: string; contactPhone: string;
   ownerName: string; ownerId: string; isVerified: boolean; views: number;
+  freshness: { available: boolean; rentConfirmed: boolean; photosUpdated: boolean; locationChecked: boolean; lastVerified: string };
 }
 
 export default function PropertyDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -185,9 +187,84 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
                   <span style={{ fontSize: 36, fontWeight: 800, color: "#0b1437" }}>₹{p.price.toLocaleString("en-IN")}</span>
                   <span style={{ fontSize: 14, color: "#4b5675" }}>/month</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#4b5675", margin: "4px 0 16px" }}>
-                  Deposit: ₹{p.deposit.toLocaleString("en-IN")} · Available: {p.availableFrom || "Immediately"}
+
+                {/* True Cost Breakdown */}
+                <div style={{ background: "#f4f6fb", borderRadius: 12, padding: 14, marginTop: 12, marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0b1437", marginBottom: 8 }}>True Monthly Cost</div>
+                  <div style={{ display: "grid", gap: 6 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                      <span style={{ color: "#4b5675" }}>Rent</span>
+                      <span style={{ fontWeight: 600 }}>₹{p.price.toLocaleString("en-IN")}</span>
+                    </div>
+                    {(p.maintenance || 0) > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                        <span style={{ color: "#4b5675" }}>Maintenance</span>
+                        <span style={{ fontWeight: 600 }}>₹{p.maintenance.toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
+                    {(p.parking || 0) > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                        <span style={{ color: "#4b5675" }}>Parking</span>
+                        <span style={{ fontWeight: 600 }}>₹{p.parking.toLocaleString("en-IN")}</span>
+                      </div>
+                    )}
+                    <div style={{ borderTop: "1px solid #d3d8e1", paddingTop: 6, display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 800 }}>
+                      <span style={{ color: "#0b1437" }}>Real monthly cost</span>
+                      <span style={{ color: "#ff6a3d" }}>₹{(p.price + (p.maintenance || 0) + (p.parking || 0)).toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginTop: 8, paddingTop: 8, borderTop: "1px solid #d3d8e1" }}>
+                    <span style={{ color: "#4b5675" }}>Deposit</span>
+                    <span style={{ fontWeight: 700 }}>₹{p.deposit.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13, color: "#4b5675", margin: "0 0 16px" }}>
+                  Available: {p.availableFrom || "Immediately"}
                 </p>
+
+                {/* Freshness Score */}
+                {p.freshness && (() => {
+                  const f = p.freshness;
+                  const checks = [
+                    { label: "Availability", ok: f.available },
+                    { label: "Rent confirmed", ok: f.rentConfirmed },
+                    { label: "Photos updated", ok: f.photosUpdated },
+                    { label: "Location checked", ok: f.locationChecked },
+                  ];
+                  const score = (f.available ? 30 : 0) + (f.rentConfirmed ? 25 : 0) + (f.photosUpdated ? 25 : 0) + (f.locationChecked ? 20 : 0);
+                  const daysSince = f.lastVerified ? Math.floor((Date.now() - new Date(f.lastVerified).getTime()) / 86400000) : 999;
+                  return (
+                    <div style={{ background: "#f4f6fb", borderRadius: 12, padding: 14, marginBottom: 16 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#0b1437" }}>Listing Freshness</span>
+                        <span style={{
+                          fontSize: 14, fontWeight: 900,
+                          color: score >= 90 ? "#10b981" : score >= 70 ? "#0d6efd" : score >= 50 ? "#f59e0b" : "#ef4444",
+                        }}>{score}/100</span>
+                      </div>
+                      <div style={{ width: "100%", height: 6, borderRadius: 3, background: "#e3e7ef", marginBottom: 10 }}>
+                        <div style={{
+                          width: `${score}%`, height: "100%", borderRadius: 3,
+                          background: score >= 90 ? "#10b981" : score >= 70 ? "#0d6efd" : score >= 50 ? "#f59e0b" : "#ef4444",
+                        }} />
+                      </div>
+                      <div style={{ display: "grid", gap: 5 }}>
+                        {checks.map((c) => (
+                          <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
+                            <span style={{ color: c.ok ? "#10b981" : "#d3d8e1", fontWeight: 700 }}>{c.ok ? "✓" : "○"}</span>
+                            <span style={{ color: c.ok ? "#0b1437" : "#9ca3af" }}>{c.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {daysSince > 0 && (
+                        <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 8 }}>
+                          {daysSince <= 2 ? "🟢 Verified " + daysSince + " days ago" : daysSince <= 7 ? "🟡 Verified " + daysSince + " days ago" : "🔴 Verified " + daysSince + " days ago"}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f4f6fb", borderRadius: 12, marginBottom: 16 }}>
                   <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>

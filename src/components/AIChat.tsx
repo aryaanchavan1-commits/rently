@@ -13,7 +13,13 @@ interface Message {
 interface SearchResult {
   id: string; title: string; price: number; type: string; area: string; city: string;
   bedrooms: number; bathrooms: number; furnishing: string; images: string[];
-  amenities: string[]; isVerified: boolean;
+  amenities: string[]; isVerified: boolean; maintenance?: number; parking?: number;
+}
+
+interface CommuteResult {
+  id: string; title: string; price: number; type: string; area: string; city: string;
+  bedrooms: number; images: string[];
+  commute: { duration: number; distance: number; mode: string; destination: string };
 }
 
 interface SearchState {
@@ -26,16 +32,130 @@ interface SearchState {
   furnishing: string;
   area: string;
   purpose: string;
+  commuteDest: string;
+  commuteMaxMin: number;
 }
 
 const CITIES = ["Mumbai", "Pune", "Thane", "Navi Mumbai", "Nagpur", "Nashik"];
-const TYPES = ["apartment", "house", "room", "pg", "office"];
-const PURPOSES: Record<string, string[]> = {
-  "🏠 Family Stay": ["apartment", "house"],
-  "💼 Work/Office": ["office", "apartment"],
-  "🎓 Student/Hostel": ["pg", "room"],
-  "👨‍💻 Individual Room": ["room", "pg"],
+
+const DESTINATIONS: Record<string, string> = {
+  "university": "university", "college": "university", "विद्यापीठ": "university", "विद्यालय": "university", "महाविद्यालय": "university",
+  "विश्वविद्यालय": "university", "कॉलेज": "university",
+  "office": "office", "ऑफिस": "office", "कार्यालय": "office", "काम": "office",
+  "metro": "metro", "मेट्रो": "metro", "station": "station", "स्टेशन": "station",
+  "hinjewadi": "hinjewadi", "हिंजवडी": "hinjewadi", "baner": "baner", "बानेर": "baner",
+  "kothrud": "kothrud", "कोठरुड": "kothrud", "deccan": "deccan", "दक्कन": "deccan",
+  "thane": "thane station", "ठाणे": "thane station",
+  "powai": "powai", "पोवई": "powai", "andheri": "andheri", "अंधेरी": "andheri",
+  "bandra": "bandra", "बांद्रा": "bandra", "vashi": "vashi", "वाशी": "vashi",
+  "pune university": "pune university", "पुणे विद्यापीठ": "pune university",
+  "savitribai": "pune university", "शिवाजी युनिव्हर्सिटी": "shivaji university",
+  "iit": "iit bombay", "आयआयटी": "iit bombay",
+  "coep": "coep", "सीओईपी": "coep", "vit": "vit pune", "व्हीआयटी": "vit pune",
 };
+
+function detectIntent(input: string): { intent: string; city?: string; budget?: number; bedrooms?: number; commuteDest?: string; commuteMin?: number; type?: string; area?: string } | null {
+  const lower = input.toLowerCase();
+
+  // Commute intent detection
+  const commuteKeywords = ["commute", "प्रवास", "reach", "पोहोच", "minutes", "मिनिट", "min", "minute", "within", "आत", "मध्ये", "office jaun", "college jaun", "पोहोचता", "येता", "travel"];
+  if (commuteKeywords.some((k) => lower.includes(k))) {
+    let dest = "";
+    let maxMin = 30;
+    for (const [key, val] of Object.entries(DESTINATIONS)) {
+      if (lower.includes(key)) { dest = val; break; }
+    }
+    const minMatch = lower.match(/(\d+)\s*(min|minute|मिनिट|मिनिटे)/);
+    if (minMatch) maxMin = parseInt(minMatch[1]);
+    if (!dest) {
+      const words = lower.split(/\s+/);
+      for (const w of words) {
+        if (DESTINATIONS[w]) { dest = DESTINATIONS[w]; break; }
+      }
+    }
+    return { intent: "commute", commuteDest: dest || "pune university", commuteMin: maxMin };
+  }
+
+  // Natural language property search in Marathi/Hindi
+  const marathiPatterns = [
+    /(\d+)\s*(?:बीएचकी|bhk|BHK)/i,
+    /(\d+)\s*(?:बेडरूम|bedroom)/i,
+  ];
+  const hindiPatterns = [
+    /(\d+)\s*(?:बीएचके|bhk|BHK)/i,
+    /(\d+)\s*(?:बेडरूम|bedroom)/i,
+  ];
+
+  let bedrooms = 0;
+  for (const p of [...marathiPatterns, ...hindiPatterns]) {
+    const m = lower.match(p);
+    if (m) { bedrooms = parseInt(m[1]); break; }
+  }
+
+  // Budget detection (supports Devanagari numbers too)
+  const devanagariMap: Record<string, string> = { "०": "0", "१": "1", "२": "2", "३": "3", "४": "4", "५": "5", "६": "6", "७": "7", "८": "8", "९": "9" };
+  let normalized = lower;
+  for (const [d, n] of Object.entries(devanagariMap)) {
+    normalized = normalized.replaceAll(d, n);
+  }
+  let budget = 0;
+  const budgetPatterns = [
+    /(\d[\d,]*)\s*(?:हजार|hazaar|k|千元|च्या\s*आत|मध्ये|under|below|ते|पर्यंत|budget)/i,
+    /(?:budget|बजेट|किंमत|price)\s*[:=]?\s*(\d[\d,]*)/i,
+    /(\d[\d,]*)\s*(?:rs|₹|inr)/i,
+  ];
+  for (const p of budgetPatterns) {
+    const m = normalized.match(p);
+    if (m) {
+      let val = parseInt(m[1].replace(/,/g, ""));
+      if (lower.includes("हजार") || lower.includes("hazaar")) val *= 1000;
+      if (val < 1000 && val > 5) val *= 1000;
+      budget = val;
+      break;
+    }
+  }
+
+  // City detection
+  let city = "";
+  const cityAliases: Record<string, string> = {
+    "मुंबई": "Mumbai", "बॉम्बे": "Mumbai", "mumbai": "Mumbai",
+    "पुणे": "Pune", "pune": "Pune", "पुण्यात": "Pune", "पुण्याच्या": "Pune",
+    "ठाणे": "Thane", "thane": "Thane",
+    "नवी मुंबई": "Navi Mumbai", "navi mumbai": "Navi Mumbai", "नवीमुंबई": "Navi Mumbai",
+    "नागपूर": "Nagpur", "nagpur": "Nagpur",
+    "नाशिक": "Nashik", "nashik": "Nashik",
+  };
+  for (const [alias, c] of Object.entries(cityAliases)) {
+    if (normalized.includes(alias)) { city = c; break; }
+  }
+
+  // Type detection
+  let type = "";
+  if (lower.includes("pg") || lower.includes("hostel") || lower.includes("छात्रावास")) type = "pg";
+  else if (lower.includes("room") || lower.includes("खोली") || lower.includes("कमरा")) type = "room";
+  else if (lower.includes("office") || lower.includes("ऑफिस") || lower.includes("कार्यालय")) type = "office";
+  else if (lower.includes("flat") || lower.includes("apartment") || lower.includes("फ्लॅट") || lower.includes("फ्लैट")) type = "apartment";
+  else if (lower.includes("house") || lower.includes("घर") || lower.includes("निवास")) type = "house";
+
+  // Area detection
+  let area = "";
+  const areaKeywords = ["near", "जवळ", "पासोे", "कडे", "मध्ये", "in", "at"];
+  for (const kw of areaKeywords) {
+    const idx = normalized.indexOf(kw);
+    if (idx !== -1) {
+      const after = normalized.slice(idx + kw.length).trim();
+      const words = after.split(/\s+/).filter((w) => w.length > 2).slice(0, 2);
+      if (words.length > 0) area = words.join(" ");
+      break;
+    }
+  }
+
+  if (bedrooms > 0 || budget > 0 || city || type || area) {
+    return { intent: "property_search", city, budget, bedrooms, type, area };
+  }
+
+  return null;
+}
 
 export default function AIChat() {
   const { user } = useAuth();
@@ -47,6 +167,7 @@ export default function AIChat() {
   const [searchState, setSearchState] = useState<SearchState>({
     step: "welcome", city: "", type: "", minPrice: 500, maxPrice: 100000,
     bedrooms: 0, furnishing: "", area: "", purpose: "",
+    commuteDest: "", commuteMaxMin: 30,
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -59,15 +180,15 @@ export default function AIChat() {
       const name = user?.name?.split(" ")[0] || "there";
       const greet = lang === "mr" ? `नमस्कार, ${name}! 👋` : lang === "hi" ? `नमस्ते, ${name}! 👋` : `Hey ${name}! 👋`;
       const intro = lang === "mr"
-        ? `मी Ria आहे, तुमची AI rental assistant. मी तुम्हाला योग्य मालमत्ता शोधण्यास मदत करीन. 🏠\n\nतुम्हाला काय हवे आहे? खालील पर्याय निवडा:`
+        ? `मी Ria आहे, तुमची AI rental assistant. मी तुम्हाला योग्य मालमत्ता शोधण्यास मदत करीन. 🏠\n\nतुम्ही मला मराठी किंवा हिंदीमध्ये सहज बात करू शकता!\n\nतुम्हाला काय हवे आहे?`
         : lang === "hi"
-        ? `मैं Ria हूँ, आपकी AI rental assistant। मैं आपको सही प्रॉपर्टी खोजने में मदद करूँगी। 🏠\n\nआपको क्या चाहिए? नीचे विकल्प चुनें:`
-        : `I'm Ria, your AI rental assistant. I'll help you find the perfect property. 🏠\n\nWhat are you looking for? Choose an option:`;
-      const purposeMsg = lang === "mr"
-        ? "🏠 Family Stay — कुटुंबासाठी\n💼 Work/Office — कामासाठी\n🎓 Student/Hostel — विद्यार्थ्यांसाठी\n👨‍💻 Individual Room — एकट्यासाठी"
-        : lang === "hi"
-        ? "🏠 Family Stay — परिवार के लिए\n💼 Work/Office — काम/ऑफिस के लिए\n🎓 Student/Hostel — छात्रावास के लिए\n👨‍💻 Individual Room — अकेले कमरे के लिए"
-        : "🏠 Family Stay\n💼 Work/Office\n🎓 Student/Hostel\n👨‍💻 Individual Room";
+        ? `मैं Ria हूँ, आपकी AI rental assistant। मैं आपको सही प्रॉपर्टी खोजने में मदद करूँगी। 🏠\n\nआप मुझसे हिंदी या मराठी में बात कर सकते हैं!\n\nआपको क्या चाहिए?`
+        : `I'm Ria, your AI rental assistant. I'll help you find the perfect property. 🏠\n\nYou can talk to me in English, Marathi, or Hindi!\n\nWhat are you looking for?`;
+      const purposeMsg = "🏠 " + t("Family Stay", "कुटुंबासाठी", "परिवार के लिए") +
+        "\n💼 " + t("Work/Office", "कामासाठी", "काम/ऑफिस के लिए") +
+        "\n🎓 " + t("Student/Hostel", "विद्यार्थ्यांसाठी", "छात्रावास के लिए") +
+        "\n🚗 " + t("Commute Search", "प्रवास शोध", "यात्रा खोज") +
+        "\n💬 " + t("Or just tell me naturally!", "किंवा थेट सांगा!", "या सीधे बताएं!");
       setMessages([{ role: "assistant", content: greet + "\n\n" + intro + "\n\n" + purposeMsg }]);
       setSearchState((s) => ({ ...s, step: "purpose" }));
     }
@@ -82,9 +203,19 @@ export default function AIChat() {
   async function fetchSearch(filters: Record<string, unknown>): Promise<SearchResult[]> {
     try {
       const res = await fetch("/api/properties/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filters),
+      });
+      const data = await res.json();
+      return data.success ? data.results : [];
+    } catch { return []; }
+  }
+
+  async function fetchCommute(dest: string, maxMin: number): Promise<CommuteResult[]> {
+    try {
+      const res = await fetch("/api/commute", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination: dest, maxMinutes: maxMin }),
       });
       const data = await res.json();
       return data.success ? data.results : [];
@@ -96,162 +227,267 @@ export default function AIChat() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
-
-    await new Promise((r) => setTimeout(r, 600 + Math.random() * 800));
+    await new Promise((r) => setTimeout(r, 500 + Math.random() * 600));
 
     const lower = userInput.toLowerCase();
     let reply = "";
     let results: SearchResult[] = [];
+    let commuteResults: CommuteResult[] = [];
     const newState = { ...searchState };
 
+    // Check if user is in guided flow
+    if (searchState.step === "results") {
+      if (lower.includes("search") || lower.includes("new") || lower.includes("शोध") || lower.includes("नवीन") || lower.includes("खोजें") || lower.includes("नई") || lower.includes("नवीन") || lower.includes("सुरू")) {
+        reply = t("Let's start fresh! What are you looking for?", "नवीन सुरुवत! तुम्हाला काय हवे आहे?", "फिर से शुरू करते हैं! आपको क्या चाहिए?");
+        reply += "\n\n🏠 " + t("Family Stay", "कुटुंबासाठी", "परिवार के लिए") + "\n💼 " + t("Work/Office", "कामासाठी", "काम/ऑफिस") + "\n🎓 " + t("Student/Hostel", "विद्यार्थ्यांसाठी", "छात्रावास") + "\n🚗 " + t("Commute Search", "प्रवास शोध", "यात्रा खोज");
+        newState.step = "purpose";
+        setSearchState(newState);
+        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+        setIsTyping(false);
+        return;
+      }
+    }
+
+    // Try natural language detection first
+    const detected = detectIntent(userInput);
+
+    if (detected && detected.intent === "commute") {
+      const dest = detected.commuteDest || "pune university";
+      const maxMin = detected.commuteMin || 30;
+      reply = t(
+        `🚗 Searching properties within ${maxMin} min commute to ${dest}…`,
+        `🚗 ${dest} च्या ${maxMin} मिनिटांच्या प्रवासात मालमत्ता शोधत आहे…`,
+        `🚗 ${dest} तक ${maxMin} मिनट की यात्रा में प्रॉपर्टी खोज रहे हैं…`
+      );
+      commuteResults = await fetchCommute(dest, maxMin);
+      newState.step = "results";
+      newState.commuteDest = dest;
+      newState.commuteMaxMin = maxMin;
+      setSearchState(newState);
+
+      if (commuteResults.length > 0) {
+        const summary = t(
+          `Found ${commuteResults.length} properties within ${maxMin} min:`,
+          `${commuteResults.length} मालमत्ता ${maxMin} मिनिटांमध्ये सापडल्या:`,
+          `${commuteResults.length} प्रॉपर्टी ${maxMin} मिनट में मिलीं:`
+        );
+        reply += "\n\n" + summary;
+        setMessages((prev) => [...prev, {
+          role: "assistant", content: reply,
+          properties: commuteResults.map((r) => ({
+            id: r.id, title: r.title, price: r.price, type: r.type, area: r.area, city: r.city,
+            bedrooms: r.bedrooms, bathrooms: 0, furnishing: "", images: r.images,
+            amenities: [], isVerified: false,
+          })),
+        }]);
+        setIsTyping(false);
+        return;
+      } else {
+        reply += "\n\n" + t(
+          "No properties found in that commute range. Try increasing the time.",
+          "त्या प्रवास वेळेत मालमत्ता सापडली नाही. वेळ वाढवून पहा.",
+          "उस यात्रा सीमा में कोई प्रॉपर्टी नहीं मिली। समय बढ़ाकर देखें।"
+        );
+        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+        setIsTyping(false);
+        return;
+      }
+    }
+
+    if (detected && detected.intent === "property_search") {
+      if (detected.city) newState.city = detected.city;
+      if (detected.budget) newState.maxPrice = detected.budget;
+      if (detected.bedrooms) newState.bedrooms = detected.bedrooms;
+      if (detected.type) newState.type = detected.type;
+      if (detected.area) newState.area = detected.area;
+
+      const filters: Record<string, unknown> = { minPrice: 500, maxPrice: newState.maxPrice };
+      if (newState.city) filters.city = newState.city;
+      if (newState.type) filters.type = newState.type;
+      if (newState.bedrooms > 0) filters.bedrooms = newState.bedrooms;
+      if (newState.area) filters.area = newState.area;
+
+      const parts = [];
+      if (newState.bedrooms > 0) parts.push(`${newState.bedrooms}BHK`);
+      if (newState.city) parts.push(newState.city);
+      if (newState.maxPrice < 100000) parts.push(`under ₹${newState.maxPrice.toLocaleString("en-IN")}`);
+      if (newState.type) parts.push(newState.type);
+
+      reply = t(
+        `🔍 Searching for ${parts.join(" in ")}…`,
+        `🔍 ${parts.join(" ")} शोधत आहे…`,
+        `🔍 ${parts.join(" ")} खोज रहे हैं…`
+      );
+      results = await fetchSearch(filters);
+      newState.step = "results";
+      setSearchState(newState);
+
+      if (results.length === 0) {
+        reply += "\n\n" + t(
+          "No exact matches. Let me broaden the search…",
+          "जुळणी सापडली नाही. शोध विस्तारत आहे…",
+          "कोई मैच नहीं मिला। खोज विस्तारित हो रही है…"
+        );
+        results = await fetchSearch({ minPrice: 500, maxPrice: newState.maxPrice });
+      }
+
+      if (results.length > 0) {
+        const summary = t(
+          `Found ${results.length} properties:`,
+          `${results.length} मालमत्ता सापडल्या:`,
+          `${results.length} प्रॉपर्टी मिलीं:`
+        );
+        reply += "\n\n" + summary + "\n\n" + t("Type 'search' to start over.", "पुन्हा सुरू करण्यासाठी 'search' टाइप करा.", "फिर से शुरू करने के लिए 'search' टाइप करें।");
+        setMessages((prev) => [...prev, { role: "assistant", content: reply, properties: results }]);
+        setIsTyping(false);
+        return;
+      }
+    }
+
+    // Guided flow fallback
     switch (searchState.step) {
       case "purpose": {
         if (lower.includes("family") || lower.includes("कुटुंब") || lower.includes("परिवार") || lower.includes("🏠 family")) {
-          newState.purpose = "family";
-          newState.type = "";
-          reply = t(
-            "Great choice! 🏠\n\nNow, which city in Maharashtra?",
-            "छान निवड! 🏠\n\nआता, महाराष्ट्रातील कोणत्या शहरात?",
-            "बहुत अच्छा! 🏠\n\nअब, महाराष्ट्र के किस शहर में?"
-          );
+          newState.purpose = "family"; newState.type = "";
+          reply = t("Great choice! 🏠\n\nWhich city in Maharashtra?", "छान निवड! 🏠\n\nकोणत्या शहरात?", "बहुत अच्छा! 🏠\n\nकिस शहर में?");
           reply += "\n\n" + CITIES.join(" · ");
           newState.step = "city";
-        } else if (lower.includes("work") || lower.includes("office") || lower.includes("काम") || lower.includes("💼")) {
-          newState.purpose = "work";
-          newState.type = "office";
-          reply = t(
-            "Office space, got it! 💼\n\nWhich city?",
-            "ऑफिस स्पेस, समजले! 💼\n\nकोणत्या शहरात?",
-            "ऑफिस स्पेस, समझ गए! 💼\n\nकिस शहर में?"
-          );
+        } else if (lower.includes("work") || lower.includes("office") || lower.includes("काम") || lower.includes("💼") || lower.includes("ऑफिस")) {
+          newState.purpose = "work"; newState.type = "office";
+          reply = t("Office space, got it! 💼\n\nWhich city?", "ऑफिस स्पेस, समजले! 💼\n\nकोणत्या शहरात?", "ऑफिस स्पेस, समझ गए! 💼\n\nकिस शहर में?");
           reply += "\n\n" + CITIES.join(" · ");
           newState.step = "city";
-        } else if (lower.includes("student") || lower.includes("hostel") || lower.includes("pg") || lower.includes("🎓") || lower.includes("विद्यार्थी") || lower.includes("छात्र")) {
-          newState.purpose = "student";
-          newState.type = "pg";
-          reply = t(
-            "Student-friendly options! 🎓\n\nWhich city?",
-            "विद्यार्थी अनुकूल पर्याय! 🎓\n\nकोणत्या शहरात?",
-            "छात्रों के लिए! 🎓\n\nकिस शहर में?"
-          );
+        } else if (lower.includes("student") || lower.includes("hostel") || lower.includes("pg") || lower.includes("🎓") || lower.includes("विद्यार्थी") || lower.includes("छात्र") || lower.includes("छात्रावास")) {
+          newState.purpose = "student"; newState.type = "pg";
+          reply = t("Student-friendly options! 🎓\n\nWhich city?", "विद्यार्थी अनुकूल! 🎓\n\nकोणत्या शहरात?", "छात्रों के लिए! 🎓\n\nकिस शहर में?");
           reply += "\n\n" + CITIES.join(" · ");
           newState.step = "city";
-        } else if (lower.includes("room") || lower.includes("individual") || lower.includes("एकल") || lower.includes("👨‍💻") || lower.includes("कमरा")) {
-          newState.purpose = "individual";
-          newState.type = "room";
+        } else if (lower.includes("commute") || lower.includes("प्रवास") || lower.includes("reach") || lower.includes("🚗") || lower.includes("travel") || lower.includes("minutes") || lower.includes("मिनिट")) {
+          newState.purpose = "commute";
           reply = t(
-            "Single room got it! 👨‍💻\n\nWhich city?",
-            "एकल खोली, समजले! 👨‍💻\n\nकोणत्या शहरात?",
-            "सिंगल रूम, समझ गए! 👨‍💻\n\nकिस शहर में?"
+            "🚗 Commute search!\n\nWhere do you need to go? (e.g. Pune University, Hinjewadi IT Park…)",
+            "🚗 प्रवास शोध!\n\nतुम्हाला कुठे जावे लागते? (उदा. पुण्याचे विद्यापीठ, हिंजवडी IT पार्क…)",
+            "🚗 यात्रा खोज!\n\nआपको कहाँ जाना है? (जैसे पुणे यूनिवर्सिटी, हिंजवडी IT पार्क…)"
           );
-          reply += "\n\n" + CITIES.join(" · ");
-          newState.step = "city";
+          newState.step = "commute_dest";
         } else {
           reply = t(
-            "Please choose one of the options:\n\n🏠 Family Stay\n💼 Work/Office\n🎓 Student/Hostel\n👨‍💻 Individual Room",
-            "कृपया एखादा पर्याय निवडा:\n\n🏠 कुटुंबासाठी\n💼 कामासाठी\n🎓 विद्यार्थ्यांसाठी\n👨‍💻 एकट्यासाठी",
-            "कृपया एक विकल्प चुनें:\n\n🏠 परिवार के लिए\n💼 काम/ऑफिस के लिए\n🎓 छात्रावास के लिए\n👨‍💻 अकेले कमरे के लिए"
+            "I can help in many ways! Choose or type naturally:\n\n🏠 Family Stay\n💼 Work/Office\n🎓 Student/Hostel\n🚗 Commute Search\n\nOr just say: 'I need 2BHK in Pune under ₹15000'",
+            "मी अनेक मार्गांनी मदत करू शकतो! निवडा किंवा थेट सांगा:\n\n🏠 कुटुंबासाठी\n💼 कामासाठी\n🎓 विद्यार्थ्यांसाठी\n🚗 प्रवास शोध\n\nकिंवा थेट सांगा: 'मला पुण्यात १५ हजाराच्या आत २ BHK पाहिजे'",
+            "मैं कई तरह से मदद कर सकता हूँ! चुनें या सीधे बताएं:\n\n🏠 परिवार के लिए\n💼 काम/ऑफिस\n🎓 छात्रावास\n🚗 यात्रा खोज\n\nया सीधे कहें: 'मुझे पुणे में 15 हजार के अंदर 2BHK चाहिए'"
           );
         }
         break;
       }
 
       case "city": {
-        const matchedCity = CITIES.find((c) => lower.includes(c.toLowerCase()));
+        const cityMap: Record<string, string> = { "मुंबई": "Mumbai", "पुणे": "Pune", "ठाणे": "Thane", "नवी मुंबई": "Navi Mumbai", "नागपूर": "Nagpur", "नाशिक": "Nashik", "पुण्यात": "Pune" };
+        let matchedCity = CITIES.find((c) => lower.includes(c.toLowerCase()));
+        if (!matchedCity) {
+          for (const [alias, c] of Object.entries(cityMap)) {
+            if (lower.includes(alias)) { matchedCity = c; break; }
+          }
+        }
         if (matchedCity) {
           newState.city = matchedCity;
-          if (newState.purpose === "student") {
-            reply = t(
-              `Perfect, ${matchedCity}! 🎓\n\nWhat's your monthly budget? (min ₹500)`,
-              `परफेक्ट, ${matchedCity}! 🎓\n\nतुमचा मासिक बजेट काय आहे? (किमान ₹500)`,
-              `बहुत अच्छा, ${matchedCity}! 🎓\n\nमासिक बजट क्या है? (न्यूनतम ₹500)`
-            );
-            newState.step = "budget";
-          } else if (newState.purpose === "individual") {
-            reply = t(
-              `${matchedCity} it is! 👨‍💻\n\nYour budget range? (min ₹500)`,
-              `${matchedCity} ठीक आहे! 👨\u200D💻\n\nतुमचा बजेट श्रेणी? (किमान ₹500)`,
-              `${matchedCity} ठीक है! 👨\u200D💻\n\nबजट रेंज? (न्यूनतम ₹500)`
-            );
+          if (newState.purpose === "student" || newState.purpose === "commute") {
+            reply = t(`${matchedCity}! 🎓\n\nYour monthly budget? (min ₹500)`, `${matchedCity}! 🎓\n\nमासिक बजेट? (किमान ₹500)`, `${matchedCity}! 🎓\n\nमासिक बजट? (न्यूनतम ₹500)`);
             newState.step = "budget";
           } else {
-            reply = t(
-              `${matchedCity} — great choice! 🏙️\n\nLooking for an apartment, house, or both?`,
-              `${matchedCity} — छान निवड! 🏙️\n\nफ्लॅट, घर, किंवा दोन्ही?`,
-              `${matchedCity} — बहुत अच्छा! 🏙️\n\nफ्लैट, घर, या दोनों?`
-            );
+            reply = t(`${matchedCity} — great! 🏙️\n\nApartment, house, or both?`, `${matchedCity} — छान! 🏙️\n\nफ्लॅट, घर, किंवा दोन्ही?`, `${matchedCity} — बहुत अच्छा! 🏙️\n\nफ्लैट, घर, या दोनों?`);
             reply += "\n\n" + t("apartment · house · both", "फ्लॅट · घर · दोन्ही", "फ्लैट · घर · दोनों");
             newState.step = "type";
           }
         } else {
+          reply = t("Please choose a city:\n\n" + CITIES.join(" · "), "शहर निवडा:\n\n" + CITIES.join(" · "), "शहर चुनें:\n\n" + CITIES.join(" · "));
+        }
+        break;
+      }
+
+      case "commute_dest": {
+        let dest = "";
+        for (const [key, val] of Object.entries(DESTINATIONS)) {
+          if (lower.includes(key)) { dest = val; break; }
+        }
+        if (!dest) {
+          const words = lower.split(/\s+/);
+          for (const w of words) { if (DESTINATIONS[w]) { dest = DESTINATIONS[w]; break; } }
+        }
+        if (!dest) dest = userInput;
+        newState.commuteDest = dest;
+        reply = t(
+          `How many minutes max? (e.g. 20, 30, 45)`,
+          `जास्तीत जास्त किती मिनिट? (उदा. 20, 30, 45)`,
+          `अधिकतम कितने मिनट? (जैसे 20, 30, 45)`
+        );
+        newState.step = "commute_time";
+        break;
+      }
+
+      case "commute_time": {
+        const minMatch = lower.match(/(\d+)/);
+        if (minMatch) {
+          const maxMin = parseInt(minMatch[1]);
+          newState.commuteMaxMin = maxMin;
           reply = t(
-            "I didn't catch that. Please choose a city:\n\n" + CITIES.join(" · "),
-            "समजले नाही. कृपया शहर निवडा:\n\n" + CITIES.join(" · "),
-            "समझ नहीं आया। कृपया शहर चुनें:\n\n" + CITIES.join(" · ")
+            `🚗 Searching properties within ${maxMin} min of ${newState.commuteDest}…`,
+            `🚗 ${newState.commuteDest} च्या ${maxMin} मिनिटांमध्ये शोधत आहे…`,
+            `🚗 ${newState.commuteDest} तक ${maxMin} मिनट में खोज रहे हैं…`
           );
+          commuteResults = await fetchCommute(newState.commuteDest, maxMin);
+          newState.step = "results";
+          if (commuteResults.length > 0) {
+            reply += "\n\n" + t(
+              `Found ${commuteResults.length} properties!`,
+              `${commuteResults.length} मालमत्ता सापडल्या!`,
+              `${commuteResults.length} प्रॉपर्टी मिलीं!`
+            );
+            setMessages((prev) => [...prev, {
+              role: "assistant", content: reply,
+              properties: commuteResults.map((r) => ({
+                id: r.id, title: r.title, price: r.price, type: r.type, area: r.area, city: r.city,
+                bedrooms: r.bedrooms, bathrooms: 0, furnishing: "", images: r.images,
+                amenities: [], isVerified: false,
+              })),
+            }]);
+            setIsTyping(false);
+            return;
+          } else {
+            reply += "\n\n" + t("No properties in range. Try more time.", "वेळेत मालमत्ता नाही. अधिक वेळ वापरा.", "रेंज में प्रॉपर्टी नहीं। अधिक समय आज़माएं।");
+          }
+        } else {
+          reply = t("Enter minutes, e.g. 30", "मिनिट प्रविष्ट करा, उदा. 30", "मिनट दर्ज करें, जैसे 30");
         }
         break;
       }
 
       case "type": {
-        if (lower.includes("apartment") || lower.includes("flat") || lower.includes("फ्लॅट") || lower.includes("फ्लैट")) {
-          newState.type = "apartment";
-        } else if (lower.includes("house") || lower.includes("घर")) {
-          newState.type = "house";
-        } else if (lower.includes("both") || lower.includes("दोन्ही") || lower.includes("दोनों") || lower.includes("any")) {
-          newState.type = "";
-        } else {
-          reply = t(
-            "Please choose: apartment, house, or both",
-            "कृपया निवडा: फ्लॅट, घर, किंवा दोन्ही",
-            "कृपया चुनें: फ्लैट, घर, या दोनों"
-          );
-          break;
-        }
-        reply = t(
-          "What's your monthly budget? 💰\n(Min ₹500, e.g. ₹15000)",
-          "तुमचा मासिक बजेट काय आहे? 💰\n(किमान ₹500, उदा. ₹15000)",
-          "मासिक बजट क्या है? 💰\n(न्यूनतम ₹500, जैसे ₹15000)"
-        );
+        if (lower.includes("apartment") || lower.includes("flat") || lower.includes("फ्लॅट") || lower.includes("फ्लैट")) newState.type = "apartment";
+        else if (lower.includes("house") || lower.includes("घर")) newState.type = "house";
+        else if (lower.includes("both") || lower.includes("दोन्ही") || lower.includes("दोनों") || lower.includes("any")) newState.type = "";
+        else { reply = t("Choose: apartment, house, or both", "निवडा: फ्लॅट, घर, किंवा दोन्ही", "चुनें: फ्लैट, घर, या दोनों"); break; }
+        reply = t("Monthly budget? 💰 (min ₹500)", "मासिक बजेट? 💰 (किमान ₹500)", "मासिक बजट? 💰 (न्यूनतम ₹500)");
         newState.step = "budget";
         break;
       }
 
       case "budget": {
-        const priceMatch = lower.match(/(\d[\d,]*)/);
+        const devanagariMap: Record<string, string> = { "०": "0", "१": "1", "२": "2", "३": "3", "४": "4", "५": "5", "६": "6", "७": "7", "८": "8", "९": "9" };
+        let normalized = userInput.toLowerCase();
+        for (const [d, n] of Object.entries(devanagariMap)) { normalized = normalized.replaceAll(d, n); }
+        const priceMatch = normalized.match(/(\d[\d,]*)/);
         if (priceMatch) {
-          const price = parseInt(priceMatch[1].replace(/,/g, ""));
+          let price = parseInt(priceMatch[1].replace(/,/g, ""));
+          if (lower.includes("हजार") || lower.includes("hazaar")) price *= 1000;
           if (price >= 500) {
             newState.maxPrice = price;
-            if (newState.minPrice < 500) newState.minPrice = 500;
-            if (newState.purpose === "student" || newState.purpose === "individual") {
-              reply = t(
-                "How many people / rooms needed? 🛏️\n(1, 2, 3, or more)",
-                "किती लोक / खोल्या लागतात? 🛏️\n(1, 2, 3, किंवा अधिक)",
-                "कितने लोग / कमरे चाहिए? 🛏️\n(1, 2, 3, या अधिक)"
-              );
-              newState.step = "bedrooms";
-            } else {
-              reply = t(
-                "How many bedrooms? 🛏️\n(1BHK, 2BHK, 3BHK…)",
-                "किती बेडरूम? 🛏️\n(1BHK, 2BHK, 3BHK…)",
-                "कितने बेडरूम? 🛏️\n(1BHK, 2BHK, 3BHK…)"
-              );
-              newState.step = "bedrooms";
-            }
+            reply = t("How many bedrooms? 🛏️", "किती बेडरूम? 🛏️", "कितने बेडरूम? 🛏️");
+            newState.step = "bedrooms";
           } else {
-            reply = t(
-              "Minimum budget is ₹500. Please enter a higher amount.",
-              "किमान बजेट ₹500 आहे. कृपया अधिक रक्कम प्रविष्ट करा.",
-              "न्यूनतम बजट ₹500 है। कृपया अधिक राशि दर्ज करें।"
-            );
+            reply = t("Min ₹500.", "किमान ₹500.", "न्यूनतम ₹500।");
           }
         } else {
-          reply = t(
-            "Please enter a number, e.g. ₹15000",
-            "कृपया संख्या प्रविष्ट करा, उदा. ₹15000",
-            "कृपया संख्या दर्ज करें, जैसे ₹15000"
-          );
+          reply = t("Enter amount, e.g. 15000", "रक्कम प्रविष्ट करा, उदा. 15000", "राशि दर्ज करें, जैसे 15000");
         }
         break;
       }
@@ -259,39 +495,12 @@ export default function AIChat() {
       case "bedrooms": {
         const numMatch = lower.match(/(\d+)/);
         if (numMatch) {
-          const num = parseInt(numMatch[1]);
-          newState.bedrooms = num;
-          if (newState.purpose === "student" || newState.purpose === "individual") {
-            reply = t(
-              "Any specific area or locality? 📍\n(Or type 'any' to search all)",
-              "कोणता विशिष्ट भाग किंवा ठिकाण? 📍\n(किंवा सर्व शोधण्यासाठी 'any' टाइप करा)",
-              "कोई विशेष इलाका? 📍\n(या सभी खोजने के लिए 'any' टाइप करें)"
-            );
-            newState.step = "area";
-          } else {
-            reply = t(
-              "Preferred furnishing? 🪑\n(unfurnished · semi · furnished · any)",
-              "पसंदीदा फर्निशिंग? 🪑\n(unfurnished · semi · furnished · any)",
-              "पसंदीदा फर्निशिंग? 🪑\n(अनफर्निश्ड · सेमी · फर्निश्ड · कोई भी)"
-            );
-            newState.step = "furnishing";
-          }
+          newState.bedrooms = parseInt(numMatch[1]);
+          reply = t("Preferred furnishing? 🪑\n(unfurnished · semi · furnished · any)", "फर्निशिंग? 🪑\n(unfurnished · semi · furnished · any)", "फर्निशिंग? 🪑\n(अनफर्निश्ड · सेमी · फर्निश्ड · कोई भी)");
+          newState.step = "furnishing";
         } else {
-          reply = t("Enter a number (1, 2, 3…)", "संख्या प्रविष्ट करा (1, 2, 3…)", "संख्या दर्ज करें (1, 2, 3…)");
+          reply = t("Enter 1, 2, 3…", "1, 2, 3… प्रविष्ट करा", "1, 2, 3… दर्ज करें");
         }
-        break;
-      }
-
-      case "area": {
-        if (!lower.includes("any") && !lower.includes("सर्व") && !lower.includes("सभी")) {
-          newState.area = userInput;
-        }
-        reply = t(
-          "Preferred furnishing? 🪑\n(unfurnished · semi · furnished · any)",
-          "पसंदीदा फर्निशिंग? 🪑\n(unfurnished · semi · furnished · any)",
-          "पसंदीदा फर्निशिंग? 🪑\n(अनफर्निश्ड · सेमी · फर्निश्ड · कोई भी)"
-        );
-        newState.step = "furnishing";
         break;
       }
 
@@ -300,58 +509,22 @@ export default function AIChat() {
         else if (lower.includes("full") || lower.includes("furnished") || lower.includes("फर्निश्ड")) newState.furnishing = "furnished";
         else if (lower.includes("un") || lower.includes("अनफर्निश्ड")) newState.furnishing = "unfurnished";
 
-        reply = t("🔍 Searching for your perfect match…", "🔍 तुमचा परिपूर्ण शोधत आहे…", "🔍 आपका सही मैच खोज रहे हैं…");
+        reply = t("🔍 Searching…", "🔍 शोधत आहे…", "🔍 खोज रहे हैं…");
         newState.step = "results";
-
         const filters: Record<string, unknown> = { minPrice: 500, maxPrice: newState.maxPrice };
         if (newState.city) filters.city = newState.city;
         if (newState.type) filters.type = newState.type;
         if (newState.bedrooms > 0) filters.bedrooms = newState.bedrooms;
-        if (newState.area) filters.area = newState.area;
         if (newState.furnishing) filters.furnishing = newState.furnishing;
-
         results = await fetchSearch(filters);
-
         if (results.length === 0) {
-          reply = t(
-            `No exact matches found in ${newState.city || "Maharashtra"}. Let me broaden the search…`,
-            `${newState.city || "महाराष्ट्र"} मध्ये जुळणी सापडली नाही. शोध विस्तारत आहे…`,
-            `${newState.city || "महाराष्ट्र"} में कोई मैच नहीं मिला। खोज विस्तारित हो रही है…`
-          );
-          const broadFilters: Record<string, unknown> = { minPrice: 500, maxPrice: newState.maxPrice };
-          if (newState.city) broadFilters.city = newState.city;
-          results = await fetchSearch(broadFilters);
-
-          if (results.length === 0 && newState.city) {
-            results = await fetchSearch({ minPrice: 500, maxPrice: newState.maxPrice });
-          }
-        }
-        break;
-      }
-
-      case "results": {
-        const lowerInput = lower;
-        if (lowerInput.includes("cheap") || lowerInput.includes("low") || lowerInput.includes("कमी") || lowerInput.includes("सस्ते")) {
-          newState.maxPrice = Math.max(500, Math.floor(newState.maxPrice * 0.6));
-          reply = t("Showing more budget-friendly options…", "अधिक बजेट-अनुकूल पर्याय दर्शवत आहे…", "अधिक बजट-अनुकूल विकल्प दिखा रहे हैं…");
-          results = await fetchSearch({ city: newState.city, maxPrice: newState.maxPrice, minPrice: 500, type: newState.type || undefined, bedrooms: newState.bedrooms || undefined });
-        } else if (lowerInput.includes("premium") || lowerInput.includes("luxury") || lowerInput.includes("प्रीमियम") || lowerInput.includes("luxurious")) {
-          newState.minPrice = newState.maxPrice;
-          newState.maxPrice = 100000;
-          reply = t("Showing premium properties…", "प्रीमियम मालमत्ता दर्शवत आहे…", "प्रीमियम प्रॉपर्टी दिखा रहे हैं…");
-          results = await fetchSearch({ city: newState.city, minPrice: newState.minPrice, maxPrice: 100000, type: newState.type || undefined });
-        } else if (lowerInput.includes("search") || lowerInput.includes("new") || lowerInput.includes("शोध") || lowerInput.includes("नवीन") || lowerInput.includes("खोजें") || lowerInput.includes("नई")) {
-          reply = t("Let's start fresh! What are you looking for?", "नवीन सुरुवत! तुम्हाला काय हवे आहे?", "फिर से शुरू करते हैं! आपको क्या चाहिए?");
-          reply += "\n\n🏠 " + t("Family Stay", "कुटुंबासाठी", "परिवार के लिए") + "\n💼 " + t("Work/Office", "कामासाठी", "काम/ऑफिस") + "\n🎓 " + t("Student/Hostel", "विद्यार्थ्यांसाठी", "छात्रावास") + "\n👨‍💻 " + t("Individual Room", "एकल खोली", "अकेला कमरा");
-          newState.step = "purpose";
-        } else {
-          results = await fetchSearch({ city: newState.city, maxPrice: newState.maxPrice, minPrice: 500, type: newState.type || undefined, bedrooms: newState.bedrooms || undefined });
+          results = await fetchSearch({ minPrice: 500, maxPrice: newState.maxPrice, city: newState.city });
         }
         break;
       }
 
       default:
-        reply = t("How can I help you? Type your question.", "मी कशी मदत करू? तुमचा प्रश्न टाइप करा.", "मैं कैसे मदद कर सकता हूँ? अपना सवाल टाइप करें।");
+        reply = t("How can I help? You can:\n\n🏠 Search properties\n🚗 Find by commute time\n💬 Or just type naturally!", "मी कशी मदत करू? तुम्ही करू शकता:\n\n🏠 मालमत्ता शोधा\n🚗 प्रवासानुसार शोधा\n💬 किंवा थेट सांगा!", "मैं कैसे मदद करूँ? आप कर सकते हैं:\n\n🏠 प्रॉपर्टी खोजें\n🚗 यात्रा के अनुसार खोजें\n💬 या सीधे बताएं!");
     }
 
     setSearchState(newState);
@@ -360,9 +533,9 @@ export default function AIChat() {
       const summary = results.length === 1
         ? t(`Found 1 property:`, `1 मालमत्ता सापडली:`, `1 प्रॉपर्टी मिली:`)
         : t(`Found ${results.length} properties:`, `${results.length} मालमत्ता सापडल्या:`, `${results.length} प्रॉपर्टी मिलीं:`);
-      reply += "\n\n" + summary + "\n\n" + t("Click 'View Details' to see more. Type 'search' to start over.", "अधिक पहा 'View Details'. पुन्हा सुरू करण्यासाठी 'search' टाइप करा.", "अधिक देखने के लिए 'View Details' क्लिक करें। फिर से शुरू करने के लिए 'search' टाइप करें।");
+      reply += "\n\n" + summary + "\n\n" + t("Type 'search' to start over.", "पुन्हा सुरू करण्यासाठी 'search' टाइप करा.", "फिर से शुरू करने के लिए 'search' टाइप करें।");
       setMessages((prev) => [...prev, { role: "assistant", content: reply, properties: results }]);
-    } else {
+    } else if (!commuteResults.length) {
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     }
     setIsTyping(false);
@@ -373,55 +546,42 @@ export default function AIChat() {
     processInput(input.trim());
   }
 
+  function resetChat() {
+    setMessages([]);
+    setSearchState({ step: "welcome", city: "", type: "", minPrice: 500, maxPrice: 100000, bedrooms: 0, furnishing: "", area: "", purpose: "", commuteDest: "", commuteMaxMin: 30 });
+  }
+
   return (
     <>
-      {/* Floating Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="ai-fab"
-        style={{
-          position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%",
-          background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", border: "none",
-          cursor: "pointer", boxShadow: "0 4px 16px rgba(13,110,253,0.4)", zIndex: 9999,
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
-          transition: "transform 0.2s",
-        }}
-      >
+      <button onClick={() => setIsOpen(!isOpen)} className="ai-fab" style={{
+        position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%",
+        background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", border: "none",
+        cursor: "pointer", boxShadow: "0 4px 16px rgba(13,110,253,0.4)", zIndex: 9999,
+        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
+      }}>
         {isOpen ? "✕" : "💬"}
       </button>
 
-      {/* Chat Window */}
       {isOpen && (
-        <div
-          className="ai-chat-window"
-          style={{
-            position: "fixed", bottom: 92, right: 24, width: 380, maxWidth: "calc(100vw - 32px)",
-            height: 520, maxHeight: "calc(100vh - 140px)", borderRadius: 20, overflow: "hidden",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.15)", zIndex: 9998, display: "flex", flexDirection: "column",
-            border: "1px solid #e3e7ef", background: "white",
-          }}
-        >
-          {/* Header */}
-          <div style={{
-            padding: "16px 20px", background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white",
-            display: "flex", alignItems: "center", gap: 12,
-          }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.2)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
-            }}>🤖</div>
+        <div className="ai-chat-window" style={{
+          position: "fixed", bottom: 92, right: 24, width: 380, maxWidth: "calc(100vw - 32px)",
+          height: 520, maxHeight: "calc(100vh - 140px)", borderRadius: 20, overflow: "hidden",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.15)", zIndex: 9998, display: "flex", flexDirection: "column",
+          border: "1px solid #e3e7ef", background: "white",
+        }}>
+          <div style={{ padding: "16px 20px", background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🤖</div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 15 }}>Ria</div>
-              <div style={{ fontSize: 11, opacity: 0.9 }}>{t("AI Rental Assistant", "AI भाडे सहाय्यक", "AI किराया सहायक")}</div>
+              <div style={{ fontSize: 11, opacity: 0.9 }}>{t("AI Rental Assistant · EN/MR/HI", "AI भाडे सहाय्यक", "AI किराया सहायक")}</div>
             </div>
             <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-              <button onClick={() => { setMessages([]); setSearchState({ step: "welcome", city: "", type: "", minPrice: 500, maxPrice: 100000, bedrooms: 0, furnishing: "", area: "", purpose: "" }); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", padding: "4px 10px", borderRadius: 8, fontSize: 11, cursor: "pointer" }}>
+              <button onClick={resetChat} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "white", padding: "4px 10px", borderRadius: 8, fontSize: 11, cursor: "pointer" }}>
                 {t("Reset", "रीसेट", "रीसेट")}
               </button>
             </div>
           </div>
 
-          {/* Messages */}
           <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gap: 12, background: "#f7f8fc" }}>
             {messages.map((m, i) => (
               <div key={i}>
@@ -439,10 +599,7 @@ export default function AIChat() {
                 {m.properties && m.properties.length > 0 && (
                   <div style={{ display: "grid", gap: 8, marginTop: 8, maxWidth: "95%" }}>
                     {m.properties.slice(0, 3).map((p) => (
-                      <div key={p.id} style={{
-                        background: "white", borderRadius: 12, border: "1px solid #e3e7ef",
-                        overflow: "hidden", display: "flex", gap: 10, padding: 10,
-                      }}>
+                      <div key={p.id} style={{ background: "white", borderRadius: 12, border: "1px solid #e3e7ef", overflow: "hidden", display: "flex", gap: 10, padding: 10 }}>
                         <img src={p.images[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=200"} alt="" style={{ width: 70, height: 70, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: 13, fontWeight: 700, color: "#0b1437", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</div>
@@ -468,13 +625,11 @@ export default function AIChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
           <div style={{ padding: "12px 16px", borderTop: "1px solid #e3e7ef", display: "flex", gap: 8, background: "white" }}>
             <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={t("Type a message…", "संदेश टाइप करा…", "संदेश टाइप करें…")}
+              placeholder={t("Try: 2BHK in Pune under 15000…", "उदा: पुण्यात १५ हजारात २ BHK…", "उदा: पुणे में 15 हजार में 2BHK…")}
               className="input"
               style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #e3e7ef", fontSize: 14, outline: "none" }}
             />
