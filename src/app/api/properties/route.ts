@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, type, price, deposit, address, area, city, bedrooms, bathrooms, furnishing, availableFrom, images, amenities, rules, description, contactPhone, ownerId, ownerName } = body;
+    const { title, type, price, deposit, address, area, city, state, lat, lng, bedrooms, bathrooms, furnishing, availableFrom, images, amenities, rules, description, contactPhone, ownerId, ownerName } = body;
 
     if (!title || !type || !price || !city || !ownerId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       ownerId, ownerName: ownerName || "Owner", title, type,
       price: Number(price), deposit: Number(deposit) || Number(price) * 2,
       address: address || "", area: area || "", city,
+      state: state || "Maharashtra", lat: Number(lat) || 18.5204, lng: Number(lng) || 73.8567,
       bedrooms: Number(bedrooms) || 0, bathrooms: Number(bathrooms) || 1,
       furnishing: furnishing || "unfurnished",
       availableFrom: availableFrom || new Date().toISOString().split("T")[0],

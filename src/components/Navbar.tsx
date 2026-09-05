@@ -81,6 +81,7 @@ export default function Navbar() {
           }}
         >
           <Link href="/properties" className="btn btn-ghost">{t.nav.browse}</Link>
+          <Link href="/map" className="btn btn-ghost">🗺️ Map</Link>
           <Link href="/inbox" className="btn btn-ghost">{t.nav.inbox}</Link>
           <Link href="/owner" className="btn btn-ghost">{t.nav.owners}</Link>
           <Link href="/pricing" className="btn btn-ghost">{t.nav.pricing}</Link>
@@ -143,6 +144,7 @@ export default function Navbar() {
           }}
         >
           <Link href="/properties" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>{t.nav.browse}</Link>
+          <Link href="/map" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>🗺️ Map</Link>
           <Link href="/inbox" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>{t.nav.inbox}</Link>
           <Link href="/owner" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>{t.nav.owners}</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>{t.nav.pricing}</Link>

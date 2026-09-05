@@ -265,3 +265,60 @@ textarea.input {
   color: #0b1437;
   margin-bottom: 6px;
 }
+
+/* Owner quick action cards */
+.owner-quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 16px;
+  background: white;
+  border: 1px solid #e3e7ef;
+  border-radius: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.owner-quick-action:hover {
+  border-color: #0d6efd;
+  box-shadow: 0 4px 16px rgba(13, 110, 253, 0.1);
+}
+
+/* Leaflet overrides */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content {
+  margin: 10px !important;
+  font-family: inherit !important;
+}
+.leaflet-popup-tip {
+  box-shadow: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container-app {
+    padding: 0 12px;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .owner-quick-action {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}

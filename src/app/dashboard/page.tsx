@@ -11,7 +11,7 @@ import AIChat from "@/components/AIChat";
 import ListingWizard from "@/components/ListingWizard";
 import type { Property } from "@/lib/properties-store";
 
-type Tab = "overview" | "listings" | "add" | "inquiries";
+type Tab = "overview" | "listings" | "add" | "edit" | "inquiries";
 
 export default function OwnerDashboard() {
   const { user } = useAuth();
@@ -21,6 +21,7 @@ export default function OwnerDashboard() {
   const [listings, setListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
   useEffect(() => {
     if (!user) { router.push("/auth/login"); return; }
@@ -50,6 +51,26 @@ export default function OwnerDashboard() {
     } finally {
       setDeleting(null);
     }
+  }
+
+  async function handleStatusToggle(id: string, currentStatus: string) {
+    const newStatus = currentStatus === "active" ? "rented" : "active";
+    try {
+      const res = await fetch(`/api/properties/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setListings((prev) => prev.map((p) => p.id === id ? { ...p, status: newStatus } : p));
+      }
+    } catch { /* ignore */ }
+  }
+
+  function handleEdit(property: Property) {
+    setEditingProperty(property);
+    setTab("edit" as Tab);
   }
 
   const t = (en: string, mr: string, hi: string) => {
@@ -252,6 +273,20 @@ export default function OwnerDashboard() {
                         )}
                         <span style={{ fontSize: 12, color: "#4b5675" }}>👁 {p.views}</span>
                         <div style={{ flex: 1 }} />
+                        <button onClick={() => handleStatusToggle(p.id, p.status)} style={{
+                          padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer",
+                          border: `1px solid ${p.status === "active" ? "#10b981" : "#f59e0b"}`,
+                          background: p.status === "active" ? "rgba(16,185,129,0.08)" : "rgba(245,158,11,0.08)",
+                          color: p.status === "active" ? "#10b981" : "#f59e0b",
+                        }}>
+                          {p.status === "active" ? `✅ ${t("Active", "सक्रिय", "सक्रिय")}` : `🟢 ${t("Mark Active", "सक्रिय करा", "सक्रिय करें")}`}
+                        </button>
+                        <button onClick={() => handleEdit(p)} style={{
+                          padding: "5px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                          border: "1px solid #e3e7ef", background: "white", color: "#0d6efd",
+                        }}>
+                          ✏️ {t("Edit", "बदला", "बदलें")}
+                        </button>
                         <button onClick={() => handleDelete(p.id)} disabled={deleting === p.id} style={{
                           padding: "5px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer",
                           border: "1px solid #e3e7ef", background: deleting === p.id ? "#f4f6fb" : "white",
@@ -270,6 +305,14 @@ export default function OwnerDashboard() {
           {/* Add Property Tab */}
           {tab === "add" && (
             <ListingWizard onDone={() => { setTab("listings"); loadListings(); }} />
+          )}
+
+          {/* Edit Property Tab */}
+          {tab === "edit" && editingProperty && (
+            <ListingWizard
+              editProperty={editingProperty}
+              onDone={() => { setEditingProperty(null); setTab("listings"); loadListings(); }}
+            />
           )}
 
           {/* Inquiries Tab */}
