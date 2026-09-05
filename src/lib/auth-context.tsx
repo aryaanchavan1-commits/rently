@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
 
 interface UserProfile {
   id: string;
@@ -71,19 +70,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadUser]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    return {};
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        return { error: data.error || "Login failed" };
+      }
+      if (data.session) {
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+      }
+      setUser(data.user);
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
   }, []);
 
   const signup = useCallback(async (email: string, password: string, name: string, phone: string, role: "tenant" | "owner") => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { name, phone, role } },
-    });
-    if (error) return { error: error.message };
-    return {};
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, phone, role }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        return { error: data.error || "Signup failed" };
+      }
+      return {};
+    } catch {
+      return { error: "Network error. Please try again." };
+    }
   }, []);
 
   const logout = useCallback(async () => {

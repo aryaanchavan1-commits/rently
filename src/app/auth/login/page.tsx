@@ -97,8 +97,8 @@ export default function LoginPage() {
 
             <div style={{ marginTop: 18, padding: 14, background: "#f4f6fb", borderRadius: 10, fontSize: 13 }}>
               <div style={{ fontWeight: 700, marginBottom: 6 }}>{t.auth.demoLabel}</div>
-              <div style={{ marginBottom: 4 }}>👤 {t.auth.tenant}: <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>tenant@demo.in</code> / <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>demo1234</code></div>
-              <div>🏠 {t.auth.owner}: <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>owner@demo.in</code> / <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>demo1234</code></div>
+              <div style={{ marginBottom: 4 }}>👤 {t.auth.tenant}: <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>demo@rently.in</code> / <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>demo1234</code></div>
+              <div>🏠 {t.auth.owner}: <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>owner@rently.in</code> / <code style={{ background: "#e3e7ef", padding: "2px 6px", borderRadius: 4 }}>demo1234</code></div>
             </div>
 
             <p style={{ marginTop: 20, fontSize: 14, color: "#4b5675", textAlign: "center" }}>
