@@ -14,15 +14,12 @@ const PROPERTY_TYPES = [
   { value: "office", icon: "💼", label: "Office Space" },
 ];
 
-const CITIES = ["Mumbai", "Pune", "Thane", "Navi Mumbai", "Nagpur", "Nashik"];
-
 const CITY_COORDS: Record<string, [number, number]> = {
-  "Mumbai": [19.0760, 72.8777],
-  "Pune": [18.5204, 73.8567],
-  "Thane": [19.2183, 72.9781],
-  "Navi Mumbai": [19.0330, 73.0297],
-  "Nagpur": [21.1458, 79.0882],
-  "Nashik": [19.9975, 73.7898],
+  "Mumbai": [19.0760, 72.8777], "Pune": [18.5204, 73.8567], "Thane": [19.2183, 72.9781],
+  "Navi Mumbai": [19.0330, 73.0297], "Nagpur": [21.1458, 79.0882], "Nashik": [19.9975, 73.7898],
+  "Kolhapur": [16.7050, 74.2433], "Aurangabad": [19.8762, 75.3433], "Solapur": [17.6599, 75.9064],
+  "Satara": [17.6868, 74.2433], "Nanded": [19.1573, 77.3260], "Amravati": [20.9374, 77.7796],
+  "Ratnagiri": [16.9902, 73.3120],
 };
 
 const AMENITY_OPTIONS = [
@@ -319,10 +316,7 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label className="form-label">{t("City", "शहर", "शहर")} *</label>
-                  <select className="input" value={form.city} onChange={(e) => update("city", e.target.value)}>
-                    <option value="">{t("Select city", "शहर निवडा", "शहर चुनें")}</option>
-                    {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <input className="input" placeholder={t("Type any city in Maharashtra", "महाराष्ट्रातील कोणतेही शहर टाइप करा", "महाराष्ट्र में कोई भी शहर टाइप करें")} value={form.city} onChange={(e) => update("city", e.target.value)} />
                 </div>
                 <div>
                   <label className="form-label">{t("Area / Locality", "भाग / ठिकाण", "इलाका")}</label>

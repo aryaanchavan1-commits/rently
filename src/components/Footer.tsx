@@ -49,8 +49,8 @@ export default function Footer() {
             </div>
             <p style={{ color: "#a8b1c8", fontSize: 14, lineHeight: 1.6 }}>
               Maharashtra&apos;s modern rental platform. Find flats, houses & PGs
-              across Pune, Mumbai, Thane, Navi Mumbai, Nagpur & Nashik — with
-              zero brokerage and AI-powered search.
+              across Mumbai, Pune, Thane, Nagpur, Nashik, Kolhapur, Aurangabad,
+              and 100+ cities — with zero brokerage and AI-powered search.
             </p>
           </div>
 
@@ -63,6 +63,7 @@ export default function Footer() {
             <FooterLink href="/properties?city=Thane">Rent in Thane</FooterLink>
             <FooterLink href="/properties?city=Nagpur">Rent in Nagpur</FooterLink>
             <FooterLink href="/properties?city=Nashik">Rent in Nashik</FooterLink>
+            <FooterLink href="/properties">Browse all Maharashtra →</FooterLink>
           </div>
 
           <div>

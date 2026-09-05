@@ -23,6 +23,14 @@ const QUICK_DESTINATIONS = [
   { label: "🏫 VIT Pune", value: "vit pune" },
   { label: "🚇 Thane Station", value: "thane station" },
   { label: "🚇 Vashi", value: "vashi" },
+  { label: "🏙️ Nagpur City", value: "nagpur" },
+  { label: "🏙️ Nashik City", value: "nashik" },
+  { label: "🏙️ Kolhapur", value: "kolhapur" },
+  { label: "🏙️ Aurangabad", value: "aurangabad" },
+  { label: "🏙️ Solapur", value: "solapur" },
+  { label: "🏙️ Nanded", value: "nanded" },
+  { label: "🏢 Dadar", value: "dadar" },
+  { label: "🏢 Bandra", value: "bandra" },
 ];
 
 export default function CommutePage() {
@@ -62,27 +70,25 @@ export default function CommutePage() {
       <Navbar />
       <main style={{ padding: "24px 0 60px", background: "#f7f8fc", minHeight: "calc(100vh - 66px)" }}>
         <div className="container-app">
-          {/* Hero */}
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <h1 style={{ fontSize: 28, fontWeight: 900, color: "#0b1437" }}>
               🚗 {t("Commute Search", "प्रवास शोध", "यात्रा खोज")}
             </h1>
             <p style={{ fontSize: 15, color: "#4b5675", marginTop: 6, maxWidth: 500, margin: "6px auto 0" }}>
               {t(
-                "Tell us where you need to go. We'll find properties within your commute time.",
-                "सांगा तुम्हाला कुठे जावे लागते. आम्ही तुमच्या प्रवास वेळेत मालमत्ता शोधू.",
-                "बताएं आपको कहाँ जाना है। हम आपके कम्यूट समय में प्रॉपर्टी खोजेंगे।"
+                "Type any destination across Maharashtra. We'll find properties within your commute time.",
+                "महाराष्ट्रातील कोणतेही गंतव्य टाइप करा. आम्ही तुमच्या प्रवास वेळेत मालमत्ता शोधू.",
+                "महाराष्ट्र में कोई भी गंतव्य टाइप करें। हम आपके कम्यूट समय में प्रॉपर्टी खोजेंगे।"
               )}
             </p>
           </div>
 
-          {/* Search Card */}
           <div style={{ background: "white", borderRadius: 18, padding: 28, border: "1px solid #e3e7ef", maxWidth: 600, margin: "0 auto 28px" }}>
             <div style={{ marginBottom: 16 }}>
               <label className="form-label">{t("Where do you need to go?", "तुम्हाला कुठे जावे लागते?", "आपको कहाँ जाना है?")}</label>
               <input
                 className="input"
-                placeholder={t("e.g. Pune University, Hinjewadi IT Park…", "उदा. पुण्याचे विद्यापीठ, हिंजवडी IT पार्क…", "जैसे पुणे यूनिवर्सिटी, हिंजवडी IT पार्क…")}
+                placeholder={t("Type any location — city, office, university…", "कोणतेही ठिकाण टाइप करा — शहर, कार्यालय, विद्यापीठ…", "कोई भी स्थान टाइप करें — शहर, कार्यालय, विश्वविद्यालय…")}
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -107,11 +113,10 @@ export default function CommutePage() {
             </button>
           </div>
 
-          {/* Quick Destinations */}
           {!searched && (
             <div style={{ maxWidth: 600, margin: "0 auto 28px" }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, color: "#4b5675", marginBottom: 10 }}>
-                {t("Popular destinations", "लोकप्रिय गंतव्ये", "लोकप्रिय गंतव्य")}
+                {t("Popular destinations across Maharashtra", "महाराष्ट्रातील लोकप्रिय गंतव्ये", "महाराष्ट्र में लोकप्रिय गंतव्य")}
               </h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {QUICK_DESTINATIONS.map((d) => (
@@ -124,7 +129,6 @@ export default function CommutePage() {
             </div>
           )}
 
-          {/* Results */}
           {searched && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -177,23 +181,25 @@ export default function CommutePage() {
                             <span style={{ fontSize: 12, color: "#4b5675" }}>/mo</span>
                           </div>
                         </div>
-                        <div style={{
-                          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                          padding: "8px 14px", borderRadius: 12,
-                          background: p.commute.duration <= 15 ? "rgba(16,185,129,0.1)" : p.commute.duration <= 30 ? "rgba(13,110,253,0.1)" : "rgba(245,158,11,0.1)",
-                          flexShrink: 0, minWidth: 80,
-                        }}>
+                        {p.commute.duration > 0 && (
                           <div style={{
-                            fontSize: 22, fontWeight: 900,
-                            color: p.commute.duration <= 15 ? "#10b981" : p.commute.duration <= 30 ? "#0d6efd" : "#f59e0b",
+                            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                            padding: "8px 14px", borderRadius: 12,
+                            background: p.commute.duration <= 15 ? "rgba(16,185,129,0.1)" : p.commute.duration <= 30 ? "rgba(13,110,253,0.1)" : "rgba(245,158,11,0.1)",
+                            flexShrink: 0, minWidth: 80,
                           }}>
-                            {p.commute.duration}
+                            <div style={{
+                              fontSize: 22, fontWeight: 900,
+                              color: p.commute.duration <= 15 ? "#10b981" : p.commute.duration <= 30 ? "#0d6efd" : "#f59e0b",
+                            }}>
+                              {p.commute.duration}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#4b5675", fontWeight: 600 }}>
+                              {t("min", "मिनिटे", "मिनट")} 🚗
+                            </div>
+                            <div style={{ fontSize: 10, color: "#9ca3af" }}>{p.commute.distance} km</div>
                           </div>
-                          <div style={{ fontSize: 11, color: "#4b5675", fontWeight: 600 }}>
-                            {t("min", "मिनिटे", "मिनट")} 🚗
-                          </div>
-                          <div style={{ fontSize: 10, color: "#9ca3af" }}>{p.commute.distance} km</div>
-                        </div>
+                        )}
                       </div>
                     </Link>
                   ))}

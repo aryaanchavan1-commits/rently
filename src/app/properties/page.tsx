@@ -17,7 +17,6 @@ type P = {
   isVerified: boolean; isFeatured: boolean; amenities?: string[];
 };
 
-const cityList = ["Mumbai", "Pune", "Thane", "Navi Mumbai", "Nagpur", "Nashik"];
 const typeList = ["apartment", "house", "room", "pg", "office"];
 const sortList = ["recommended", "price_asc", "price_desc", "newest"];
 
@@ -27,7 +26,7 @@ function Content() {
   const [allProperties, setAllProperties] = useState<P[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtered, setFiltered] = useState<P[]>([]);
-  const [city, setCity] = useState(searchParams.get("city") || "");
+  const [locationQuery, setLocationQuery] = useState(searchParams.get("city") || "");
   const [type, setType] = useState(searchParams.get("type") || "");
   const [maxPrice, setMaxPrice] = useState(100000);
   const [sort, setSort] = useState("recommended");
@@ -47,16 +46,21 @@ function Content() {
 
   useEffect(() => {
     let r = [...allProperties];
-    if (city) r = r.filter((p) => p.city === city);
+    if (locationQuery.trim()) {
+      const q = locationQuery.toLowerCase();
+      r = r.filter((p) => p.city.toLowerCase().includes(q) || p.area.toLowerCase().includes(q) || p.address.toLowerCase().includes(q));
+    }
     if (type) r = r.filter((p) => p.type === type);
     r = r.filter((p) => p.price >= 500 && p.price <= maxPrice);
     if (sort === "price_asc") r.sort((a, b) => a.price - b.price);
     else if (sort === "price_desc") r.sort((a, b) => b.price - a.price);
     else if (sort === "newest") r.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
     setFiltered(r);
-  }, [city, type, maxPrice, sort, allProperties]);
+  }, [locationQuery, type, maxPrice, sort, allProperties]);
 
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
+
+  const uniqueCities = [...new Set(allProperties.map((p) => p.city))].sort();
 
   return (
     <div style={{ padding: "24px 0 60px", background: "#f7f8fc", minHeight: "calc(100vh - 66px)" }}>
@@ -64,8 +68,8 @@ function Content() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18, flexWrap: "wrap", gap: 12 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0b1437" }}>
-              {city
-                ? t("Rentals in " + city, city + " मध्ये भाडे", city + " में किराया")
+              {locationQuery
+                ? t("Rentals in " + locationQuery, locationQuery + " मध्ये भाडे", locationQuery + " में किराया")
                 : t("Browse Maharashtra rentals", "महाराष्ट्र भाडे शोधा", "महाराष्ट्र किराया खोजें")}
             </h1>
             <p style={{ color: "#4b5675", fontSize: 14, marginTop: 4 }}>
@@ -93,15 +97,33 @@ function Content() {
           </div>
         )}
 
-        {/* Filters */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-          <button onClick={() => setCity("")} className={`btn ${!city ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px" }}>
+        {/* Location Search + Filters */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14, alignItems: "center" }}>
+          <div style={{ position: "relative", flex: "1 1 250px" }}>
+            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 14, pointerEvents: "none", zIndex: 1 }}>📍</span>
+            <input
+              className="input"
+              placeholder={t("Search any city or area in Maharashtra…", "महाराष्ट्रातील कोणत्याही शहरात शोधा…", "महाराष्ट्र में कोई भी शहर खोजें…")}
+              value={locationQuery}
+              onChange={(e) => setLocationQuery(e.target.value)}
+              style={{ paddingLeft: 36 }}
+            />
+          </div>
+          <button onClick={() => setLocationQuery("")} className={`btn ${!locationQuery ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px" }}>
             {t("All Maharashtra", "संपूर्ण महाराष्ट्र", "पूरा महाराष्ट्र")}
           </button>
-          {cityList.map((c) => (
-            <button key={c} onClick={() => setCity(c)} className={`btn ${city === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px" }}>{c}</button>
-          ))}
         </div>
+
+        {/* Quick city chips from actual data */}
+        {!locationQuery && uniqueCities.length > 0 && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+            {uniqueCities.map((c) => (
+              <button key={c} onClick={() => setLocationQuery(c)} className="btn btn-outline" style={{ padding: "6px 12px", fontSize: 12 }}>
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 18, alignItems: "center" }}>
           <select className="input" value={type} onChange={(e) => setType(e.target.value)} style={{ width: 160 }}>
@@ -141,7 +163,7 @@ function Content() {
             <p style={{ color: "#4b5675", marginBottom: 18 }}>
               {t("Try widening filters, or chat with Ria.", "फिल्टर विस्तारा, किंवा Ria शी चॅट करा.", "फ़िल्टर बढ़ाएं, या Ria से बात करें।")}
             </p>
-            <button onClick={() => { setCity(""); setType(""); setMaxPrice(100000); }} className="btn btn-secondary">
+            <button onClick={() => { setLocationQuery(""); setType(""); setMaxPrice(100000); }} className="btn btn-secondary">
               {t("Clear filters", "फिल्टर साफ करा", "फ़िल्टर साफ़ करें")}
             </button>
           </div>

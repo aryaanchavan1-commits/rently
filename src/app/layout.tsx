@@ -14,8 +14,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Rently — Find Your Perfect Rental in Maharashtra",
-  description: "Zero brokerage rental platform with AI-powered search. Find rooms, apartments, houses & PGs across Mumbai, Pune, Thane, Nagpur & Nashik.",
-  keywords: ["rental properties", "Maharashtra", "Mumbai", "Pune", "rooms for rent", "apartment", "no brokerage", "rent house"],
+  description: "Zero brokerage rental platform with AI-powered search. Find rooms, apartments, houses & PGs across Mumbai, Pune, Thane, Nagpur, Nashik, Kolhapur, Aurangabad, and 100+ cities in Maharashtra.",
+  keywords: ["rental properties", "Maharashtra", "Mumbai", "Pune", "Nagpur", "Nashik", "Kolhapur", "Aurangabad", "rooms for rent", "apartment", "no brokerage", "rent house", "PG", "hostel"],
   openGraph: {
     title: "Rently — Find Your Perfect Rental in Maharashtra",
     description: "Zero brokerage rental platform with AI-powered property search",
