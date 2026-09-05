@@ -1,139 +1,293 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SearchBar from "@/components/SearchBar";
-import AIChat from "@/components/AIChat";
 import PropertyCard from "@/components/PropertyCard";
+import AIChat from "@/components/AIChat";
 
-const featured = [
-  { id: "1", title: "Spacious 2BHK with Modern Amenities", type: "apartment", price: 22000, address: "Andheri West, Mumbai", area: "Andheri West", city: "Mumbai", bedrooms: 2, bathrooms: 2, furnishing: "semi", images: JSON.stringify(["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"]), isVerified: true, isFeatured: true },
-  { id: "3", title: "Premium 3BHK with Garden View", type: "house", price: 35000, address: "Baner, Pune", area: "Baner", city: "Pune", bedrooms: 3, bathrooms: 3, furnishing: "furnished", images: JSON.stringify(["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"]), isVerified: true, isFeatured: true },
-  { id: "11", title: "Premium 3BHK in Gated Society", type: "apartment", price: 32000, address: "Vashi, Navi Mumbai", area: "Vashi", city: "Navi Mumbai", bedrooms: 3, bathrooms: 2, furnishing: "semi", images: JSON.stringify(["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800"]), isVerified: true, isFeatured: true },
-  { id: "21", title: "3BHK in Civil Lines", type: "apartment", price: 25000, address: "Civil Lines, Nagpur", area: "Civil Lines", city: "Nagpur", bedrooms: 3, bathrooms: 2, furnishing: "furnished", images: JSON.stringify(["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"]), isVerified: true, isFeatured: true },
-  { id: "5", title: "Independent House with Parking", type: "house", price: 18000, address: "Thane West", area: "Thane West", city: "Thane", bedrooms: 2, bathrooms: 2, furnishing: "unfurnished", images: JSON.stringify(["https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800"]), isVerified: true, isFeatured: false },
-  { id: "22", title: "2BHK in College Road", type: "apartment", price: 10000, address: "College Road, Nashik", area: "College Road", city: "Nashik", bedrooms: 2, bathrooms: 1, furnishing: "semi", images: JSON.stringify(["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800"]), isVerified: true, isFeatured: false },
+const TABS = [
+  { key: "rent", label: "भाडे / Rent", icon: "🏠" },
+  { key: "buy", label: "खरेदी / Buy", icon: "🔑" },
+  { key: "pg", label: "पीजी / PG & Co-living", icon: "🏨" },
 ];
 
-const stats = [
-  { n: "30+", label: "Active listings" },
-  { n: "₹49", label: "Weekly owner plan" },
-  { n: "0%", label: "Brokerage" },
-  { n: "15+", label: "Maharashtra cities" },
+const BUDGETS = [
+  { label: "Under ₹5,000", min: 0, max: 5000 },
+  { label: "₹5,000 – ₹10,000", min: 5000, max: 10000 },
+  { label: "₹10,000 – ₹20,000", min: 10000, max: 20000 },
+  { label: "₹20,000 – ₹50,000", min: 20000, max: 50000 },
+  { label: "₹50,000+", min: 50000, max: 100000 },
+];
+
+const POPULAR_AREAS = [
+  { name: "Baner, Pune", avg: "₹22K", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400", count: 45 },
+  { name: "Andheri West, Mumbai", avg: "₹35K", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400", count: 32 },
+  { name: "Vashi, Navi Mumbai", avg: "₹28K", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", count: 28 },
+  { name: "Kothrud, Pune", avg: "₹18K", img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400", count: 38 },
+  { name: "Thane West", avg: "₹25K", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400", count: 22 },
+  { name: "Hinjewadi, Pune", avg: "₹20K", img: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400", count: 55 },
+];
+
+const GUIDES = [
+  { title: "भाड्यासाठी फ्लॅट कशी शोधायची", en: "How to Find a Rental Flat", desc: "Step-by-step guide for first-time renters in Maharashtra", icon: "📋" },
+  { title: "भाडे करार: आवश्यक बाबी", en: "Rent Agreement Essentials", desc: "What to check before signing a rental agreement", icon: "📝" },
+  { title: "सुरक्षा भांडवल: कायदेशीर हक्क", en: "Security Deposit: Legal Rights", desc: "Maharashtra deposit rules and how to protect yourself", icon: "🔒" },
+  { title: "पोलीस प्रमाणीकरण", en: "Police Verification Guide", desc: "Complete process for tenant verification in Maharashtra", icon: "👮" },
+];
+
+const NEWS = [
+  { title: "Mumbai-Pune Missing Link opens — real estate re-rating expected", date: "May 2026", tag: "Market" },
+  { title: "Maharashtra offers incentives for rental housing in MMR", date: "Nov 2025", tag: "Policy" },
+  { title: "Model Tenancy Act: Deposit cap at 2 months rent", date: "2025", tag: "Legal" },
+  { title: "New metro lines to boost Pune rental demand", date: "2026", tag: "Infrastructure" },
+];
+
+const TRUST_STATS = [
+  { n: "1,200+", label: "Verified Owners" },
+  { n: "30+", label: "Maharashtra Cities" },
+  { n: "₹0", label: "Brokerage" },
+  { n: "4.8★", label: "User Rating" },
 ];
 
 export default function HomePage() {
+  const [activeTab, setActiveTab] = useState("rent");
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <div>
       <Navbar />
 
-      {/* Hero */}
-      <section className="hero-gradient" style={{ padding: "60px 0 40px", position: "relative", overflow: "hidden" }}>
+      {/* Hero with search tabs */}
+      <section style={{ background: "linear-gradient(135deg, #0b1437 0%, #1a237e 50%, #0d47a1 100%)", padding: "50px 0 0", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 20%, rgba(255,106,61,0.15) 0%, transparent 50%)" }} />
         <div className="container-app" style={{ position: "relative", zIndex: 2 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 50, alignItems: "center" }} className="hero-grid">
-            <div className="fade-in">
-              <div className="badge badge-warn" style={{ marginBottom: 16, display: "inline-flex" }}>
-                🏠 Maharashtra&apos;s #1 Rental Platform
+          <div style={{ textAlign: "center", marginBottom: 30 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.1)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "rgba(255,255,255,0.9)", marginBottom: 16, backdropFilter: "blur(10px)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4caf50" }} />
+              Maharashtra&apos;s most trusted rental platform
+            </div>
+            <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 800, color: "white", lineHeight: 1.1, letterSpacing: -1 }}>
+              घर शोधा, <span style={{ color: "#ff6a3d" }}>ब्रोकरशिवाय</span>
+            </h1>
+            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", marginTop: 12, maxWidth: 600, margin: "12px auto 0", lineHeight: 1.6 }}>
+              Find your perfect home across <strong>30+ cities in Maharashtra</strong>. Zero brokerage. Direct owners. AI-powered search.
+            </p>
+          </div>
+
+          {/* Search Box with Tabs */}
+          <div style={{ background: "white", borderRadius: "20px 20px 0 0", maxWidth: 900, margin: "0 auto", boxShadow: "0 -10px 40px rgba(0,0,0,0.15)" }}>
+            {/* Tabs */}
+            <div style={{ display: "flex", borderBottom: "1px solid #e3e7ef" }}>
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  style={{
+                    flex: 1, padding: "14px 16px", fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer",
+                    background: activeTab === tab.key ? "white" : "#f7f8fc",
+                    color: activeTab === tab.key ? "#0d6efd" : "#4b5675",
+                    borderBottom: activeTab === tab.key ? "3px solid #0d6efd" : "3px solid transparent",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {tab.icon} {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Search form */}
+            <div style={{ padding: 20 }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
+                <div style={{ flex: 1, position: "relative" }}>
+                  <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 18, color: "#9ca3af" }}>🔍</span>
+                  <input
+                    className="input"
+                    placeholder="Search by locality, landmark, or society name…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ paddingLeft: 44, height: 50, fontSize: 15, borderRadius: 12, border: "2px solid #e3e7ef" }}
+                  />
+                </div>
+                <Link
+                  href={searchQuery ? `/properties?city=${encodeURIComponent(searchQuery)}` : "/properties"}
+                  style={{ padding: "0 28px", height: 50, borderRadius: 12, background: "linear-gradient(135deg, #0d6efd, #0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, textDecoration: "none", whiteSpace: "nowrap" }}
+                >
+                  Search
+                </Link>
               </div>
-              <h1 style={{ fontSize: "clamp(2.1rem, 5vw, 3.4rem)", fontWeight: 800, lineHeight: 1.05, letterSpacing: -1, color: "#0b1437" }}>
-                Find your next home, <span className="mark">without the broker</span>
-              </h1>
-              <p style={{ fontSize: 17, color: "#4b5675", marginTop: 16, lineHeight: 1.6, maxWidth: 540 }}>
-                Search rentals across <strong>any city in Maharashtra</strong> — Mumbai, Pune, Thane, Nagpur, Nashik, Kolhapur, Aurangabad, Solapur, and 100+ more localities. Zero brokerage. AI-powered search. List your property for just ₹49/week.
-              </p>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 22 }}>
-                <Link href="/properties" className="btn btn-primary" style={{ padding: "12px 22px", fontSize: 15 }}>🔍 Search Rentals</Link>
-                <Link href="/dashboard" className="btn btn-outline" style={{ padding: "12px 22px", fontSize: 15 }}>List your property →</Link>
+
+              {/* Quick filters */}
+              <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13, color: "#4b5675", fontWeight: 600, padding: "6px 0" }}>Budget:</span>
+                {BUDGETS.map((b) => (
+                  <Link key={b.label} href={`/properties?budget_min=${b.min}&budget_max=${b.max}`} style={{ padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, background: "#f4f6fb", color: "#4b5675", border: "1px solid #e3e7ef", textDecoration: "none", whiteSpace: "nowrap" }}>
+                    {b.label}
+                  </Link>
+                ))}
               </div>
-              <div style={{ display: "flex", gap: 26, marginTop: 30, flexWrap: "wrap" }}>
-                {stats.map((s) => (
-                  <div key={s.label}>
-                    <div style={{ fontSize: 26, fontWeight: 800, color: "#0b1437", lineHeight: 1 }}>{s.n}</div>
-                    <div style={{ fontSize: 13, color: "#4b5675", marginTop: 4 }}>{s.label}</div>
-                  </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13, color: "#4b5675", fontWeight: 600, padding: "6px 0" }}>BHK:</span>
+                {["1 BHK", "2 BHK", "3 BHK", "4+ BHK", "Studio"].map((b) => (
+                  <Link key={b} href={`/properties?bedrooms=${b.charAt(0) === "S" ? "0" : b.charAt(0)}`} style={{ padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, background: "#f4f6fb", color: "#4b5675", border: "1px solid #e3e7ef", textDecoration: "none" }}>
+                    {b}
+                  </Link>
                 ))}
               </div>
             </div>
+          </div>
 
-            <div className="hero-art" style={{ position: "relative", height: 420 }}>
-              <div style={{ position: "absolute", top: 0, right: 0, width: "100%", height: "100%", borderRadius: 24, background: "linear-gradient(135deg,#0d6efd 0%,#0a58ca 60%,#ff6a3d 100%)", boxShadow: "0 30px 70px rgba(11,20,55,0.25)", overflow: "hidden" }}>
-                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 70% 20%, rgba(255,255,255,0.25) 0%, transparent 50%)" }} />
-                <div style={{ position: "absolute", bottom: 30, left: 30, right: 30, background: "rgba(255,255,255,0.95)", borderRadius: 16, padding: 18, backdropFilter: "blur(10px)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#ff6a3d,#f94234)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18 }}>🤖</div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 15 }}>Ria — AI Assistant</div>
-                      <div style={{ fontSize: 12, color: "#4b5675" }}>Ask for any property in Maharashtra</div>
-                    </div>
-                  </div>
-                  <div style={{ background: "#0d6efd", color: "white", padding: "8px 12px", borderRadius: 10, fontSize: 13, marginBottom: 8 }}>2BHK in Kharadi under 25k</div>
-                  <div style={{ background: "#f4f6fb", color: "#0b1437", padding: "8px 12px", borderRadius: 10, fontSize: 12, lineHeight: 1.5 }}>Found <strong>3 great matches</strong> in Kharadi. Top pick: 2BHK with pool & gym, ₹24,000/mo.</div>
-                </div>
+          {/* Trust stats */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 50, padding: "30px 0 40px", flexWrap: "wrap" }}>
+            {TRUST_STATS.map((s) => (
+              <div key={s.label} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "white" }}>{s.n}</div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>{s.label}</div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Areas */}
+      <section style={{ padding: "50px 0" }}>
+        <div className="container-app">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+            <div>
+              <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 4 }}>Popular Areas</div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>लोकप्रिय भाग / Trending Localities</h2>
+            </div>
+            <Link href="/properties" style={{ fontSize: 14, fontWeight: 700, color: "#0d6efd", textDecoration: "none" }}>View all →</Link>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+            {POPULAR_AREAS.map((area) => (
+              <Link key={area.name} href={`/properties?city=${encodeURIComponent(area.name.split(",")[0])}`} style={{ position: "relative", borderRadius: 16, overflow: "hidden", height: 200, display: "block", textDecoration: "none" }}>
+                <img src={area.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%)" }} />
+                <div style={{ position: "absolute", bottom: 16, left: 16, right: 16, color: "white" }}>
+                  <div style={{ fontSize: 16, fontWeight: 800 }}>{area.name}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+                    <span style={{ fontSize: 13, opacity: 0.9 }}>Avg. rent {area.avg}/mo</span>
+                    <span style={{ fontSize: 12, background: "rgba(255,255,255,0.2)", padding: "3px 10px", borderRadius: 999, backdropFilter: "blur(4px)" }}>{area.count} properties</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Listings */}
+      <section style={{ padding: "50px 0", background: "#f7f8fc" }}>
+        <div className="container-app">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+            <div>
+              <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 4 }}>Featured</div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>विशेष निवड / Hand-picked Homes</h2>
+              <p style={{ fontSize: 14, color: "#4b5675", marginTop: 4 }}>Verified owner properties, curated for quality and value.</p>
+            </div>
+            <Link href="/properties" style={{ fontSize: 14, fontWeight: 700, color: "#0d6efd", textDecoration: "none" }}>View all →</Link>
+          </div>
+          <FeaturedGrid />
+        </div>
+      </section>
+
+      {/* Guides */}
+      <section style={{ padding: "50px 0" }}>
+        <div className="container-app">
+          <div style={{ textAlign: "center", marginBottom: 30 }}>
+            <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 4 }}>Resources</div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>मार्गदर्शक / Renter&apos;s Guide</h2>
+            <p style={{ fontSize: 14, color: "#4b5675", marginTop: 6 }}>Everything you need to know about renting in Maharashtra</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+            {GUIDES.map((g) => (
+              <div key={g.en} style={{ background: "white", borderRadius: 16, padding: 22, border: "1px solid #e3e7ef", cursor: "pointer" }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>{g.icon}</div>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>{g.title}</h3>
+                <p style={{ fontSize: 13, color: "#4b5675", lineHeight: 1.5 }}>{g.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* News */}
+      <section style={{ padding: "50px 0", background: "#f7f8fc" }}>
+        <div className="container-app">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+            <div>
+              <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 4 }}>News</div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>बातम्या / Latest Updates</h2>
             </div>
           </div>
-
-          <div style={{ marginTop: 40 }}><SearchBar variant="hero" /></div>
-        </div>
-      </section>
-
-      {/* Featured */}
-      <section style={{ padding: "50px 0 10px" }}>
-        <div className="container-app">
-          <SectionHeader eyebrow="Featured listings" title="Top picks this week" subtitle="Verified owner properties, hand-curated for quality and value." action={<Link href="/properties" className="btn btn-outline">View all →</Link>} />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18, marginTop: 22 }}>
-            {featured.map((p) => <PropertyCard key={p.id} property={p} />)}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+            {NEWS.map((n) => (
+              <div key={n.title} style={{ background: "white", borderRadius: 14, padding: 18, border: "1px solid #e3e7ef" }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
+                  <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: "#e8f5e9", color: "#2e7d32" }}>{n.tag}</span>
+                  <span style={{ fontSize: 12, color: "#9ca3af" }}>{n.date}</span>
+                </div>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0b1437", lineHeight: 1.4 }}>{n.title}</h3>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section style={{ padding: "50px 0 10px" }}>
-        <div className="container-app">
-          <SectionHeader eyebrow="For owners" title="List your property in 3 easy steps" subtitle="Reach thousands of verified tenants in Maharashtra. Cancel anytime." />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginTop: 22 }}>
-            <OwnerStep step="1" title="Sign up free" desc="Create your owner account in under 60 seconds. No credit card required." />
-            <OwnerStep step="2" title="Activate ₹49/week" desc="Pay just ₹49 per week — cheaper than a single broker visit. 100% digital." />
-            <OwnerStep step="3" title="Add & manage listings" desc="Post unlimited photos, rent, amenities, and chat directly with interested tenants." />
-            <OwnerStep step="4" title="Zero brokerage" desc="Tenants contact you directly. Save ₹20K–40K in typical broker fees." />
-          </div>
-          <div style={{ textAlign: "center", marginTop: 28 }}>
-            <Link href="/pricing" className="btn btn-primary" style={{ padding: "12px 26px", fontSize: 15 }}>Start listing for ₹49/week →</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Rently */}
-      <section style={{ padding: "50px 0 10px" }}>
+      {/* Owner CTA */}
+      <section style={{ padding: "50px 0" }}>
         <div className="container-app">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "center" }} className="values-grid">
             <div>
-              <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 6 }}>Why Rently</div>
-              <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 800, color: "#0b1437", letterSpacing: -0.5, marginBottom: 14 }}>The smarter way to rent in Maharashtra</h2>
-              <p style={{ color: "#4b5675", fontSize: 15, lineHeight: 1.7, marginBottom: 20 }}>We built Rently to give tenants and owners a faster, fairer alternative to traditional brokers — across every city in Maharashtra.</p>
-              <div style={{ display: "grid", gap: 14 }}>
-                <Value icon="🪙" title="Save 95% vs brokers" desc="Skip the 1–2 month brokerage. Owners pay just ₹49/week." />
-                <Value icon="🤖" title="AI assistant Ria" desc="Talk in plain English, Marathi, or Hindi — '2BHK in Hinjewadi under 25k' — and Ria finds matching homes." />
-                <Value icon="✅" title="Verified owners" desc="Every listing owner is phone-verified. Police-verified tenant reports supported." />
-                <Value icon="📍" title="Covering all Maharashtra" desc="From Mumbai to Nagpur, Pune to Nashik, Kolhapur to Aurangabad — we cover what others don't." />
+              <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 6 }}>For Owners</div>
+              <h2 style={{ fontSize: 28, fontWeight: 800, color: "#0b1437", marginBottom: 10 }}>मालकांसाठी / List Your Property</h2>
+              <p style={{ color: "#4b5675", fontSize: 15, lineHeight: 1.7, marginBottom: 20 }}>Reach thousands of verified tenants in Maharashtra. Pay just ₹49/week. Cancel anytime.</p>
+              <div style={{ display: "grid", gap: 14, marginBottom: 24 }}>
+                {[
+                  { icon: "🪙", title: "Save 95% vs brokers", desc: "Skip 1-2 month brokerage fees. Pay just ₹49/week." },
+                  { icon: "✅", title: "Verified tenants", desc: "Every tenant is phone-verified. Police verification supported." },
+                  { icon: "📊", title: "Owner dashboard", desc: "Track views, inquiries, and manage listings from one place." },
+                ].map((v) => (
+                  <div key={v.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(13,110,253,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{v.icon}</div>
+                    <div>
+                      <h4 style={{ fontSize: 14, fontWeight: 800, color: "#0b1437", marginBottom: 2 }}>{v.title}</h4>
+                      <p style={{ fontSize: 13, color: "#4b5675", margin: 0, lineHeight: 1.5 }}>{v.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
+              <Link href="/dashboard" className="btn btn-primary" style={{ padding: "12px 24px", fontSize: 15 }}>Start listing for ₹49/week →</Link>
             </div>
-            <div style={{ position: "relative", padding: 18, background: "white", borderRadius: 24, border: "1px solid #e3e7ef", boxShadow: "0 14px 40px rgba(11,20,55,0.08)" }}>
-              <div style={{ position: "absolute", top: -22, right: 22, background: "linear-gradient(135deg,#ff6a3d,#f94234)", color: "white", padding: "8px 14px", borderRadius: 999, fontSize: 12, fontWeight: 800, boxShadow: "0 8px 20px rgba(255,106,61,0.4)" }}>Ria is live 24/7</div>
-              <div style={{ background: "#f4f6fb", borderRadius: 14, padding: 16, marginBottom: 12 }}>
-                <div style={{ fontSize: 12, color: "#4b5675", marginBottom: 8 }}>You · just now</div>
-                <div style={{ background: "#0d6efd", color: "white", padding: "10px 14px", borderRadius: 12, fontSize: 14, maxWidth: "80%", marginLeft: "auto", borderBottomRightRadius: 4 }}>Find me a 2BHK in Baner with parking, under ₹35,000</div>
-              </div>
-              <div style={{ background: "#f4f6fb", borderRadius: 14, padding: 16 }}>
-                <div style={{ fontSize: 12, color: "#4b5675", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#0d6efd" }} />Ria · AI assistant
+            <div style={{ background: "white", borderRadius: 20, padding: 24, border: "1px solid #e3e7ef", boxShadow: "0 10px 30px rgba(0,0,0,0.06)" }}>
+              <div style={{ background: "#f4f6fb", borderRadius: 14, padding: 18, marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, color: "#4b5675" }}>Monthly Rent</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#0b1437" }}>₹25,000</span>
                 </div>
-                <div style={{ background: "white", padding: "12px 14px", borderRadius: 12, fontSize: 13, lineHeight: 1.6, border: "1px solid #e3e7ef", borderBottomLeftRadius: 4 }}>
-                  Found <strong style={{ color: "#0d6efd" }}>3 great matches</strong> in Pune for 2BHK family rentals under ₹35,000 with parking:<br /><br />
-                  • <strong>Baner</strong> — 2BHK, 1,050 sqft, semi-furnished, ₹32K<br />
-                  • <strong>Wakad</strong> — 2BHK with garden, ₹26K<br />
-                  <br />Tap a listing or refine: <em>&quot;only ready-to-move&quot;</em>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, color: "#4b5675" }}>Security Deposit</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#0b1437" }}>₹50,000</span>
+                </div>
+                <div style={{ borderTop: "1px solid #d3d8e1", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 13, color: "#4b5675" }}>True Monthly Cost</span>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: "#ff6a3d" }}>₹28,500</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ flex: 1, background: "#f0fdf4", borderRadius: 10, padding: 12, textAlign: "center" }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#10b981" }}>✓</div>
+                  <div style={{ fontSize: 11, color: "#10b981", fontWeight: 600 }}>Verified</div>
+                </div>
+                <div style={{ flex: 1, background: "#f0f7ff", borderRadius: 10, padding: 12, textAlign: "center" }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#0d6efd" }}>👤</div>
+                  <div style={{ fontSize: 11, color: "#0d6efd", fontWeight: 600 }}>Direct Owner</div>
+                </div>
+                <div style={{ flex: 1, background: "#fff7ed", borderRadius: 10, padding: 12, textAlign: "center" }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#ff6a3d" }}>₹0</div>
+                  <div style={{ fontSize: 11, color: "#ff6a3d", fontWeight: 600 }}>Brokerage</div>
                 </div>
               </div>
             </div>
@@ -142,68 +296,39 @@ export default function HomePage() {
         <style>{`@media (max-width: 900px) { .values-grid { grid-template-columns: 1fr !important; } }`}</style>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: "60px 0" }}>
-        <div className="container-app">
-          <div style={{ borderRadius: 24, padding: "50px 40px", background: "linear-gradient(135deg,#0b1437 0%,#1c2a5e 60%,#ff6a3d 130%)", color: "white", textAlign: "center" }} className="cta-block">
-            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 800, marginBottom: 12 }}>Ready to find your next home in Maharashtra?</h2>
-            <p style={{ fontSize: 16, opacity: 0.9, maxWidth: 600, margin: "0 auto 24px", lineHeight: 1.6 }}>Join thousands of happy tenants and owners using Rently. No broker. No spam. Just real homes — across all of Maharashtra.</p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/properties" className="btn" style={{ background: "white", color: "#0b1437", padding: "12px 24px", fontSize: 15 }}>Start searching</Link>
-              <Link href="/auth/signup" className="btn" style={{ background: "transparent", color: "white", border: "1px solid rgba(255,255,255,0.4)", padding: "12px 24px", fontSize: 15 }}>Create free account</Link>
-            </div>
+      {/* Final CTA */}
+      <section style={{ padding: "50px 0", background: "linear-gradient(135deg, #0b1437, #1a237e)" }}>
+        <div className="container-app" style={{ textAlign: "center" }}>
+          <h2 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 10 }}>Ready to find your next home?</h2>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.8)", marginBottom: 24 }}>Join thousands of happy tenants and owners across Maharashtra.</p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/properties" className="btn" style={{ background: "white", color: "#0b1437", padding: "12px 24px", fontSize: 15 }}>Start searching</Link>
+            <Link href="/auth/signup" className="btn" style={{ background: "transparent", color: "white", border: "1px solid rgba(255,255,255,0.4)", padding: "12px 24px", fontSize: 15 }}>Create free account</Link>
           </div>
         </div>
       </section>
 
       <Footer />
       <AIChat />
-
-      <style>{`
-        @media (max-width: 900px) {
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .hero-art { display: none !important; }
-        }
-        @media (max-width: 600px) {
-          .cta-block { padding: 32px 22px !important; }
-        }
-      `}</style>
     </div>
   );
 }
 
-function SectionHeader({ eyebrow, title, subtitle, action }: { eyebrow: string; title: string; subtitle?: string; action?: React.ReactNode }) {
-  return (
-    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 14 }}>
-      <div>
-        <div style={{ fontSize: 12, color: "#ff6a3d", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 6 }}>{eyebrow}</div>
-        <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#0b1437", letterSpacing: -0.5 }}>{title}</h2>
-        {subtitle && <p style={{ color: "#4b5675", fontSize: 15, marginTop: 6, maxWidth: 600 }}>{subtitle}</p>}
-      </div>
-      {action}
-    </div>
-  );
-}
+function FeaturedGrid() {
+  const [properties, setProperties] = useState<Array<{id:string;title:string;type:string;price:number;area:string;city:string;bedrooms:number;bathrooms:number;furnishing:string;images:string;isVerified:boolean;isFeatured:boolean;createdAt:string;address:string}>>([]);
+  const [loading, setLoading] = useState(true);
 
-function OwnerStep({ step, title, desc }: { step: string; title: string; desc: string }) {
-  return (
-    <div style={{ background: "white", borderRadius: 16, padding: 22, border: "1px solid #e3e7ef", position: "relative" }}>
-      <div style={{ position: "absolute", top: 18, right: 18, width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14 }}>{step}</div>
-      <div style={{ fontSize: 12, color: "#ff6a3d", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>Step</div>
-      <h3 style={{ fontSize: 17, fontWeight: 800, margin: "4px 0 8px" }}>{title}</h3>
-      <p style={{ fontSize: 14, color: "#4b5675", lineHeight: 1.5, margin: 0 }}>{desc}</p>
-    </div>
-  );
-}
+  if (typeof window !== "undefined" && loading) {
+    fetch("/api/properties").then(r => r.json()).then(d => { setProperties(Array.isArray(d) ? d.slice(0, 6) : []); setLoading(false); }).catch(() => setLoading(false));
+  }
 
-function Value({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+  if (loading) {
+    return <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>{[1,2,3,4,5,6].map(n => <div key={n} className="skeleton" style={{ height: 280, borderRadius: 14 }} />)}</div>;
+  }
+
   return (
-    <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-      <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(13,110,253,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{icon}</div>
-      <div>
-        <h4 style={{ fontSize: 15, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>{title}</h4>
-        <p style={{ fontSize: 14, color: "#4b5675", margin: 0, lineHeight: 1.5 }}>{desc}</p>
-      </div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+      {properties.map((p) => <PropertyCard key={p.id} property={p} />)}
     </div>
   );
 }
