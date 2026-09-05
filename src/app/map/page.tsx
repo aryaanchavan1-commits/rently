@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import PropertyMap from "@/components/PropertyMap";
 import PropertyCard from "@/components/PropertyCard";
 import AIChat from "@/components/AIChat";
 import { useLang } from "@/lib/lang-context";
+
+const PropertyMap = dynamic(() => import("@/components/PropertyMap"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ width: "100%", height: 500, background: "#f0f2f7", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #e3e7ef" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: 40, marginBottom: 8 }}>🗺️</div>
+        <div style={{ fontSize: 14, color: "#4b5675" }}>Loading map…</div>
+      </div>
+    </div>
+  ),
+});
 
 interface Prop {
   id: string; title: string; type: string; price: number;
@@ -20,7 +32,7 @@ export default function MapPage() {
   const [properties, setProperties] = useState<Prop[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [city, setCity] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
 
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
 
@@ -36,7 +48,14 @@ export default function MapPage() {
     load();
   }, []);
 
-  const filtered = city ? properties.filter((p) => p.city === city) : properties;
+  const uniqueCities = useMemo(() => [...new Set(properties.map((p) => p.city))].sort(), [properties]);
+
+  const filtered = useMemo(() => {
+    if (!locationQuery.trim()) return properties;
+    const q = locationQuery.toLowerCase();
+    return properties.filter((p) => p.city.toLowerCase().includes(q) || p.area.toLowerCase().includes(q));
+  }, [properties, locationQuery]);
+
   const selectedProperty = selectedId ? properties.find((p) => p.id === selectedId) : null;
 
   return (
@@ -53,16 +72,30 @@ export default function MapPage() {
             </p>
           </div>
 
-          {/* City filter */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-            <button onClick={() => setCity("")} className={`btn ${!city ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px", fontSize: 13 }}>
-              {t("All", "सर्व", "सभी")}
-            </button>
-            {["Mumbai", "Pune", "Thane", "Navi Mumbai", "Nagpur", "Nashik"].map((c) => (
-              <button key={c} onClick={() => setCity(c)} className={`btn ${city === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px", fontSize: 13 }}>
-                {c}
+          {/* Location search + city chips */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ position: "relative", flex: "1 1 200px" }}>
+                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 14, pointerEvents: "none", zIndex: 1 }}>📍</span>
+                <input
+                  className="input"
+                  placeholder={t("Search any city or area…", "कोणतेही शहर शोधा…", "कोई भी शहर खोजें…")}
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                  style={{ paddingLeft: 36 }}
+                />
+              </div>
+              <button onClick={() => setLocationQuery("")} className={`btn ${!locationQuery ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px" }}>
+                {t("All", "सर्व", "सभी")}
               </button>
-            ))}
+            </div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {uniqueCities.map((c) => (
+                <button key={c} onClick={() => setLocationQuery(c)} className={`btn ${locationQuery === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "6px 12px", fontSize: 12 }}>
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
 
           {loading ? (

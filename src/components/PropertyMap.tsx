@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState, useMemo } from "react";
+import dynamic from "next/dynamic";
+
+const L = typeof window !== "undefined" ? require("leaflet") : null;
 
 interface MapProperty {
   id: string;
@@ -25,16 +27,18 @@ interface Props {
   onPropertyClick?: (id: string) => void;
 }
 
-export default function PropertyMap({ properties, center = [19.7515, 75.7139], zoom = 7, height = "500px", onPropertyClick }: Props) {
+function MapInner({ properties, center = [19.7515, 75.7139], zoom = 7, height = "500px", onPropertyClick }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<unknown>(null);
   const [loaded, setLoaded] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    if (!mapRef.current || loaded) return;
+    setIsClient(true);
+  }, []);
 
-    const L = require("leaflet");
-    require("leaflet/dist/leaflet.css");
+  useEffect(() => {
+    if (!isClient || !mapRef.current || loaded || !L) return;
 
     delete (L.Icon.Default.prototype as Record<string, unknown>)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -70,12 +74,13 @@ export default function PropertyMap({ properties, center = [19.7515, 75.7139], z
     });
 
     properties.forEach((p) => {
+      if (!p.lat || !p.lng) return;
       const icon = p.isFeatured ? featuredIcon : primaryIcon;
       const marker = L.marker([p.lat, p.lng], { icon }).addTo(map);
-      const img = p.images[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400";
+      const img = p.images?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400";
       const popupContent = `
         <div style="min-width:220px;font-family:system-ui,sans-serif;">
-          <img src="${img}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" />
+          <img src="${img}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" loading="lazy" />
           <div style="font-weight:700;font-size:14px;color:#0b1437;margin-bottom:4px;">${p.title}</div>
           <div style="font-size:12px;color:#4b5675;margin-bottom:4px;">${p.area}, ${p.city} · ${p.bedrooms > 0 ? p.bedrooms + "BHK" : p.type}</div>
           <div style="font-size:16px;font-weight:800;color:#ff6a3d;">₹${p.price.toLocaleString("en-IN")}/mo</div>
@@ -89,8 +94,11 @@ export default function PropertyMap({ properties, center = [19.7515, 75.7139], z
     });
 
     if (properties.length > 0) {
-      const bounds = L.latLngBounds(properties.map((p) => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+      const validProps = properties.filter((p) => p.lat && p.lng);
+      if (validProps.length > 0) {
+        const bounds = L.latLngBounds(validProps.map((p) => [p.lat, p.lng]));
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+      }
     }
 
     mapInstanceRef.current = map;
@@ -100,12 +108,21 @@ export default function PropertyMap({ properties, center = [19.7515, 75.7139], z
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [properties, center, zoom, loaded, onPropertyClick]);
+  }, [isClient, properties, center, zoom, loaded, onPropertyClick]);
 
   return (
     <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", border: "1px solid #e3e7ef" }}>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-      <div ref={mapRef} style={{ width: "100%", height, background: "#f0f2f7" }} />
+      {!isClient ? (
+        <div style={{ width: "100%", height, background: "#f0f2f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🗺️</div>
+            <div style={{ fontSize: 14, color: "#4b5675" }}>Loading map…</div>
+          </div>
+        </div>
+      ) : (
+        <div ref={mapRef} style={{ width: "100%", height, background: "#f0f2f7" }} />
+      )}
       {properties.length > 0 && (
         <div style={{
           position: "absolute", bottom: 12, left: 12, background: "rgba(11,20,55,0.9)",
@@ -117,4 +134,8 @@ export default function PropertyMap({ properties, center = [19.7515, 75.7139], z
       )}
     </div>
   );
+}
+
+export default function PropertyMap(props: Props) {
+  return <MapInner {...props} />;
 }
