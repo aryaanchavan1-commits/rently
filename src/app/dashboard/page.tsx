@@ -1,187 +1,309 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { useLang } from "@/lib/lang-context";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AIChat from "@/components/AIChat";
+import ListingWizard from "@/components/ListingWizard";
+import type { Property } from "@/lib/properties-store";
 
-interface Conversation {
-  id: string;
-  propertyTitle: string;
-  tenantName: string;
-  tenantEmail: string;
-  tenantPhone: string;
-  tenantMessage: string;
-  status: string;
-  createdAt: string;
-  lastMessage: string;
-  lastMessageAt: string;
-  unread: number;
-}
+type Tab = "overview" | "listings" | "add" | "inquiries";
 
-const myProps = [
-  { id: "1", title: "Spacious 2BHK in Andheri", city: "Mumbai", price: 22000, views: 245, status: "active", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400" },
-  { id: "2", title: "Room in Hinjewadi", city: "Pune", price: 6500, views: 98, status: "active", image: "https://images.unsplash.com/photo-1598928506311-c55ez637a513?w=400" },
-  { id: "3", title: "Office Space IT Park", city: "Pune", price: 35000, views: 67, status: "pending", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400" },
-];
-
-export default function DashboardPage() {
-  const [tab, setTab] = useState<"listings" | "inquiries" | "subscription">("listings");
-  const [inquiries, setInquiries] = useState<Conversation[]>([]);
+export default function OwnerDashboard() {
+  const { user } = useAuth();
+  const { lang } = useLang();
+  const router = useRouter();
+  const [tab, setTab] = useState<Tab>("overview");
+  const [listings, setListings] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/inquiries?ownerId=owner-1")
-      .then((r) => r.json())
-      .then((data) => setInquiries(data))
-      .catch(() => {});
-  }, []);
+    if (!user) { router.push("/auth/login"); return; }
+    loadListings();
+  }, [user, router]);
 
-  const newCount = inquiries.filter((c) => c.status === "new").length;
+  const loadListings = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/properties?ownerId=${user.id}`);
+      const data = await res.json();
+      setListings(Array.isArray(data) ? data : []);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
-  function timeAgo(dateStr: string) {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this listing?")) return;
+    setDeleting(id);
+    try {
+      await fetch(`/api/properties/${id}`, { method: "DELETE" });
+      setListings((prev) => prev.filter((p) => p.id !== id));
+    } finally {
+      setDeleting(null);
+    }
   }
 
+  const t = (en: string, mr: string, hi: string) => {
+    if (lang === "mr") return mr;
+    if (lang === "hi") return hi;
+    return en;
+  };
+
+  const totalRent = listings.reduce((sum, p) => sum + p.price, 0);
+  const activeListings = listings.filter((p) => p.status === "active").length;
+
+  const tabs: { key: Tab; icon: string; label: string }[] = [
+    { key: "overview", icon: "📊", label: t("Overview", "सारांश", "अवलोकन") },
+    { key: "listings", icon: "🏠", label: t("My Listings", "माझ्या यादी", "मेरी लिस्टिंग") },
+    { key: "add", icon: "➕", label: t("Add Property", "मालमत्ता जोडा", "प्रॉपर्टी जोड़ें") },
+    { key: "inquiries", icon: "📩", label: t("Inquiries", "चौकशी", "पूछताछ") },
+  ];
+
   return (
-    <div style={{ background: "#f7f8fc", minHeight: "100vh" }}>
+    <div className="app">
       <Navbar />
-      <div className="container-app" style={{ padding: "30px 20px 60px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>Owner Dashboard</h1>
-            <p style={{ fontSize: 14, color: "#4b5675" }}>Manage your property listings</p>
+      <main style={{ padding: "32px 0 80px" }}>
+        <div className="container-app">
+          {/* Header */}
+          <div style={{ marginBottom: 28 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 900, color: "#0b1437" }}>
+              {t("Owner Dashboard", "मालक डॅशबोर्ड", "मालिक डैशबोर्ड")}
+            </h1>
+            <p style={{ fontSize: 15, color: "#4b5675", marginTop: 4 }}>
+              {t("Manage your properties and track performance", "तुमच्या मालमत्ता व्यवस्थापित करा", "अपनी प्रॉपर्टी प्रबंधित करें")}
+            </p>
           </div>
-          <Link href="/inbox" className="btn btn-primary">
-            📬 Inbox {newCount > 0 && <span style={{ background: "white", color: "#ff6a3d", borderRadius: 999, padding: "2px 7px", fontSize: 11, fontWeight: 700 }}>{newCount}</span>}
-          </Link>
-        </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 24 }}>
-          {[
-            { label: "Total Properties", value: "3", icon: "🏠" },
-            { label: "Total Views", value: "410", icon: "👁️" },
-            { label: "Inquiries", value: String(inquiries.length), icon: "💬" },
-            { label: "New Messages", value: String(newCount), icon: "📬" },
-          ].map((s) => (
-            <div key={s.label} style={{ background: "white", borderRadius: 14, padding: 18, border: "1px solid #e3e7ef" }}>
-              <div style={{ fontSize: 22, marginBottom: 8 }}>{s.icon}</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>{s.value}</div>
-              <div style={{ fontSize: 13, color: "#4b5675" }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-          {(["listings", "inquiries", "subscription"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`btn ${tab === t ? "btn-secondary" : "btn-outline"}`} style={{ textTransform: "capitalize" }}>
-              {t} {t === "inquiries" && newCount > 0 && <span style={{ background: "#ff6a3d", color: "white", borderRadius: 999, padding: "2px 6px", fontSize: 10 }}>{newCount}</span>}
-            </button>
-          ))}
-        </div>
-
-        {tab === "listings" && (
-          <div style={{ display: "grid", gap: 14 }}>
-            {myProps.map((prop) => (
-              <div key={prop.id} style={{ background: "white", borderRadius: 14, padding: 18, border: "1px solid #e3e7ef", display: "flex", gap: 16, alignItems: "center" }}>
-                <img src={prop.image} alt="" style={{ width: 100, height: 80, objectFit: "cover", borderRadius: 10 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0b1437" }}>{prop.title}</h3>
-                    <span className={`badge ${prop.status === "active" ? "badge-success" : "badge-warn"}`}>{prop.status}</span>
-                  </div>
-                  <p style={{ fontSize: 13, color: "#4b5675" }}>{prop.city} · ₹{prop.price.toLocaleString("en-IN")}/mo</p>
-                  <div style={{ fontSize: 12, color: "#4b5675", marginTop: 6 }}>👁️ {prop.views} views</div>
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="btn btn-outline" style={{ padding: "8px 14px" }}>Edit</button>
-                </div>
-              </div>
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 24, overflowX: "auto", paddingBottom: 4 }}>
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                style={{
+                  padding: "10px 18px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                  border: tab === t.key ? "2px solid #0d6efd" : "1px solid #e3e7ef",
+                  background: tab === t.key ? "rgba(13,110,253,0.06)" : "white",
+                  color: tab === t.key ? "#0d6efd" : "#4b5675",
+                  transition: "all 0.15s",
+                }}
+              >
+                {t.icon} {t.label}
+              </button>
             ))}
           </div>
-        )}
 
-        {tab === "inquiries" && (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437" }}>All Inquiries</h3>
-              <Link href="/inbox" className="btn btn-outline" style={{ fontSize: 13 }}>View Full Inbox →</Link>
-            </div>
-            {inquiries.length === 0 ? (
-              <div style={{ background: "white", borderRadius: 18, padding: 50, textAlign: "center", border: "1px solid #e3e7ef" }}>
-                <div style={{ fontSize: 50, marginBottom: 12 }}>📭</div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No inquiries yet</h3>
-                <p style={{ color: "#4b5675" }}>When tenants contact you, their inquiries will appear here.</p>
+          {/* Overview Tab */}
+          {tab === "overview" && (
+            <div className="fade-in" style={{ display: "grid", gap: 20 }}>
+              {/* Stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
+                <StatCard
+                  icon="🏠"
+                  label={t("Total Listings", "एकूण यादी", "कुल लिस्टिंग")}
+                  value={listings.length.toString()}
+                  color="#0d6efd"
+                />
+                <StatCard
+                  icon="✅"
+                  label={t("Active", "सक्रिय", "सक्रिय")}
+                  value={activeListings.toString()}
+                  color="#10b981"
+                />
+                <StatCard
+                  icon="💰"
+                  label={t("Potential Revenue", "संभावित उत्पन्न", "संभावित आय")}
+                  value={`₹${totalRent.toLocaleString("en-IN")}`}
+                  accent
+                />
+                <StatCard
+                  icon="👁️"
+                  label={t("Total Views", "एकूण दृश्य", "कुल व्यूज")}
+                  value={listings.reduce((s, p) => s + p.views, 0).toString()}
+                  color="#f59e0b"
+                />
               </div>
-            ) : (
-              <div style={{ display: "grid", gap: 12 }}>
-                {inquiries.map((conv) => (
-                  <Link
-                    key={conv.id}
-                    href={`/chat/${conv.id}`}
-                    className="property-card"
-                    style={{ display: "block", background: "white", borderRadius: 14, padding: 18, border: conv.unread > 0 ? "2px solid #0d6efd" : "1px solid #e3e7ef", textDecoration: "none", color: "inherit" }}
-                  >
-                    <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                      <div style={{ width: 48, height: 48, borderRadius: "50%", background: conv.unread > 0 ? "linear-gradient(135deg,#0d6efd,#0a58ca)" : "#f4f6fb", color: conv.unread > 0 ? "white" : "#0b1437", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
-                        {conv.tenantName.charAt(0)}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 15, fontWeight: conv.unread > 0 ? 800 : 600, color: "#0b1437" }}>{conv.tenantName}</span>
-                            {conv.status === "new" && <span className="badge badge-warn" style={{ fontSize: 10 }}>NEW</span>}
-                          </div>
-                          <span style={{ fontSize: 12, color: "#4b5675" }}>{timeAgo(conv.lastMessageAt)}</span>
+
+              {/* Quick Actions */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+                <button onClick={() => setTab("add")} className="owner-quick-action">
+                  <div style={{ fontSize: 28 }}>➕</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{t("List New Property", "नवीन मालमत्ता यादी", "नई प्रॉपर्टी लिस्ट करें")}</div>
+                  <div style={{ fontSize: 12, color: "#4b5675" }}>{t("Add rooms, flats, or houses", "खोल्या, फ्लॅट किंवा घर जोडा", "कमरे, फ्लैट या घर जोड़ें")}</div>
+                </button>
+                <Link href="/inbox" className="owner-quick-action" style={{ textDecoration: "none" }}>
+                  <div style={{ fontSize: 28 }}>📩</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{t("View Inquiries", "चौकशी पहा", "पूछताछ देखें")}</div>
+                  <div style={{ fontSize: 12, color: "#4b5675" }}>{t("Respond to tenant messages", "भाडेकरू संदेशांना उत्तर द्या", "किरायेदार संदेशों का जवाब दें")}</div>
+                </Link>
+                <Link href="/pricing" className="owner-quick-action" style={{ textDecoration: "none" }}>
+                  <div style={{ fontSize: 28 }}>⭐</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{t("Upgrade Plan", "प्लान अपग्रेड करा", "प्लान अपग्रेड करें")}</div>
+                  <div style={{ fontSize: 12, color: "#4b5675" }}>{t("Get more views & leads", "अधिक दृश्य आणि लीड मिळवा", "अधिक व्यूज और लीड पाएं")}</div>
+                </Link>
+              </div>
+
+              {/* Recent Listings */}
+              {listings.length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: "#0b1437", marginBottom: 14 }}>
+                    {t("Recent Listings", "अलीकडील यादी", "हाल की लिस्टिंग")}
+                  </h3>
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {listings.slice(0, 3).map((p) => (
+                      <div key={p.id} style={{
+                        display: "flex", alignItems: "center", gap: 14, padding: "12px 16px",
+                        borderRadius: 12, border: "1px solid #e3e7ef", background: "white",
+                      }}>
+                        <div style={{
+                          width: 48, height: 48, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#f4f6fb",
+                        }}>
+                          {p.images[0] ? (
+                            <img src={p.images[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🏠</div>
+                          )}
                         </div>
-                        <div style={{ fontSize: 12, color: "#4b5675", marginBottom: 4 }}>Re: {conv.propertyTitle}</div>
-                        <p style={{ fontSize: 14, color: conv.unread > 0 ? "#0b1437" : "#4b5675", fontWeight: conv.unread > 0 ? 600 : 400, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{conv.lastMessage}</p>
-                        <div style={{ display: "flex", gap: 12, marginTop: 8, fontSize: 12, color: "#4b5675" }}>
-                          <span>📧 {conv.tenantEmail}</span>
-                          {conv.tenantPhone && <span>📞 {conv.tenantPhone}</span>}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#0b1437", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</div>
+                          <div style={{ fontSize: 12, color: "#4b5675" }}>{p.area && `${p.area}, `}{p.city}</div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#ff6a3d" }}>₹{p.price.toLocaleString("en-IN")}/mo</div>
+                          <div style={{ fontSize: 11, color: p.status === "active" ? "#10b981" : "#f59e0b" }}>{p.status}</div>
                         </div>
                       </div>
-                      {conv.unread > 0 && (
-                        <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#0d6efd", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{conv.unread}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Listings Tab */}
+          {tab === "listings" && (
+            <div className="fade-in" style={{ display: "grid", gap: 14 }}>
+              {loading ? (
+                <div style={{ display: "grid", gap: 14 }}>
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="skeleton" style={{ height: 100, borderRadius: 14 }} />
+                  ))}
+                </div>
+              ) : listings.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 18, border: "1px solid #e3e7ef" }}>
+                  <div style={{ fontSize: 48, marginBottom: 14 }}>🏠</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>
+                    {t("No listings yet", "अजून यादी नाही", "अभी तक कोई लिस्टिंग नहीं")}
+                  </h3>
+                  <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 18 }}>
+                    {t("Add your first property to start receiving inquiries", "पहिली मालमत्ता जोडा", "पूछताछ प्राप्त करने के लिए अपनी पहली प्रॉपर्टी जोड़ें")}
+                  </p>
+                  <button onClick={() => setTab("add")} className="btn btn-primary">
+                    {t("➕ Add Property", "मालमत्ता जोडा", "प्रॉपर्टी जोड़ें")}
+                  </button>
+                </div>
+              ) : (
+                listings.map((p) => (
+                  <div key={p.id} style={{
+                    display: "flex", gap: 14, padding: 16, borderRadius: 14,
+                    border: "1px solid #e3e7ef", background: "white",
+                  }}>
+                    <div style={{
+                      width: 140, height: 100, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#f4f6fb",
+                    }}>
+                      {p.images[0] ? (
+                        <img src={p.images[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>🏠</div>
                       )}
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 700, color: "#0b1437" }}>{p.title}</div>
+                          <div style={{ fontSize: 13, color: "#4b5675", marginTop: 2 }}>
+                            {p.area && `${p.area}, `}{p.city} · {p.bedrooms}BHK · {p.bathrooms}Bath
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: "#ff6a3d" }}>₹{p.price.toLocaleString("en-IN")}</div>
+                          <div style={{ fontSize: 11, color: "#4b5675" }}/>{t("/month", "/महिना", "/महीना")}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
+                        <span style={{
+                          padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+                          background: p.status === "active" ? "rgba(16,185,129,0.1)" : p.status === "pending" ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)",
+                          color: p.status === "active" ? "#10b981" : p.status === "pending" ? "#f59e0b" : "#ef4444",
+                        }}>{p.status}</span>
+                        {p.isVerified && (
+                          <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: "rgba(13,110,253,0.1)", color: "#0d6efd" }}>
+                            ✓ {t("Verified", "पडताळलेले", "सत्यापित")}
+                          </span>
+                        )}
+                        <span style={{ fontSize: 12, color: "#4b5675" }}>👁 {p.views}</span>
+                        <div style={{ flex: 1 }} />
+                        <button onClick={() => handleDelete(p.id)} disabled={deleting === p.id} style={{
+                          padding: "5px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                          border: "1px solid #e3e7ef", background: deleting === p.id ? "#f4f6fb" : "white",
+                          color: deleting === p.id ? "#9ca3af" : "#ef4444",
+                        }}>
+                          {deleting === p.id ? "…" : `🗑️ ${t("Delete", "हटवा", "हटाएं")}`}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
 
-        {tab === "subscription" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18 }}>
-            <div style={{ background: "white", borderRadius: 18, padding: 24, border: "2px solid #10b981" }}>
-              <span className="badge badge-success" style={{ marginBottom: 12 }}>Active Plan</span>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>Weekly</h3>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>₹49<span style={{ fontSize: 14, color: "#4b5675", fontWeight: 400 }}>/week</span></div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {["Unlimited listings", "Verified badge", "Direct contact", "AI matching"].map((f) => (
-                  <li key={f} style={{ padding: "6px 0", fontSize: 14, color: "#0b1437" }}>✓ {f}</li>
-                ))}
-              </ul>
+          {/* Add Property Tab */}
+          {tab === "add" && (
+            <ListingWizard onDone={() => { setTab("listings"); loadListings(); }} />
+          )}
+
+          {/* Inquiries Tab */}
+          {tab === "inquiries" && (
+            <div className="fade-in" style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 18, border: "1px solid #e3e7ef" }}>
+              <div style={{ fontSize: 48, marginBottom: 14 }}>📩</div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>
+                {t("Inquiries Hub", "चौकशी केंद्र", "पूछताछ केंद्र")}
+              </h3>
+              <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 18 }}>
+                {t("Messages from potential tenants appear here", "संभाव्य भाडेकरूंचे संदेस येथे दिसतील", "संभावित किरायेदारों के संदेश यहाँ दिखाई देंगे")}
+              </p>
+              <Link href="/inbox" className="btn btn-primary">
+                {t("📬 Go to Inbox", "इनबॉक्सवर जा", "इनबॉक्स पर जाएं")}
+              </Link>
             </div>
-            <div style={{ background: "white", borderRadius: 18, padding: 24, border: "1px solid #e3e7ef" }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>Monthly</h3>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>₹149<span style={{ fontSize: 14, color: "#4b5675", fontWeight: 400 }}>/month</span></div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 16px" }}>
-                {["Everything in Weekly", "Featured listings", "Advanced analytics"].map((f) => (
-                  <li key={f} style={{ padding: "6px 0", fontSize: 14, color: "#0b1437" }}>✓ {f}</li>
-                ))}
-              </ul>
-              <button className="btn btn-primary" style={{ width: "100%" }}>Upgrade</button>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </main>
+      <AIChat />
       <Footer />
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, color, accent }: { icon: string; label: string; value: string; color?: string; accent?: boolean }) {
+  return (
+    <div style={{
+      padding: 20, borderRadius: 14, border: accent ? "none" : "1px solid #e3e7ef",
+      background: accent ? "linear-gradient(135deg,#ff6a3d,#ff9a6c)" : "white",
+    }}>
+      <div style={{ fontSize: 24, marginBottom: 8 }}>{icon}</div>
+      <div style={{ fontSize: 24, fontWeight: 900, color: accent ? "white" : color || "#0b1437" }}>{value}</div>
+      <div style={{ fontSize: 12, color: accent ? "rgba(255,255,255,0.9)" : "#4b5675", marginTop: 2 }}>{label}</div>
     </div>
   );
 }

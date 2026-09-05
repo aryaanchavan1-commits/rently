@@ -13,14 +13,18 @@ interface Property {
   bedrooms: number;
   bathrooms: number;
   furnishing: string;
-  images: string;
+  images: string | string[];
   isVerified: boolean;
   isFeatured: boolean;
 }
 
 export default function PropertyCard({ property }: { property: Property }) {
   let images: string[] = [];
-  try { images = JSON.parse(property.images); } catch { images = ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"]; }
+  if (Array.isArray(property.images)) {
+    images = property.images;
+  } else {
+    try { images = JSON.parse(property.images); } catch { images = ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"]; }
+  }
 
   const typeLabels: Record<string, string> = { apartment: "Apartment", house: "House", room: "Room", pg: "PG", office: "Office" };
 

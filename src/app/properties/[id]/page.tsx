@@ -1,25 +1,42 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
 
-const data: Record<string, any> = {
-  "1": { title: "Spacious 2BHK with Modern Amenities", type: "apartment", price: 22000, deposit: 44000, address: "15, Sunshine Apartments, Andheri West, Mumbai - 400053", area: "Andheri West", city: "Mumbai", bedrooms: 2, bathrooms: 2, furnishing: "semi", availableFrom: "2026-09-15", images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800", "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800"], amenities: ["WiFi", "Parking", "AC", "Gym", "Pool", "Security", "Power Backup", "Lift"], rules: "No smoking. Rent payable by 5th of each month.", isVerified: true, owner: { name: "Rajesh Sharma", phone: "+91 98765 43210", verified: true, listings: 12, id: "owner-1" } },
-  "2": { title: "Cozy 1BHK Near Metro Station", type: "apartment", price: 12000, deposit: 24000, address: "22, Green Valley Society, Kothrud, Pune - 411038", area: "Kothrud", city: "Pune", bedrooms: 1, bathrooms: 1, furnishing: "furnished", availableFrom: "2026-09-10", images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800"], amenities: ["WiFi", "AC", "Security", "Lift"], rules: "Rent due by 5th. No smoking.", isVerified: true, owner: { name: "Priya Patil", phone: "+91 98765 43211", verified: true, listings: 8, id: "owner-2" } },
-  "3": { title: "Premium 3BHK with Garden View", type: "house", price: 35000, deposit: 70000, address: "8, Rose Garden Lane, Baner, Pune - 411045", area: "Baner", city: "Pune", bedrooms: 3, bathrooms: 3, furnishing: "furnished", availableFrom: "2026-10-01", images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"], amenities: ["WiFi", "Parking", "AC", "Gym", "Pool", "Security", "Garden"], rules: "Family preferred. 1 month notice.", isVerified: true, owner: { name: "Suresh Deshmukh", phone: "+91 98765 43212", verified: true, listings: 15, id: "owner-3" } },
-};
+interface PropData {
+  id: string; title: string; type: string; price: number; deposit: number;
+  address: string; area: string; city: string; bedrooms: number; bathrooms: number;
+  furnishing: string; availableFrom: string; images: string[]; amenities: string[];
+  rules: string; description: string; contactPhone: string;
+  ownerName: string; ownerId: string; isVerified: boolean; views: number;
+}
 
 export default function PropertyDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const p = data[id] || data["1"];
+  const [p, setP] = useState<PropData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch(`/api/properties/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setP(data);
+        }
+      } catch { /* ignore */ }
+      setLoading(false);
+    }
+    load();
+  }, [id]);
 
   async function handleInquiry(e: React.FormEvent) {
     e.preventDefault();
@@ -35,14 +52,13 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: id,
-          propertyTitle: p.title,
+          propertyTitle: p?.title,
           tenantName: form.name,
           tenantEmail: form.email,
           tenantPhone: form.phone,
           tenantMessage: form.message,
-          ownerName: p.owner.name,
-          ownerPhone: p.owner.phone,
-          ownerId: p.owner.id,
+          ownerName: p?.ownerName,
+          ownerId: p?.ownerId,
         }),
       });
       const data = await res.json();
@@ -59,6 +75,37 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
     }
   }
 
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <div style={{ padding: "30px 0 60px", background: "#f7f8fc", minHeight: "calc(100vh - 66px)" }}>
+          <div className="container-app">
+            <div className="skeleton" style={{ height: 24, width: 200, borderRadius: 6, marginBottom: 20 }} />
+            <div className="skeleton" style={{ height: 420, borderRadius: 18, marginBottom: 20 }} />
+            <div className="skeleton" style={{ height: 200, borderRadius: 18 }} />
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!p) {
+    return (
+      <div>
+        <Navbar />
+        <div style={{ padding: "80px 20px", textAlign: "center" }}>
+          <div style={{ fontSize: 60, marginBottom: 16 }}>🏚️</div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>Property not found</h2>
+          <p style={{ color: "#4b5675", marginBottom: 20 }}>This listing may have been removed or is no longer available.</p>
+          <Link href="/properties" className="btn btn-primary">Browse Properties →</Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div>
       <Navbar />
@@ -69,12 +116,12 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
           <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 30 }} className="detail-grid">
             <div>
               <div style={{ borderRadius: 18, overflow: "hidden", background: "#f0f2f7" }}>
-                <img src={p.images[0]} alt={p.title} style={{ width: "100%", height: 420, objectFit: "cover" }} />
+                <img src={p.images[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"} alt={p.title} style={{ width: "100%", height: 420, objectFit: "cover" }} />
               </div>
               {p.images.length > 1 && (
-                <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                <div style={{ display: "flex", gap: 10, marginTop: 10, overflowX: "auto" }}>
                   {p.images.slice(1).map((img: string, i: number) => (
-                    <img key={i} src={img} alt="" style={{ width: 100, height: 80, objectFit: "cover", borderRadius: 10 }} />
+                    <img key={i} src={img} alt="" style={{ width: 100, height: 80, objectFit: "cover", borderRadius: 10, flexShrink: 0 }} />
                   ))}
                 </div>
               )}
@@ -83,9 +130,10 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   {p.isVerified && <span className="badge badge-success">✓ Verified</span>}
                   <span className="badge badge-primary">{p.type}</span>
+                  <span style={{ fontSize: 12, color: "#4b5675", marginLeft: "auto" }}>👁 {p.views} views</span>
                 </div>
                 <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>{p.title}</h1>
-                <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>📍 {p.address}</p>
+                <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>📍 {p.address || `${p.area}, ${p.city}`}</p>
 
                 <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
                   <div style={{ flex: 1, background: "#f4f6fb", borderRadius: 12, padding: 14, textAlign: "center" }}>
@@ -104,20 +152,28 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
 
                 <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 10 }}>About This Property</h2>
                 <p style={{ fontSize: 14, color: "#4b5675", lineHeight: 1.7, marginBottom: 24 }}>
-                  This beautiful {p.bedrooms}BHK {p.type} is located in {p.area}, {p.city}. It features {p.furnishing === "fully" ? "full" : p.furnishing === "semi" ? "semi" : "no"} furnishing with modern amenities. Perfect for comfortable living in a prime location.
+                  {p.description || `This beautiful ${p.bedrooms}BHK ${p.type} is located in ${p.area}, ${p.city}. It features ${p.furnishing === "fully" ? "full" : p.furnishing === "semi" ? "semi" : "no"} furnishing with modern amenities. Perfect for comfortable living in a prime location.`}
                 </p>
 
-                <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 12 }}>Amenities</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
-                  {p.amenities.map((a: string) => (
-                    <div key={a} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "#f4f6fb", borderRadius: 10, fontSize: 13, fontWeight: 600 }}>
-                      <span style={{ color: "#10b981" }}>✓</span> {a}
+                {p.amenities.length > 0 && (
+                  <>
+                    <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 12 }}>Amenities</h2>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
+                      {p.amenities.map((a: string) => (
+                        <div key={a} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "#f4f6fb", borderRadius: 10, fontSize: 13, fontWeight: 600 }}>
+                          <span style={{ color: "#10b981" }}>✓</span> {a}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
 
-                <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 10 }}>House Rules</h2>
-                <p style={{ fontSize: 14, color: "#4b5675", lineHeight: 1.7 }}>{p.rules}</p>
+                {p.rules && (
+                  <>
+                    <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 10 }}>House Rules</h2>
+                    <p style={{ fontSize: 14, color: "#4b5675", lineHeight: 1.7 }}>{p.rules}</p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -129,27 +185,37 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
                   <span style={{ fontSize: 36, fontWeight: 800, color: "#0b1437" }}>₹{p.price.toLocaleString("en-IN")}</span>
                   <span style={{ fontSize: 14, color: "#4b5675" }}>/month</span>
                 </div>
-                <p style={{ fontSize: 13, color: "#4b5675", margin: "4px 0 16px" }}>Deposit: ₹{p.deposit.toLocaleString("en-IN")} · Available: {p.availableFrom}</p>
+                <p style={{ fontSize: 13, color: "#4b5675", margin: "4px 0 16px" }}>
+                  Deposit: ₹{p.deposit.toLocaleString("en-IN")} · Available: {p.availableFrom || "Immediately"}
+                </p>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, background: "#f4f6fb", borderRadius: 12, marginBottom: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>{p.owner.name.charAt(0)}</div>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
+                    {(p.ownerName || "O").charAt(0)}
+                  </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0b1437" }}>{p.owner.name} {p.owner.verified && <span className="badge badge-success" style={{ fontSize: 10 }}>✓</span>}</div>
-                    <div style={{ fontSize: 12, color: "#4b5675" }}>{p.owner.listings} listings · Direct contact</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0b1437" }}>{p.ownerName} {p.isVerified && <span className="badge badge-success" style={{ fontSize: 10 }}>✓</span>}</div>
+                    <div style={{ fontSize: 12, color: "#4b5675" }}>Direct owner · No brokerage</div>
                   </div>
                 </div>
+
+                {p.contactPhone && (
+                  <a href={`tel:${p.contactPhone}`} className="btn btn-outline" style={{ width: "100%", textAlign: "center", marginBottom: 10 }}>
+                    📞 {p.contactPhone}
+                  </a>
+                )}
               </div>
 
               {/* Inquiry Form */}
               <div style={{ background: "white", borderRadius: 18, padding: 24, border: "1px solid #e3e7ef" }}>
                 <h3 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>Contact Owner</h3>
-                <p style={{ fontSize: 13, color: "#4b5675", marginBottom: 16 }}>Send your details directly to {p.owner.name}. No brokerage.</p>
+                <p style={{ fontSize: 13, color: "#4b5675", marginBottom: 16 }}>Send your details directly to {p.ownerName}. No brokerage.</p>
 
                 {sent ? (
                   <div style={{ textAlign: "center", padding: 30, background: "#f0fdf4", borderRadius: 14, border: "1px solid #bbf7d0" }}>
                     <div style={{ fontSize: 40, marginBottom: 10 }}>✅</div>
                     <h3 style={{ fontSize: 17, fontWeight: 700, color: "#047857", marginBottom: 6 }}>Inquiry Sent!</h3>
-                    <p style={{ fontSize: 14, color: "#047857", marginBottom: 16 }}>{p.owner.name} will respond shortly. Check your inbox for updates.</p>
+                    <p style={{ fontSize: 14, color: "#047857", marginBottom: 16 }}>{p.ownerName} will respond shortly. Check your inbox for updates.</p>
                     <Link href="/inbox" className="btn btn-secondary" style={{ fontSize: 14 }}>View Inbox →</Link>
                   </div>
                 ) : (
