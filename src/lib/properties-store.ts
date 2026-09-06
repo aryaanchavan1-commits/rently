@@ -172,7 +172,16 @@ export function addProperty(data: Omit<Property, "id" | "createdAt" | "views" | 
 export function updateProperty(id: string, data: Partial<Property>): Property | null {
   const idx = properties.findIndex((p) => p.id === id);
   if (idx === -1) return null;
-  properties[idx] = { ...properties[idx], ...data };
+  const safeData: Record<string, unknown> = { ...data };
+  delete safeData.id;
+  delete safeData.ownerId;
+  delete safeData.isVerified;
+  delete safeData.isFeatured;
+  delete safeData.views;
+  delete safeData.status;
+  delete safeData.createdAt;
+  delete safeData.freshness;
+  properties[idx] = { ...properties[idx], ...safeData };
   return properties[idx];
 }
 

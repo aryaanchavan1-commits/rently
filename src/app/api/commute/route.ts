@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllProperties } from "@/lib/properties-store";
+import { globalRateLimit, sanitizeString } from "@/lib/api-auth";
 
 const DESTINATIONS: Record<string, { lat: number; lng: number; name: string }> = {
   "pune university": { lat: 18.5362, lng: 73.8344, name: "Savitribai Phule Pune University" },
@@ -58,7 +59,7 @@ async function getOSRMRouteTime(
   destLat: number, destLng: number
 ): Promise<{ duration: number; distance: number; mode: string } | null> {
   try {
-    const url = `http://router.project-osrm.org/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=false`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=false`;
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     const data = await res.json();
     if (data.code === "Ok" && data.routes?.[0]) {
@@ -85,22 +86,31 @@ function findDestination(query: string): { lat: number; lng: number; name: strin
 
 export async function POST(req: NextRequest) {
   try {
+    if (!globalRateLimit("commute", 10)) {
+      return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
+    }
+
     const body = await req.json();
     const { destination, maxMinutes = 30 } = body;
 
-    if (!destination) {
+    if (!destination || typeof destination !== "string") {
       return NextResponse.json({ error: "Destination required" }, { status: 400 });
     }
 
-    const destCoords = findDestination(destination);
+    const sanitizedDest = sanitizeString(destination, 200);
+    const clampedMinutes = Math.min(Math.max(Number(maxMinutes) || 30, 5), 120);
+
+    const destCoords = findDestination(sanitizedDest);
 
     const allProps = getAllProperties().filter((p) => p.status === "active");
 
     if (destCoords) {
-      const results: Array<typeof allProps[0] & { commute: { duration: number; distance: number; mode: string; destination: string } }> = [];
-      for (const p of allProps) {
+      // Limit to 20 properties to prevent abuse
+      const limitedProps = allProps.slice(0, 20);
+      const results: Array<typeof limitedProps[0] & { commute: { duration: number; distance: number; mode: string; destination: string } }> = [];
+      for (const p of limitedProps) {
         const route = await getOSRMRouteTime(p.lat, p.lng, destCoords.lat, destCoords.lng);
-        if (route && route.duration <= maxMinutes) {
+        if (route && route.duration <= clampedMinutes) {
           results.push({ ...p, commute: { ...route, destination: destCoords.name } });
         }
       }
@@ -108,29 +118,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, destination: destCoords, results, count: results.length });
     }
 
-    // Fallback: find nearest properties by city name match
-    const destLower = destination.toLowerCase();
+    const destLower = sanitizedDest.toLowerCase();
     const cityMatches = allProps.filter((p) =>
       p.city.toLowerCase().includes(destLower) ||
       p.area.toLowerCase().includes(destLower) ||
       p.address.toLowerCase().includes(destLower)
-    );
+    ).slice(0, 20);
 
     if (cityMatches.length > 0) {
       const results = cityMatches.map((p) => ({
         ...p,
-        commute: { duration: Math.round(Math.random() * 20 + 5), distance: Math.round(Math.random() * 10 + 1), mode: "est", destination: destination },
+        commute: { duration: Math.round(Math.random() * 20 + 5), distance: Math.round(Math.random() * 10 + 1), mode: "est", destination: sanitizedDest },
       }));
       results.sort((a, b) => a.commute.duration - b.commute.duration);
-      return NextResponse.json({ success: true, destination: { name: destination, lat: 0, lng: 0 }, results, count: results.length });
+      return NextResponse.json({ success: true, destination: { name: sanitizedDest, lat: 0, lng: 0 }, results, count: results.length });
     }
 
-    // Last resort: return all properties
-    const results = allProps.map((p) => ({
+    const results = allProps.slice(0, 10).map((p) => ({
       ...p,
-      commute: { duration: 0, distance: 0, mode: "unknown", destination: destination },
+      commute: { duration: 0, distance: 0, mode: "unknown", destination: sanitizedDest },
     }));
-    return NextResponse.json({ success: true, destination: { name: destination, lat: 0, lng: 0 }, results, count: results.length });
+    return NextResponse.json({ success: true, destination: { name: sanitizedDest, lat: 0, lng: 0 }, results, count: results.length });
   } catch {
     return NextResponse.json({ error: "Commute search failed" }, { status: 500 });
   }

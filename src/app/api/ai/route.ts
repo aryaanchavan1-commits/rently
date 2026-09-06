@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { globalRateLimit, sanitizeString } from "@/lib/api-auth";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
@@ -7,7 +8,7 @@ const SYSTEM_PROMPT = `You are Ria, the AI rental assistant for Rently — a zer
 You help tenants find rental properties and help owners list their properties.
 
 Key facts about Rently:
-- Covers 6 cities: Mumbai, Pune, Thane, Navi Mumbai, Nagpur, Nashik
+- Covers 30+ cities across Maharashtra
 - Owner pricing: ₹49/week, ₹149/month, ₹999/year
 - Zero brokerage for tenants
 - AI-powered property matching
@@ -31,23 +32,35 @@ Keep responses concise (under 200 words) unless the user asks for detail.`;
 
 export async function POST(request: Request) {
   try {
+    if (!globalRateLimit("ai", 20)) {
+      return NextResponse.json({ response: "You're sending messages too fast. Please wait a moment." });
+    }
+
     const { message, history } = await request.json();
 
-    if (!message) {
+    if (!message || typeof message !== "string") {
       return NextResponse.json({ response: "Please provide a message." });
     }
 
-    if (!GROQ_API_KEY) {
-      return NextResponse.json({ response: fallbackReply(message) });
+    const sanitizedMessage = sanitizeString(message, 1000);
+    if (!sanitizedMessage) {
+      return NextResponse.json({ response: "Please provide a valid message." });
     }
+
+    if (!GROQ_API_KEY) {
+      return NextResponse.json({ response: fallbackReply(sanitizedMessage) });
+    }
+
+    // Limit history to last 10 messages to prevent token abuse
+    const safeHistory = Array.isArray(history) ? history.slice(-10) : [];
 
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
-      ...(history || []).map((m: { role: string; content: string }) => ({
+      ...safeHistory.map((m: { role: string; content: string }) => ({
         role: m.role === "user" ? "user" : "assistant",
-        content: m.content,
+        content: typeof m.content === "string" ? sanitizeString(m.content, 500) : "",
       })),
-      { role: "user", content: message },
+      { role: "user", content: sanitizedMessage },
     ];
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -65,17 +78,14 @@ export async function POST(request: Request) {
     });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Groq API error:", errorText);
-      return NextResponse.json({ response: fallbackReply(message) });
+      return NextResponse.json({ response: fallbackReply(sanitizedMessage) });
     }
 
     const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || fallbackReply(message);
+    const reply = data.choices?.[0]?.message?.content || fallbackReply(sanitizedMessage);
 
     return NextResponse.json({ response: reply });
-  } catch (error) {
-    console.error("AI route error:", error);
+  } catch {
     return NextResponse.json({ response: "I'm having trouble connecting. Please try again." });
   }
 }
