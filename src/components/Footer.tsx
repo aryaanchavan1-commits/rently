@@ -100,7 +100,7 @@ export default function Footer() {
           }}
         >
           <div>&copy; 2026 Rently Maharashtra. All rights reserved.</div>
-          <div>Made with ❤️ in Pune</div>
+          <div>Made with ❤️ in Maharashtra</div>
         </div>
       </div>
     </footer>

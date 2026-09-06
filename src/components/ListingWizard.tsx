@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/lang-context";
+import type { Property } from "@/lib/properties-store";
 
 type Step = "type" | "details" | "location" | "amenities" | "photos" | "review";
 
@@ -38,65 +39,58 @@ const AMENITY_OPTIONS = [
   { en: "Water Supply", mr: "पाणी", hi: "पानी" },
   { en: "Gas Pipeline", mr: "गॅस पाइपलाइन", hi: "गैस पाइपलाइन" },
   { en: "Modular Kitchen", mr: "मॉड्युलर स्वयंपाकघर", hi: "मॉड्युलर किचन" },
-  { en: "Wardrobe", mr: "वॉर्डरोब", hi: "अलमारी" },
-  { en: "Washing Machine", mr: "वॉशिंग मशीन", hi: "वॉशिंग मशीन" },
-  { en: "TV", mr: "टीव्ही", hi: "टीवी" },
-  { en: "Intercom", mr: "इंटरकॉम", hi: "इंटरकॉम" },
 ];
 
 const SAMPLE_IMAGES = [
-  "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
-  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-  "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800",
-  "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800",
-  "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800",
-  "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+  "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600",
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600",
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600",
+  "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600",
+  "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600",
+  "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600",
+  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600",
 ];
 
 interface Props {
+  editProperty?: Property;
   onDone: () => void;
-  editProperty?: Record<string, unknown> | { id: string; type: string; title: string; description: string; price: number; deposit: number; bedrooms: number; bathrooms: number; furnishing: string; city: string; area: string; address: string; lat: number; lng: number; availableFrom: string; contactPhone: string; amenities: string[]; rules: string; images: string[] };
 }
 
-export default function ListingWizard({ onDone, editProperty }: Props) {
+export default function ListingWizard({ editProperty, onDone }: Props) {
   const { user } = useAuth();
   const { lang } = useLang();
+  const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
   const [step, setStep] = useState<Step>("type");
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<unknown>(null);
-  const markerRef = useRef<unknown>(null);
-  const [isClient, setIsClient] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationResults, setLocationResults] = useState<Array<{ lat: number; lon: number; name: string; type: string }>>([]);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout>>(null);
 
   const [form, setForm] = useState({
     type: (editProperty?.type as string) || "",
     title: (editProperty?.title as string) || "",
     description: (editProperty?.description as string) || "",
-    price: (editProperty?.price as number)?.toString() || "",
-    deposit: (editProperty?.deposit as number)?.toString() || "",
-    bedrooms: (editProperty?.bedrooms as number)?.toString() || "1",
-    bathrooms: (editProperty?.bathrooms as number)?.toString() || "1",
+    price: String(editProperty?.price || ""),
+    deposit: String(editProperty?.deposit || ""),
+    bedrooms: String(editProperty?.bedrooms ?? 2),
+    bathrooms: String(editProperty?.bathrooms ?? 1),
     furnishing: (editProperty?.furnishing as string) || "unfurnished",
+    availableFrom: (editProperty?.availableFrom as string) || new Date().toISOString().split("T")[0],
     city: (editProperty?.city as string) || "",
     area: (editProperty?.area as string) || "",
     address: (editProperty?.address as string) || "",
+    contactPhone: (editProperty?.contactPhone as string) || "",
     lat: (editProperty?.lat as number) || 18.5204,
     lng: (editProperty?.lng as number) || 73.8567,
-    availableFrom: (editProperty?.availableFrom as string) || "",
-    contactPhone: (editProperty?.contactPhone as string) || "",
     amenities: (editProperty?.amenities as string[]) || [],
     rules: (editProperty?.rules as string) || "",
     images: (editProperty?.images as string[]) || [],
   });
 
-  const t = (mr: string, hi: string, en: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
-
-  function update(field: string, value: string | string[] | number) {
+  function update(field: string, value: unknown) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -117,79 +111,39 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
     update("images", form.images.filter((_, i) => i !== idx));
   }
 
-  // Load Leaflet via CDN script
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setIsClient(true);
-    if (!document.querySelector('link[href*="leaflet"]')) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
-      document.head.appendChild(link);
-    }
-    if (window.L) return;
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
-    document.head.appendChild(script);
-  }, []);
+  // Nominatim search for location
+  function searchLocation(query: string) {
+    setLocationQuery(query);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    if (query.length < 3) { setLocationResults([]); return; }
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + " Maharashtra")}&format=json&limit=6&countrycodes=in`,
+          { headers: { "User-Agent": "Rently/1.0" } }
+        );
+        const data = await res.json();
+        setLocationResults(data.map((r: { lat: string; lon: string; display_name: string; type: string }) => ({
+          lat: parseFloat(r.lat), lon: parseFloat(r.lon),
+          name: r.display_name.split(",").slice(0, 3).join(","),
+          type: r.type,
+        })));
+      } catch { setLocationResults([]); }
+    }, 400);
+  }
 
-  // Initialize map when step is location
-  useEffect(() => {
-    if (step !== "location" || !isClient || !window.L || !mapRef.current || mapReady) return;
-    const L = window.L;
+  function selectLocationResult(r: { lat: number; lon: number; name: string }) {
+    update("lat", r.lat);
+    update("lng", r.lon);
+    setLocationQuery(r.name);
+    setLocationResults([]);
+    // Try to extract city/area from the name
+    const parts = r.name.split(",").map((p) => p.trim());
+    if (parts.length >= 2 && !form.area) update("area", parts[0]);
+  }
 
-    const center: [number, number] = CITY_COORDS[form.city] || [18.5204, 73.8567];
-    const map = L.map(mapRef.current, { center, zoom: 13, scrollWheelZoom: true });
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenStreetMap',
-      maxZoom: 19,
-    }).addTo(map);
-
-    const icon = L.divIcon({
-      className: "custom-marker",
-      html: `<div style="background:linear-gradient(135deg,#ff6a3d,#ff9a6c);color:white;padding:6px 10px;border-radius:10px;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;cursor:grab;">📍</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 30],
-    });
-
-    const marker = L.marker(center, { icon, draggable: true }).addTo(map);
-
-    marker.on("dragend", () => {
-      const pos = marker.getLatLng();
-      update("lat", pos.lat);
-      update("lng", pos.lng);
-    });
-
-    map.on("click", (e: { latlng: { lat: number; lng: number } }) => {
-      marker.setLatLng(e.latlng);
-      update("lat", e.latlng.lat);
-      update("lng", e.latlng.lng);
-    });
-
-    mapInstanceRef.current = map;
-    markerRef.current = marker;
-    setMapReady(true);
-
-    return () => { map.remove(); mapInstanceRef.current = null; markerRef.current = null; setMapReady(false); };
-  }, [step, isClient, mapReady]);
-
-  // Update map view when city changes
-  useEffect(() => {
-    if (step !== "location" || !form.city || !CITY_COORDS[form.city] || !mapInstanceRef.current || !markerRef.current) return;
-    const coords = CITY_COORDS[form.city];
-    (mapInstanceRef.current as { setView: (c: [number, number], z: number) => void }).setView(coords, 13);
-    (markerRef.current as { setLatLng: (c: [number, number]) => void }).setLatLng(coords);
-    update("lat", coords[0]);
-    update("lng", coords[1]);
-  }, [form.city, step]);
-
-  // Get user's live location
   function useMyLocation() {
-    if (!navigator.geolocation) {
-      setError(t("GPS not supported", "GPS समर्थित नाही", "GPS समर्थित नहीं है"));
-      return;
-    }
+    if (!navigator.geolocation) { setError("GPS not supported"); return; }
     setLocationLoading(true);
     setError("");
     navigator.geolocation.getCurrentPosition(
@@ -199,21 +153,13 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
         update("lat", lat);
         update("lng", lng);
         setLocationLoading(false);
-        // Pan map to user location
-        if (mapInstanceRef.current && markerRef.current) {
-          (mapInstanceRef.current as { setView: (c: [number, number], z: number) => void }).setView([lat, lng], 15);
-          (markerRef.current as { setLatLng: (c: [number, number]) => void }).setLatLng([lat, lng]);
-        }
+        reverseGeocode(lat, lng);
       },
-      () => {
-        setLocationLoading(false);
-        setError(t("Location access denied", "स्थान प्रवेश नाकारला", "स्थान एक्सेस अस्वीकृत"));
-      },
+      () => { setLocationLoading(false); setError("Location access denied"); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }
 
-  // Reverse geocode to get area name from coordinates
   async function reverseGeocode(lat: number, lng: number) {
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=mr,hi,en`);
@@ -268,29 +214,23 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        onDone();
-      } else {
-        setError(data.error || t("जतन करण्यात अपयश", "सहेजने में विफल", "Failed to save"));
-      }
-    } catch {
-      setError(t("नेटवर्क त्रुटी", "नेटवर्क त्रुटि", "Network error"));
-    } finally {
-      setSubmitting(false);
-    }
+      if (data.success) { onDone(); }
+      else { setError(data.error || "Failed to save"); }
+    } catch { setError("Network error"); }
+    finally { setSubmitting(false); }
   }
 
-  return (
-    <div className="fade-in" style={{ background: "white", borderRadius: 18, border: "1px solid #e3e7ef", overflow: "hidden" }}>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${form.lng - 0.01}%2C${form.lat - 0.008}%2C${form.lng + 0.01}%2C${form.lat + 0.008}&layer=mapnik&marker=${form.lat}%2C${form.lng}`;
 
+  return (
+    <div className="fade-in card-cream" style={{ overflow: "hidden" }}>
       {/* Progress */}
       <div style={{ padding: "16px 24px 0" }}>
         <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
           {steps.map((s, i) => (
             <div key={s.key} style={{
               flex: 1, height: 4, borderRadius: 2,
-              background: i <= currentIdx ? "linear-gradient(90deg,#0d6efd,#ff6a3d)" : "#e3e7ef",
+              background: i <= currentIdx ? "linear-gradient(90deg, var(--rently-primary), var(--rently-accent))" : "var(--rently-border-light)",
               transition: "background 0.3s",
             }} />
           ))}
@@ -299,7 +239,7 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
           {steps.map((s, i) => (
             <div key={s.key} style={{
               fontSize: 11, fontWeight: i === currentIdx ? 700 : 500,
-              color: i === currentIdx ? "#0d6efd" : i < currentIdx ? "#10b981" : "#4b5675",
+              color: i === currentIdx ? "var(--rently-primary)" : i < currentIdx ? "var(--rently-success)" : "var(--rently-muted)",
             }}>{s.label}</div>
           ))}
         </div>
@@ -308,25 +248,23 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
       {/* Content */}
       <div style={{ padding: "12px 24px 20px", minHeight: 360 }}>
         {error && (
-          <div style={{ background: "rgba(239,68,68,0.08)", color: "#b91c1c", padding: "10px 14px", borderRadius: 10, fontSize: 14, marginBottom: 14 }}>
-            {error}
-          </div>
+          <div style={{ background: "#FFF5F5", color: "var(--rently-danger)", padding: "10px 14px", borderRadius: 10, fontSize: 14, marginBottom: 14 }}>{error}</div>
         )}
 
         {/* STEP: Type */}
         {step === "type" && (
           <div className="fade-in">
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0b1437", marginBottom: 6 }}>{t("तुम्ही काय यादी करत आहात?", "आप क्या लिस्ट कर रहे हैं?", "What are you listing?")}</h3>
-            <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>{t("मालमत्तेचा प्रकार निवडा.", "प्रॉपर्टी का प्रकार चुनें।", "Select the type of property.")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--rently-text)", marginBottom: 6 }}>{t("तुम्ही काय यादी करत आहात?", "आप क्या लिस्ट कर रहे हैं?", "What are you listing?")}</h3>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>{t("मालमत्तेचा प्रकार निवडा.", "प्रॉपर्टी का प्रकार चुनें।", "Select the type of property.")}</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10 }}>
               {PROPERTY_TYPES.map((tp) => (
                 <button key={tp.value} onClick={() => update("type", tp.value)} style={{
                   padding: "18px 12px", borderRadius: 14, textAlign: "center", cursor: "pointer", transition: "all 0.15s",
-                  border: form.type === tp.value ? "2px solid #0d6efd" : "1px solid #e3e7ef",
-                  background: form.type === tp.value ? "rgba(13,110,253,0.06)" : "white",
+                  border: form.type === tp.value ? "2px solid var(--rently-primary)" : "1px solid var(--rently-border-light)",
+                  background: form.type === tp.value ? "var(--rently-primary-light)" : "var(--rently-card)",
                 }}>
                   <div style={{ fontSize: 30, marginBottom: 6 }}>{tp.icon}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0b1437" }}>{tp[lang as "mr" | "hi" | "en"] || tp.mr}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--rently-text)" }}>{tp[lang as "mr" | "hi" | "en"] || tp.mr}</div>
                 </button>
               ))}
             </div>
@@ -336,8 +274,8 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
         {/* STEP: Details */}
         {step === "details" && (
           <div className="fade-in">
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0b1437", marginBottom: 6 }}>{t("मालमत्तेचे तपशील", "प्रॉपर्टी विवरण", "Property details")}</h3>
-            <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>{t("भाडेकरूंना महत्त्वाची माहिती द्या.", "किरायेदारों को मुख्य जानकारी दें।", "Give tenants the key info.")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--rently-text)", marginBottom: 6 }}>{t("मालमत्तेचे तपशील", "प्रॉपर्टी विवरण", "Property details")}</h3>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>{t("भाडेकरूंना महत्त्वाची माहिती द्या.", "किरायेदारों को मुख्य जानकारी दें।", "Give tenants the key info.")}</p>
             <div style={{ display: "grid", gap: 14 }}>
               <div>
                 <label className="form-label">{t("मालमत्तेचे शीर्षक", "प्रॉपर्टी शीर्षक", "Property Title")} *</label>
@@ -351,7 +289,7 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
                 <div>
                   <label className="form-label">{t("मासिक भाडे (₹)", "मासिक किराया (₹)", "Monthly Rent (₹)")} *</label>
                   <input className="input" type="number" min="500" placeholder={t("उदा. 22000", "जैसे 22000", "e.g. 22000")} value={form.price} onChange={(e) => update("price", e.target.value)} />
-                  <span style={{ fontSize: 11, color: "#4b5675" }}>{t("किमान ₹500", "न्यूनतम ₹500", "Min ₹500")}</span>
+                  <span style={{ fontSize: 11, color: "var(--rently-muted)" }}>{t("किमान ₹500", "न्यूनतम ₹500", "Min ₹500")}</span>
                 </div>
                 <div>
                   <label className="form-label">{t("सुरक्षा भांडवल (₹)", "सिक्योरिटी डिपॉजिट (₹)", "Security Deposit (₹)")}</label>
@@ -391,9 +329,24 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
         {/* STEP: Location */}
         {step === "location" && (
           <div className="fade-in">
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0b1437", marginBottom: 6 }}>{t("हे कुठे आहे?", "यह कहाँ है?", "Where is it?")}</h3>
-            <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>{t("अचूक ठिकाण सेट करण्यासाठी नकाशावरील पिन ड्रॅग करा किंवा तुमचे स्थान वापरा.", "सटीक स्थान सेट करने के लिए नक्शे पर पिन खींचें या अपना स्थान उपयोग करें।", "Drag the pin on the map or use your live location.")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--rently-text)", marginBottom: 6 }}>{t("हे कुठे आहे?", "यह कहाँ है?", "Where is it?")}</h3>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>{t("शोध बॉक्समध्ये तुमचे ठिकाण टाइप करा.", "खोज बॉक्स में अपना स्थान टाइप करें।", "Type your location in the search box below.")}</p>
             <div style={{ display: "grid", gap: 14 }}>
+              {/* Location search */}
+              <div style={{ position: "relative" }}>
+                <label className="form-label">{t("ठिकाण शोधा", "स्थान खोजें", "Search Location")}</label>
+                <input className="input" placeholder={t("उदा. अंधेरी वेस्ट, मुंबई", "जैसे अंधेरी वेस्ट, मुंबई", "e.g. Andheri West, Mumbai")} value={locationQuery} onChange={(e) => searchLocation(e.target.value)} />
+                {locationResults.length > 0 && (
+                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "white", borderRadius: 10, marginTop: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 20, maxHeight: 200, overflow: "auto", border: "1px solid var(--rently-border-light)" }}>
+                    {locationResults.map((r, i) => (
+                      <button key={i} onClick={() => selectLocationResult(r)} style={{ display: "block", width: "100%", padding: "10px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, borderBottom: "1px solid var(--rently-border-light)", color: "var(--rently-text)" }}>
+                        📍 {r.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label className="form-label">{t("शहर", "शहर", "City")} *</label>
@@ -413,28 +366,18 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
                   <label className="form-label">{t("संपर्क फोन", "संपर्क फ़ोन", "Contact Phone")}</label>
                   <input className="input" placeholder="+91 98765 43210" value={form.contactPhone} onChange={(e) => update("contactPhone", e.target.value)} />
                 </div>
-                <div style={{ fontSize: 12, color: "#4b5675", display: "flex", alignItems: "flex-end", paddingBottom: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--rently-muted)", display: "flex", alignItems: "flex-end", paddingBottom: 4 }}>
                   📍 {form.lat.toFixed(4)}, {form.lng.toFixed(4)}
                 </div>
               </div>
 
-              {/* Use My Location button */}
-              <button
-                onClick={useMyLocation}
-                disabled={locationLoading}
-                className="btn btn-primary"
-                style={{ width: "100%", padding: "12px", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
-              >
-                {locationLoading ? (
-                  <>⏳ {t("स्थान शोधत आहे…", "स्थान खोज रहा है…", "Getting location…")}</>
-                ) : (
-                  <>📍 {t("माझे स्थान वापरा", "मेरा स्थान उपयोग करें", "Use My Location")}</>
-                )}
+              <button onClick={useMyLocation} disabled={locationLoading} className="btn btn-primary" style={{ width: "100%", padding: "12px", fontSize: 14 }}>
+                {locationLoading ? `⏳ ${t("स्थान शोधत आहे…", "स्थान खोज रहा है…", "Getting location…")}` : `📍 ${t("माझे स्थान वापरा", "मेरा स्थान उपयोग करें", "Use My Location")}`}
               </button>
 
-              {/* Map */}
+              {/* Map iframe */}
               {form.city && (
-                <div ref={mapRef} style={{ height: 300, borderRadius: 12, overflow: "hidden", border: "1px solid #e3e7ef" }} />
+                <iframe title="Location Map" width="100%" height="280" style={{ border: 0, borderRadius: 12 }} loading="lazy" src={mapUrl} />
               )}
 
               {/* Quick city chips */}
@@ -442,7 +385,7 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
                 <label className="form-label">{t("झटपट शहर निवडा", "जल्दी शहर चुनें", "Quick city select")}</label>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {Object.keys(CITY_COORDS).map((c) => (
-                    <button key={c} onClick={() => update("city", c)} className={`btn ${form.city === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "6px 12px", fontSize: 12 }}>
+                    <button key={c} onClick={() => { update("city", c); if (CITY_COORDS[c]) { update("lat", CITY_COORDS[c][0]); update("lng", CITY_COORDS[c][1]); } }} className={`btn ${form.city === c ? "btn-secondary" : "btn-outline"}`} style={{ padding: "6px 12px", fontSize: 12 }}>
                       {c}
                     </button>
                   ))}
@@ -455,15 +398,15 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
         {/* STEP: Amenities */}
         {step === "amenities" && (
           <div className="fade-in">
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0b1437", marginBottom: 6 }}>{t("काय समाविष्ट आहे?", "क्या शामिल है?", "What's included?")}</h3>
-            <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>{t("सर्व सुविधा निवडा.", "सभी सुविधाएं चुनें।", "Select all amenities.")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--rently-text)", marginBottom: 6 }}>{t("काय समाविष्ट आहे?", "क्या शामिल है?", "What's included?")}</h3>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>{t("सर्व सुविधा निवडा.", "सभी सुविधाएं चुनें।", "Select all amenities.")}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {AMENITY_OPTIONS.map((a) => (
                 <button key={a.en} onClick={() => toggleAmenity(a.en)} style={{
                   padding: "8px 14px", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.15s",
-                  border: form.amenities.includes(a.en) ? "2px solid #0d6efd" : "1px solid #d3d8e1",
-                  background: form.amenities.includes(a.en) ? "rgba(13,110,253,0.08)" : "white",
-                  color: form.amenities.includes(a.en) ? "#0d6efd" : "#0b1437",
+                  border: form.amenities.includes(a.en) ? "2px solid var(--rently-primary)" : "1px solid var(--rently-border)",
+                  background: form.amenities.includes(a.en) ? "var(--rently-primary-light)" : "var(--rently-card)",
+                  color: form.amenities.includes(a.en) ? "var(--rently-primary)" : "var(--rently-text)",
                 }}>
                   {form.amenities.includes(a.en) ? "✓ " : ""}{a[lang as "mr" | "hi" | "en"] || a.mr}
                 </button>
@@ -479,40 +422,40 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
         {/* STEP: Photos */}
         {step === "photos" && (
           <div className="fade-in">
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0b1437", marginBottom: 6 }}>{t("फोटो जोडा", "फ़ोटो जोड़ें", "Add photos")}</h3>
-            <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>{t("फोटोने 5x अधिक दृश्य मिळतात.", "फ़ोटो से 5x अधिक व्यूज मिलते हैं।", "Photos get 5x more views.")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--rently-text)", marginBottom: 6 }}>{t("फोटो जोडा", "फ़ोटो जोड़ें", "Add photos")}</h3>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>{t("फोटोने 5x अधिक दृश्य मिळतात.", "फ़ोटो से 5x अधिक व्यूज मिलते हैं।", "Photos get 5x more views.")}</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 8, marginBottom: 16 }}>
               {SAMPLE_IMAGES.map((url) => {
                 const selected = form.images.includes(url);
                 return (
                   <button key={url} onClick={() => selected ? removeImage(form.images.indexOf(url)) : addSampleImage(url)} style={{
-                    position: "relative", padding: 0, border: selected ? "3px solid #0d6efd" : "1px solid #e3e7ef",
+                    position: "relative", padding: 0, border: selected ? "3px solid var(--rently-primary)" : "1px solid var(--rently-border-light)",
                     borderRadius: 10, overflow: "hidden", cursor: "pointer", aspectRatio: "4/3",
                   }}>
                     <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     {selected && (
-                      <div style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "#0d6efd", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800 }}>✓</div>
+                      <div style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "var(--rently-primary)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800 }}>✓</div>
                     )}
                   </button>
                 );
               })}
             </div>
-            <p style={{ fontSize: 12, color: "#4b5675" }}>{form.images.length}/10 {t("निवडलेले", "चयनित", "selected")}</p>
+            <p style={{ fontSize: 12, color: "var(--rently-muted)" }}>{form.images.length}/10 {t("निवडलेले", "चयनित", "selected")}</p>
           </div>
         )}
 
         {/* STEP: Review */}
         {step === "review" && (
           <div className="fade-in">
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0b1437", marginBottom: 6 }}>{t("पुनरावलोकन आणि प्रकाशित करा", "समीक्षा और प्रकाशित करें", "Review & publish")}</h3>
-            <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 20 }}>{t("सर्व काय योग्य आहे तपासा.", "सब कुछ सही है जांचें।", "Check everything looks right.")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--rently-text)", marginBottom: 6 }}>{t("पुनरावलोकन आणि प्रकाशित करा", "समीक्षा और प्रकाशित करें", "Review & publish")}</h3>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>{t("सर्व काय योग्य आहे तपासा.", "सब कुछ सही है जांचें।", "Check everything looks right.")}</p>
             <div style={{ display: "grid", gap: 12 }}>
               {form.images[0] && (
                 <div style={{ borderRadius: 12, overflow: "hidden", maxHeight: 200 }}>
                   <img src={form.images[0]} alt="" style={{ width: "100%", height: 200, objectFit: "cover" }} />
                 </div>
               )}
-              <div style={{ background: "#f4f6fb", borderRadius: 12, padding: 16, display: "grid", gap: 8 }}>
+              <div style={{ background: "var(--rently-cream-dark)", borderRadius: 12, padding: 16, display: "grid", gap: 8 }}>
                 <ReviewRow label={t("शीर्षक", "शीर्षक", "Title")} value={form.title || "—"} />
                 <ReviewRow label={t("प्रकार", "प्रकार", "Type")} value={PROPERTY_TYPES.find((tp) => tp.value === form.type)?.[lang as "mr" | "hi" | "en"] || form.type} />
                 <ReviewRow label={t("भाडे", "किराया", "Rent")} value={form.price ? `₹${Number(form.price).toLocaleString("en-IN")}/mo` : "—"} />
@@ -530,11 +473,11 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "14px 24px", borderTop: "1px solid #e3e7ef", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ padding: "14px 24px", borderTop: "1px solid var(--rently-border-light)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <button onClick={() => { const idx = steps.findIndex((s) => s.key === step); if (idx > 0) setStep(steps[idx - 1].key); }} className="btn btn-outline" disabled={currentIdx === 0}>
           ← {t("मागे", "वापस", "Back")}
         </button>
-        <span style={{ fontSize: 12, color: "#4b5675" }}>{currentIdx + 1} / {steps.length}</span>
+        <span style={{ fontSize: 12, color: "var(--rently-muted)" }}>{currentIdx + 1} / {steps.length}</span>
         {currentIdx < steps.length - 1 ? (
           <button onClick={() => setStep(steps[currentIdx + 1].key)} className="btn btn-primary" disabled={!canNext()}>
             {t("पुढे", "अगला", "Next")} →
@@ -552,8 +495,8 @@ export default function ListingWizard({ onDone, editProperty }: Props) {
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, gap: 12 }}>
-      <span style={{ color: "#4b5675", flexShrink: 0 }}>{label}</span>
-      <span style={{ fontWeight: 600, color: "#0b1437", textAlign: "right" }}>{value}</span>
+      <span style={{ color: "var(--rently-muted)", flexShrink: 0 }}>{label}</span>
+      <span style={{ fontWeight: 600, color: "var(--rently-text)", textAlign: "right" }}>{value}</span>
     </div>
   );
 }

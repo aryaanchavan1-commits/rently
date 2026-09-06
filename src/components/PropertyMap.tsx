@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface MapProperty {
   id: string;
@@ -16,8 +16,16 @@ interface MapProperty {
   isFeatured: boolean;
 }
 
+interface PlaceResult {
+  lat: number;
+  lon: number;
+  name: string;
+  type: string;
+  icon: string;
+}
+
 interface Props {
-  properties: MapProperty[];
+  properties?: MapProperty[];
   center?: [number, number];
   zoom?: number;
   height?: string;
@@ -27,239 +35,232 @@ interface Props {
   draggable?: boolean;
 }
 
-function MapInner({
-  properties,
-  center = [19.7515, 75.7139],
-  zoom = 7,
+export default function PropertyMap({
+  properties = [],
+  center = [18.5204, 73.8567],
+  zoom = 12,
   height = "500px",
   onPropertyClick,
   showUserLocation = false,
   onLocationSelect,
   draggable = false,
 }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const userMarkerRef = useRef<any>(null);
-  const [isClient, setIsClient] = useState(false);
-  const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [locationError, setLocationError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<PlaceResult[]>([]);
+  const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(center);
+  const [mapZoom, setMapZoom] = useState(zoom);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showPlaces, setShowPlaces] = useState(true);
+  const [nearbyPlaces, setNearbyPlaces] = useState<PlaceResult[]>([]);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const requestLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation not supported");
-      return;
+  // Nominatim search
+  const searchPlaces = useCallback(async (query: string) => {
+    if (!query || query.length < 3) { setSearchResults([]); return; }
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&countrycodes=in`,
+        { headers: { "User-Agent": "Rently/1.0" } }
+      );
+      const data = await res.json();
+      setSearchResults(data.map((r: { lat: string; lon: string; display_name: string; type: string }) => ({
+        lat: parseFloat(r.lat),
+        lon: parseFloat(r.lon),
+        name: r.display_name.split(",").slice(0, 2).join(","),
+        type: r.type,
+        icon: getPlaceIcon(r.type),
+      })));
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
     }
-    setLocationError("Getting your location…");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const loc: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-        setUserLocation(loc);
-        setLocationError("");
-        const map = mapInstanceRef.current;
-        if (map) {
-          map.setView(loc, 14);
-          addUserMarker(loc);
-        }
-      },
-      () => {
-        setLocationError("Location access denied. Using default.");
-        const fallback: [number, number] = [18.5204, 73.8567];
-        setUserLocation(fallback);
-        mapInstanceRef.current?.setView(fallback, 13);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
   }, []);
 
-  const addUserMarker = useCallback((loc: [number, number]) => {
-    const L = window.L;
-    const map = mapInstanceRef.current;
-    if (!L || !map) return;
-
-    if (userMarkerRef.current) {
-      map.removeLayer(userMarkerRef.current);
-    }
-
-    const userIcon = L.divIcon({
-      className: "custom-marker",
-      html: `<div style="width:20px;height:20px;background:#0d6efd;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(13,110,253,0.3),0 2px 8px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [20, 20],
-      iconAnchor: [10, 10],
-    });
-
-    const marker = L.marker(loc, { icon: userIcon }).addTo(map);
-    marker.bindPopup("<div style='font-weight:700;font-size:13px;'>📍 Your Location</div>");
-    userMarkerRef.current = marker;
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setIsClient(true);
-    // Load leaflet CSS
-    if (!document.querySelector('link[href*="leaflet"]')) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
-      document.head.appendChild(link);
-    }
-    // Load leaflet JS
-    if (window.L) {
-      setLeafletLoaded(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
-    script.onload = () => setLeafletLoaded(true);
-    document.head.appendChild(script);
-  }, []);
-
-  useEffect(() => {
-    if (!isClient || !leafletLoaded || !mapRef.current || mapInstanceRef.current) return;
-
-    const L = window.L;
-    if (!L) return;
-
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-      iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-      shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-    });
-
-    const map = L.map(mapRef.current, {
-      center,
-      zoom,
-      scrollWheelZoom: true,
-      zoomControl: true,
-    });
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
-
-    const primaryIcon = L.divIcon({
-      className: "custom-marker",
-      html: `<div style="background:linear-gradient(135deg,#0d6efd,#0a58ca);color:white;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;cursor:pointer;">🏠</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15],
-    });
-
-    const featuredIcon = L.divIcon({
-      className: "custom-marker",
-      html: `<div style="background:linear-gradient(135deg,#ff6a3d,#ff9a6c);color:white;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;cursor:pointer;">⭐</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15],
-    });
-
-    properties.forEach((p) => {
-      if (!p.lat || !p.lng) return;
-      const icon = p.isFeatured ? featuredIcon : primaryIcon;
-      const marker = L.marker([p.lat, p.lng], { icon }).addTo(map);
-      const img = p.images?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400";
-      const popupContent = `
-        <div style="min-width:220px;font-family:system-ui,sans-serif;">
-          <img src="${img}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" loading="lazy" />
-          <div style="font-weight:700;font-size:14px;color:#0b1437;margin-bottom:4px;">${p.title}</div>
-          <div style="font-size:12px;color:#4b5675;margin-bottom:4px;">${p.area}, ${p.city} · ${p.bedrooms > 0 ? p.bedrooms + "BHK" : p.type}</div>
-          <div style="font-size:16px;font-weight:800;color:#ff6a3d;">₹${p.price.toLocaleString("en-IN")}/mo</div>
-          <a href="/properties/${p.id}" style="display:inline-block;margin-top:8px;padding:6px 14px;background:#0d6efd;color:white;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">View Details →</a>
-        </div>
+  // Overpass API - find nearby places
+  const fetchNearbyPlaces = useCallback(async (lat: number, lng: number) => {
+    try {
+      const radius = 3000;
+      const query = `
+        [out:json][timeout:10];
+        (
+          node["amenity"="college"](around:${radius},${lat},${lng});
+          node["amenity"="university"](around:${radius},${lat},${lng});
+          node["amenity"="school"](around:${radius},${lat},${lng});
+          node["amenity"="hospital"](around:${radius},${lat},${lng});
+          node["amenity"="clinic"](around:${radius},${lat},${lng});
+          node["amenity"="bank"](around:${radius},${lat},${lng});
+          node["amenity"="atm"](around:${radius},${lat},${lng});
+          node["amenity"="pharmacy"](around:${radius},${lat},${lng});
+          node["shop"="supermarket"](around:${radius},${lat},${lng});
+          node["shop"="mall"](around:${radius},${lat},${lng});
+          node["tourism"="hotel"](around:${radius},${lat},${lng});
+          node["railway"="station"](around:${radius},${lat},${lng});
+          node["railway"="halt"](around:${radius},${lat},${lng});
+          node["highway"="bus_stop"](around:${radius},${lat},${lng});
+          node["amenity"="restaurant"](around:${radius},${lat},${lng});
+          node["amenity"="cafe"](around:${radius},${lat},${lng});
+          node["leisure"="park"](around:${radius},${lat},${lng});
+        );
+        out body 30;
       `;
-      marker.bindPopup(popupContent, { maxWidth: 260, className: "rently-popup" });
-      marker.on("click", () => {
-        if (onPropertyClick) onPropertyClick(p.id);
+      const res = await fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        body: `data=${encodeURIComponent(query)}`,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-    });
-
-    if (properties.length > 0) {
-      const validProps = properties.filter((p) => p.lat && p.lng);
-      if (validProps.length > 0) {
-        const bounds = L.latLngBounds(validProps.map((p) => [p.lat, p.lng]));
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
-      }
+      const data = await res.json();
+      const places: PlaceResult[] = (data.elements || []).map((el: { lat: number; lon: number; tags: { name?: string; [key: string]: unknown } }) => ({
+        lat: el.lat,
+        lon: el.lon,
+        name: el.tags?.name || el.tags?.["name:en"] || "Unnamed",
+        type: String(el.tags?.amenity || el.tags?.shop || el.tags?.tourism || el.tags?.railway || el.tags?.highway || el.tags?.leisure || "place"),
+        icon: getPlaceIcon(String(el.tags?.amenity || el.tags?.shop || el.tags?.tourism || el.tags?.railway || el.tags?.highway || el.tags?.leisure || "place")),
+      }));
+      setNearbyPlaces(places);
+    } catch {
+      setNearbyPlaces([]);
     }
+  }, []);
 
-    if (draggable && onLocationSelect) {
-      const pickIcon = L.divIcon({
-        className: "custom-marker",
-        html: `<div style="background:linear-gradient(135deg,#ff6a3d,#ff9a6c);color:white;padding:6px 10px;border-radius:10px;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;cursor:grab;">📍</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-      });
-
-      const marker = L.marker(center, { icon: pickIcon, draggable: true }).addTo(map);
-      marker.on("dragend", () => {
-        const pos = marker.getLatLng();
-        onLocationSelect(pos.lat, pos.lng);
-      });
-      map.on("click", (e: { latlng: { lat: number; lng: number } }) => {
-        marker.setLatLng(e.latlng);
-        onLocationSelect(e.latlng.lat, e.latlng.lng);
-      });
+  // Get user location
+  useEffect(() => {
+    if (showUserLocation && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setUserLoc(loc);
+          setMapCenter(loc);
+          fetchNearbyPlaces(loc[0], loc[1]);
+        },
+        () => { /* fallback to default center */ }
+      );
     }
+  }, [showUserLocation, fetchNearbyPlaces]);
 
-    mapInstanceRef.current = map;
-
-    if (showUserLocation) {
-      requestLocation();
+  // Fetch places when center changes
+  useEffect(() => {
+    if (showPlaces) {
+      fetchNearbyPlaces(mapCenter[0], mapCenter[1]);
     }
+  }, [mapCenter, showPlaces, fetchNearbyPlaces]);
 
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-      userMarkerRef.current = null;
+  function selectSearchResult(r: PlaceResult) {
+    setMapCenter([r.lat, r.lon]);
+    setMapZoom(15);
+    setSelectedPlace(r);
+    setSearchResults([]);
+    setSearchQuery(r.name);
+    if (onLocationSelect) onLocationSelect(r.lat, r.lon);
+  }
+
+  function handleSearchInput(val: string) {
+    setSearchQuery(val);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => searchPlaces(val), 400);
+  }
+
+  function getPlaceIcon(type: string): string {
+    const icons: Record<string, string> = {
+      college: "🎓", university: "🎓", school: "🏫",
+      hospital: "🏥", clinic: "🏥",
+      bank: "🏦", atm: "🏧", pharmacy: "💊",
+      supermarket: "🛒", mall: "🏬",
+      hotel: "🏨", restaurant: "🍽️", cafe: "☕",
+      railway: "🚂", station: "🚂", halt: "🚂", bus_stop: "🚌",
+      park: "🌳", leisure: "🌳",
+      place: "📍",
     };
-  }, [isClient, leafletLoaded, properties, center, zoom, showUserLocation, draggable, onPropertyClick, onLocationSelect, requestLocation]);
+    return icons[type] || "📍";
+  }
+
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${mapCenter[1] - 0.02}%2C${mapCenter[0] - 0.015}%2C${mapCenter[1] + 0.02}%2C${mapCenter[0] + 0.015}&layer=mapnik&marker=${mapCenter[0]}%2C${mapCenter[1]}`;
 
   return (
-    <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", border: "1px solid #e3e7ef" }}>
-      {!isClient || !leafletLoaded ? (
-        <div style={{ width: "100%", height, background: "#f0f2f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>🗺️</div>
-            <div style={{ fontSize: 14, color: "#4b5675" }}>Loading map…</div>
-          </div>
+    <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", border: "1px solid var(--rently-border-light)", background: "white" }}>
+      {/* Search bar */}
+      <div style={{ position: "absolute", top: 12, left: 12, right: 12, zIndex: 20 }}>
+        <div style={{ position: "relative" }}>
+          <input
+            className="input"
+            placeholder="Search colleges, hospitals, places..."
+            value={searchQuery}
+            onChange={(e) => handleSearchInput(e.target.value)}
+            style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.12)", border: "2px solid white", paddingRight: 40 }}
+          />
+          {isSearching && (
+            <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>⏳</div>
+          )}
+          {searchResults.length > 0 && (
+            <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "white", borderRadius: 12, marginTop: 4, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", zIndex: 30, maxHeight: 280, overflow: "auto" }}>
+              {searchResults.map((r, i) => (
+                <button key={i} onClick={() => selectSearchResult(r)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "12px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid var(--rently-border-light)", fontSize: 13 }}>
+                  <span style={{ fontSize: 18 }}>{r.icon}</span>
+                  <div>
+                    <div style={{ fontWeight: 600, color: "var(--rently-text)" }}>{r.name}</div>
+                    <div style={{ fontSize: 11, color: "var(--rently-muted)", textTransform: "capitalize" }}>{r.type}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <div ref={mapRef} style={{ width: "100%", height, background: "#f0f2f7" }} />
-      )}
-      {isClient && leafletLoaded && showUserLocation && (
+      </div>
+
+      {/* Toggle places */}
+      <div style={{ position: "absolute", top: 68, left: 12, zIndex: 20 }}>
         <button
-          onClick={requestLocation}
-          style={{
-            position: "absolute", top: 12, right: 12, zIndex: 1000,
-            background: "white", border: "1px solid #e3e7ef", borderRadius: 10,
-            padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: 6,
-          }}
+          onClick={() => setShowPlaces(!showPlaces)}
+          style={{ padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, background: showPlaces ? "var(--rently-primary)" : "white", color: showPlaces ? "white" : "var(--rently-text)", border: "1px solid var(--rently-border)", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
         >
-          📍 {userLocation ? "Center on Me" : "Use My Location"}
+          {showPlaces ? "Hide" : "Show"} Places
         </button>
-      )}
-      {locationError && (
-        <div style={{
-          position: "absolute", top: 56, right: 12, zIndex: 1000,
-          background: "rgba(11,20,55,0.9)", color: "white", padding: "6px 12px",
-          borderRadius: 8, fontSize: 11, backdropFilter: "blur(8px)",
-        }}>
-          {locationError}
+      </div>
+
+      {/* Map iframe */}
+      <iframe
+        title="Property Map"
+        width="100%"
+        height={height}
+        style={{ border: 0 }}
+        loading="lazy"
+        src={mapUrl}
+      />
+
+      {/* Property markers overlay */}
+      {properties.length > 0 && (
+        <div style={{ position: "absolute", bottom: 12, left: 12, right: 12, zIndex: 20, display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {properties.slice(0, 5).map((p) => (
+            <button
+              key={p.id}
+              onClick={() => {
+                setMapCenter([p.lat, p.lng]);
+                setMapZoom(16);
+                if (onPropertyClick) onPropertyClick(p.id);
+              }}
+              style={{ padding: "6px 12px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: "white", color: "var(--rently-text)", border: "1px solid var(--rently-border)", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", whiteSpace: "nowrap" }}
+            >
+              {p.title.slice(0, 25)}... ₹{(p.price / 1000).toFixed(0)}K
+            </button>
+          ))}
         </div>
       )}
-      {properties.length > 0 && (
-        <div style={{
-          position: "absolute", bottom: 12, left: 12, background: "rgba(11,20,55,0.9)",
-          color: "white", padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, zIndex: 1000,
-          backdropFilter: "blur(8px)",
-        }}>
-          📍 {properties.length} {properties.length === 1 ? "property" : "properties"} on map
+
+      {/* Nearby places panel */}
+      {showPlaces && nearbyPlaces.length > 0 && (
+        <div style={{ position: "absolute", bottom: 60, right: 12, zIndex: 20, background: "white", borderRadius: 12, padding: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", maxHeight: 200, width: 220, overflow: "auto" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--rently-muted)", marginBottom: 6, textTransform: "uppercase" }}>Nearby Places</div>
+          {nearbyPlaces.slice(0, 12).map((p, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", fontSize: 12, color: "var(--rently-text)", borderBottom: "1px solid var(--rently-border-light)" }}>
+              <span>{p.icon}</span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
-}
-
-export default function PropertyMap(props: Props) {
-  return <MapInner {...props} />;
 }
