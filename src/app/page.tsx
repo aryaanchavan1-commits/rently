@@ -60,24 +60,24 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero with search tabs */}
-      <section style={{ background: "linear-gradient(135deg, #0b1437 0%, #1a237e 50%, #0d47a1 100%)", padding: "50px 0 0", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 20%, rgba(255,106,61,0.15) 0%, transparent 50%)" }} />
+      <section style={{ background: "linear-gradient(135deg, #1A2332 0%, #1E3A5F 40%, #2C5282 100%)", padding: "50px 0 0", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 20%, rgba(201,148,74,0.15) 0%, transparent 50%)" }} />
         <div className="container-app" style={{ position: "relative", zIndex: 2 }}>
           <div style={{ textAlign: "center", marginBottom: 30 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.1)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "rgba(255,255,255,0.9)", marginBottom: 16, backdropFilter: "blur(10px)" }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4caf50" }} />
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "rgba(255,255,255,0.85)", marginBottom: 16, backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#C9944A" }} />
               Maharashtra&apos;s most trusted rental platform
             </div>
             <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 800, color: "white", lineHeight: 1.1, letterSpacing: -1 }}>
-              घर शोधा, <span style={{ color: "#ff6a3d" }}>ब्रोकरशिवाय</span>
+              Find Your Perfect <span style={{ color: "#C9944A" }}>Home</span>
             </h1>
-            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", marginTop: 12, maxWidth: 600, margin: "12px auto 0", lineHeight: 1.6 }}>
-              Find your perfect home across <strong>30+ cities in Maharashtra</strong>. Zero brokerage. Direct owners. AI-powered search.
+            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.75)", marginTop: 12, maxWidth: 600, margin: "12px auto 0", lineHeight: 1.6, fontFamily: "Georgia, serif" }}>
+              Zero brokerage. Direct owners. AI-powered search across <strong>30+ cities</strong> in Maharashtra.
             </p>
           </div>
 
           {/* Search Box with Tabs */}
-          <div style={{ background: "white", borderRadius: "20px 20px 0 0", maxWidth: 900, margin: "0 auto", boxShadow: "0 -10px 40px rgba(0,0,0,0.15)" }}>
+          <div style={{ background: "var(--rently-cream)", borderRadius: "20px 20px 0 0", maxWidth: 900, margin: "0 auto", boxShadow: "0 -10px 40px rgba(0,0,0,0.15)" }}>
             {/* Tabs */}
             <div style={{ display: "flex", borderBottom: "1px solid #e3e7ef" }}>
               {TABS.map((tab) => (
@@ -112,7 +112,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href={searchQuery ? `/properties?city=${encodeURIComponent(searchQuery)}` : "/properties"}
-                  style={{ padding: "0 28px", height: 50, borderRadius: 12, background: "linear-gradient(135deg, #0d6efd, #0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, textDecoration: "none", whiteSpace: "nowrap" }}
+                  style={{ padding: "0 28px", height: 50, borderRadius: 12, background: "linear-gradient(135deg, var(--rently-accent), var(--rently-accent-dark))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 4px 14px rgba(201,148,74,0.3)" }}
                 >
                   Search
                 </Link>

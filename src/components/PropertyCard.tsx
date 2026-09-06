@@ -84,13 +84,14 @@ export default function PropertyCard({ property }: { property: Property }) {
             position: "absolute",
             bottom: 12,
             left: 12,
-            background: "rgba(11,20,55,0.85)",
+            background: "rgba(26, 35, 50, 0.88)",
             color: "white",
-            padding: "4px 10px",
+            padding: "5px 12px",
             borderRadius: 999,
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 700,
-            backdropFilter: "blur(4px)",
+            backdropFilter: "blur(6px)",
+            border: "1px solid rgba(255,255,255,0.1)",
           }}
         >
           ₹{property.price.toLocaleString("en-IN")}/mo

@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useLang } from "@/lib/lang-context";
+import { useAuth } from "@/lib/auth-context";
+import { authFetch } from "@/lib/auth-fetch";
+import { useParams } from "next/navigation";
 
 interface Message {
   id: string;
@@ -32,9 +35,11 @@ interface Conversation {
   unread: number;
 }
 
-export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ChatPage() {
+  const params = useParams();
+  const id = params.id as string;
   const { t } = useLang();
+  const { user } = useAuth();
   const [conv, setConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -44,8 +49,9 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const pollRef = useRef<ReturnType<typeof setInterval>>(null);
 
   useEffect(() => {
-    fetch(`/api/inquiries`)
-      .then((r) => r.json())
+    if (!id) return;
+    authFetch(`/api/inquiries`)
+      .then((r) => r.ok ? r.json() : [])
       .then((data: Conversation[]) => {
         const found = data.find((c) => c.id === id);
         if (found) setConv(found);
@@ -56,9 +62,9 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   useEffect(() => {
     if (!id) return;
     function fetchMessages() {
-      fetch(`/api/messages?conversationId=${id}`)
-        .then((r) => r.json())
-        .then((data: Message[]) => setMessages(data))
+      authFetch(`/api/messages?conversationId=${id}`)
+        .then((r) => r.ok ? r.json() : [])
+        .then((data: Message[]) => setMessages(Array.isArray(data) ? data : []))
         .catch(() => {});
     }
     fetchMessages();
@@ -82,20 +88,15 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
     const senderName = viewAs === "owner" ? (conv?.ownerName || "Owner") : (conv?.tenantName || "Tenant");
 
     try {
-      await fetch("/api/messages", {
+      await authFetch("/api/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversationId: id,
-          sender: viewAs,
-          senderName,
-          content: msg,
-        }),
+        body: JSON.stringify({ conversationId: id, sender: viewAs, senderName, content: msg }),
       });
-      const res = await fetch(`/api/messages?conversationId=${id}`);
+      const res = await authFetch(`/api/messages?conversationId=${id}`);
       const data = await res.json();
-      setMessages(data);
+      setMessages(Array.isArray(data) ? data : []);
     } catch {
+      // silent
     } finally {
       setSending(false);
     }
@@ -112,110 +113,97 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   }
 
   return (
-    <div style={{ background: "#f7f8fc", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="page-cream" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Navbar />
 
-      <div className="container-app" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "0 0 20px", maxWidth: 800, margin: "0 auto", width: "100%" }}>
-        {/* Chat Header */}
-        {conv && (
-          <div style={{ background: "white", borderRadius: "0 0 18px 18px", padding: "16px 20px", border: "1px solid #e3e7ef", borderTop: "none", marginBottom: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <Link href="/inbox" className="btn btn-ghost" style={{ padding: "6px 10px" }}>← {t.chat.back}</Link>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
-                  {(viewAs === "owner" ? conv.tenantName : conv.ownerName).charAt(0)}
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: "#0b1437" }}>
-                    {viewAs === "owner" ? conv.tenantName : conv.ownerName}
-                  </div>
-                  <div style={{ fontSize: 12, color: "#4b5675" }}>
-                    {t.chat.propertyRef} {conv.propertyTitle}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ fontSize: 12, color: "#4b5675", background: "#f4f6fb", padding: "4px 10px", borderRadius: 8 }}>
-                  {viewAs === "owner" ? "👤 Viewing as Owner" : "🏠 Viewing as Tenant"}
-                </div>
-                <button
-                  onClick={() => setViewAs(viewAs === "owner" ? "tenant" : "owner")}
-                  className="btn btn-outline"
-                  style={{ padding: "6px 10px", fontSize: 12 }}
-                >
-                  Switch View
-                </button>
-              </div>
-            </div>
-
-            {/* Tenant info card (owner view) */}
-            {viewAs === "owner" && (
-              <div style={{ marginTop: 12, padding: 12, background: "#f4f6fb", borderRadius: 10, display: "flex", gap: 12, flexWrap: "wrap", fontSize: 13 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ color: "#4b5675" }}>📧</span>
-                  <span style={{ fontWeight: 600 }}>{conv.tenantEmail}</span>
-                </div>
-                {conv.tenantPhone && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ color: "#4b5675" }}>📞</span>
-                    <span style={{ fontWeight: 600 }}>{conv.tenantPhone}</span>
-                  </div>
-                )}
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ color: "#4b5675" }}>💬</span>
-                  <span style={{ fontWeight: 600, color: conv.status === "new" ? "#b45309" : "#047857" }}>{conv.status === "new" ? "New" : "Replied"}</span>
-                </div>
-              </div>
-            )}
+      {!user ? (
+        <div className="container-app" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
+          <div className="card-cream" style={{ padding: 50, textAlign: "center", maxWidth: 400 }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Sign in to chat</h3>
+            <p style={{ color: "var(--rently-muted)", marginBottom: 18 }}>You need to be logged in to view messages.</p>
+            <Link href="/auth/login" className="btn btn-primary">Sign in</Link>
           </div>
-        )}
+        </div>
+      ) : (
+        <div className="container-app" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "0 0 20px", maxWidth: 800, margin: "0 auto", width: "100%" }}>
+          {/* Chat Header */}
+          {conv && (
+            <div className="card-cream" style={{ borderRadius: "0 0 18px 18px", padding: "16px 20px", marginTop: -1 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <Link href="/inbox" className="btn btn-ghost" style={{ padding: "6px 10px" }}>← Back</Link>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
+                    {(viewAs === "owner" ? conv.tenantName : conv.ownerName).charAt(0)}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: "var(--rently-text)" }}>
+                      {viewAs === "owner" ? conv.tenantName : conv.ownerName}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--rently-muted)" }}>
+                      Re: {conv.propertyTitle}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 12, color: "var(--rently-muted)", background: "var(--rently-cream-dark)", padding: "4px 10px", borderRadius: 8 }}>
+                    {viewAs === "owner" ? "👤 Owner" : "🏠 Tenant"}
+                  </span>
+                  <button onClick={() => setViewAs(viewAs === "owner" ? "tenant" : "owner")} className="btn btn-outline" style={{ padding: "6px 10px", fontSize: 12 }}>
+                    Switch
+                  </button>
+                </div>
+              </div>
 
-        {/* Messages */}
-        <div ref={listRef} style={{ flex: 1, overflowY: "auto", padding: "20px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
-          {messages.length === 0 && (
-            <div style={{ textAlign: "center", padding: "40px 20px", color: "#4b5675" }}>
-              <div style={{ fontSize: 40, marginBottom: 10 }}>💬</div>
-              <p style={{ fontSize: 14 }}>No messages yet. Start the conversation!</p>
+              {viewAs === "owner" && (
+                <div style={{ marginTop: 12, padding: "10px 14px", background: "var(--rently-cream-dark)", borderRadius: 10, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 13 }}>
+                  <span>📧 {conv.tenantEmail}</span>
+                  {conv.tenantPhone && <span>📞 {conv.tenantPhone}</span>}
+                  <span style={{ color: conv.status === "new" ? "var(--rently-accent)" : "var(--rently-success)" }}>
+                    {conv.status === "new" ? "● New" : "● Replied"}
+                  </span>
+                </div>
+              )}
             </div>
           )}
-          {messages.map((m) => (
-            <div key={m.id} className="fade-in" style={{ display: "flex", flexDirection: "column", alignItems: m.sender === viewAs ? "flex-end" : "flex-start", padding: "0 16px" }}>
-              <div style={{ fontSize: 11, color: "#4b5675", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
-                <span>{m.senderName}</span>
-                <span>·</span>
-                <span>{timeAgo(m.createdAt)}</span>
-              </div>
-              <div
-                className={`chat-bubble ${m.sender === viewAs ? "user" : "bot"}`}
-                style={{ maxWidth: "75%" }}
-              >
-                {m.content}
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Input */}
-        <div style={{ background: "white", borderRadius: 18, padding: 14, border: "1px solid #e3e7ef", boxShadow: "0 -4px 20px rgba(11,20,55,0.06)" }}>
-          <form onSubmit={sendMessage} style={{ display: "flex", gap: 8 }}>
-            <input
-              className="input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={t.chat.placeholder}
-              style={{ flex: 1 }}
-              disabled={sending}
-            />
-            <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()} style={{ padding: "10px 18px" }}>
-              {sending ? "…" : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </button>
-          </form>
+          {/* Messages */}
+          <div ref={listRef} style={{ flex: 1, overflowY: "auto", padding: "20px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
+            {messages.length === 0 && (
+              <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--rently-muted)" }}>
+                <div style={{ fontSize: 40, marginBottom: 10 }}>💬</div>
+                <p style={{ fontSize: 14 }}>No messages yet. Start the conversation!</p>
+              </div>
+            )}
+            {messages.map((m) => (
+              <div key={m.id} className="fade-in" style={{ display: "flex", flexDirection: "column", alignItems: m.sender === viewAs ? "flex-end" : "flex-start", padding: "0 16px" }}>
+                <div style={{ fontSize: 11, color: "var(--rently-muted)", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>{m.senderName}</span>
+                  <span>·</span>
+                  <span>{timeAgo(m.createdAt)}</span>
+                </div>
+                <div className={`chat-bubble ${m.sender === viewAs ? "user" : "bot"}`} style={{ maxWidth: "75%" }}>
+                  {m.content}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="card-cream" style={{ borderRadius: 18, padding: 14 }}>
+            <form onSubmit={sendMessage} style={{ display: "flex", gap: 8 }}>
+              <input className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder={t.chat.placeholder} style={{ flex: 1 }} disabled={sending} />
+              <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()} style={{ padding: "10px 18px" }}>
+                {sending ? "…" : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

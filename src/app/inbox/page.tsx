@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { authFetch } from "@/lib/auth-fetch";
+import { useAuth } from "@/lib/auth-context";
 
 interface Conversation {
   id: string;
@@ -23,16 +25,29 @@ interface Conversation {
 }
 
 export default function InboxPage() {
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [filter, setFilter] = useState<"all" | "new" | "replied">("all");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/inquiries?ownerId=owner-1")
-      .then((r) => r.json())
-      .then((data) => { setConversations(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    const params = user.role === "owner"
+      ? `ownerId=${user.id}`
+      : `tenantEmail=${encodeURIComponent(user.email)}`;
+
+    authFetch(`/api/inquiries?${params}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to load");
+        return r.json();
+      })
+      .then((data) => { setConversations(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setError("Could not load conversations"); setLoading(false); });
+  }, [user]);
 
   const filtered = filter === "all" ? conversations : conversations.filter((c) => c.status === filter);
   const newCount = conversations.filter((c) => c.status === "new").length;
@@ -48,74 +63,98 @@ export default function InboxPage() {
   }
 
   return (
-    <div style={{ background: "#f7f8fc", minHeight: "100vh" }}>
+    <div className="page-cream">
       <Navbar />
       <div className="container-app" style={{ padding: "30px 20px 60px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#0b1437" }}>Inbox</h1>
-            <p style={{ fontSize: 14, color: "#4b5675" }}>{conversations.length} conversations · {newCount} new</p>
+            <h1 className="text-royal" style={{ fontSize: 26, fontWeight: 800 }}>Inbox</h1>
+            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginTop: 4 }}>
+              {conversations.length} conversations · {newCount} new
+            </p>
           </div>
           <Link href="/dashboard" className="btn btn-outline">← Dashboard</Link>
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {/* Filters */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
           {(["all", "new", "replied"] as const).map((f) => (
-            <button key={f} onClick={() => setFilter(f)} className={`btn ${filter === f ? "btn-secondary" : "btn-outline"}`} style={{ textTransform: "capitalize" }}>
-              {f} {f === "new" && newCount > 0 && <span style={{ background: "#ff6a3d", color: "white", borderRadius: 999, padding: "2px 7px", fontSize: 11, fontWeight: 700 }}>{newCount}</span>}
+            <button key={f} onClick={() => setFilter(f)} className={`btn ${filter === f ? "btn-primary" : "btn-outline"}`} style={{ textTransform: "capitalize" }}>
+              {f === "all" ? "All" : f === "new" ? "New" : "Replied"}
+              {f === "new" && newCount > 0 && (
+                <span className="badge badge-accent" style={{ marginLeft: 4 }}>{newCount}</span>
+              )}
             </button>
           ))}
         </div>
 
-        {loading ? (
+        {/* Content */}
+        {!user ? (
+          <div className="card-cream" style={{ padding: 50, textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Sign in to view your inbox</h3>
+            <p style={{ color: "var(--rently-muted)", marginBottom: 18 }}>You need to be logged in to access conversations.</p>
+            <Link href="/auth/login" className="btn btn-primary">Sign in</Link>
+          </div>
+        ) : loading ? (
           <div style={{ display: "grid", gap: 12 }}>
-            {[1, 2, 3].map((i) => <div key={i} className="skeleton" style={{ height: 100, borderRadius: 14 }} />)}
+            {[1, 2, 3].map((i) => <div key={i} className="skeleton" style={{ height: 100, borderRadius: 16 }} />)}
+          </div>
+        ) : error ? (
+          <div className="card-cream" style={{ padding: 50, textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{error}</h3>
+            <p style={{ color: "var(--rently-muted)" }}>Please try refreshing the page.</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ background: "white", borderRadius: 18, padding: 50, textAlign: "center", border: "1px solid #e3e7ef" }}>
-            <div style={{ fontSize: 50, marginBottom: 12 }}>📭</div>
+          <div className="card-cream" style={{ padding: 50, textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No inquiries yet</h3>
-            <p style={{ color: "#4b5675" }}>When tenants contact you, their inquiries will appear here.</p>
+            <p style={{ color: "var(--rently-muted)" }}>When tenants contact you, their inquiries will appear here.</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ display: "grid", gap: 10 }}>
             {filtered.map((conv) => (
               <Link
                 key={conv.id}
                 href={`/chat/${conv.id}`}
+                className="card-cream"
                 style={{
                   display: "block",
-                  background: "white",
-                  borderRadius: 14,
-                  padding: 18,
-                  border: conv.unread > 0 ? "2px solid #0d6efd" : "1px solid #e3e7ef",
+                  padding: "18px 20px",
+                  borderLeft: conv.unread > 0 ? "4px solid var(--rently-accent)" : "4px solid transparent",
                   textDecoration: "none",
                   color: "inherit",
-                  transition: "all 0.15s",
                 }}
-                className="property-card"
               >
                 <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: conv.unread > 0 ? "linear-gradient(135deg,#0d6efd,#0a58ca)" : "#f4f6fb", color: conv.unread > 0 ? "white" : "#0b1437", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: "50%",
+                    background: conv.unread > 0 ? "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))" : "var(--rently-cream-dark)",
+                    color: conv.unread > 0 ? "white" : "var(--rently-text)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: 800, fontSize: 18, flexShrink: 0,
+                  }}>
                     {conv.tenantName.charAt(0)}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: conv.unread > 0 ? 800 : 600, color: "#0b1437" }}>{conv.tenantName}</span>
-                        {conv.status === "new" && <span className="badge badge-warn" style={{ fontSize: 10 }}>NEW</span>}
+                        <span style={{ fontSize: 15, fontWeight: conv.unread > 0 ? 800 : 600, color: "var(--rently-text)" }}>{conv.tenantName}</span>
+                        {conv.status === "new" && <span className="badge badge-accent">NEW</span>}
                       </div>
-                      <span style={{ fontSize: 12, color: "#4b5675" }}>{timeAgo(conv.lastMessageAt)}</span>
+                      <span style={{ fontSize: 12, color: "var(--rently-muted)" }}>{timeAgo(conv.lastMessageAt)}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: "#4b5675", marginBottom: 4 }}>
+                    <div style={{ fontSize: 12, color: "var(--rently-muted)", marginBottom: 4 }}>
                       Re: {conv.propertyTitle}
                     </div>
-                    <p style={{ fontSize: 14, color: conv.unread > 0 ? "#0b1437" : "#4b5675", fontWeight: conv.unread > 0 ? 600 : 400, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: 14, color: conv.unread > 0 ? "var(--rently-text)" : "var(--rently-muted)", fontWeight: conv.unread > 0 ? 600 : 400, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {conv.lastMessage}
                     </p>
                   </div>
                   {conv.unread > 0 && (
-                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#0d6efd", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{conv.unread}</div>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--rently-accent)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{conv.unread}</div>
                   )}
                 </div>
               </Link>
