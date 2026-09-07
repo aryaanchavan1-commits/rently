@@ -51,6 +51,7 @@ export default function Navbar() {
           <Link href="/inbox" className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 13.5 }}>Inbox</Link>
           <Link href="/owner" className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 13.5 }}>Owners</Link>
           <Link href="/pricing" className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 13.5 }}>Pricing</Link>
+          <Link href="/contracts" className="btn btn-ghost" style={{ padding: "8px 14px", fontSize: 13.5 }}>📝 Contracts</Link>
         </nav>
 
         {/* Right side */}
@@ -95,6 +96,7 @@ export default function Navbar() {
           <Link href="/inbox" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>Inbox</Link>
           <Link href="/owner" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>Owners</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>Pricing</Link>
+          <Link href="/contracts" onClick={() => setOpen(false)} className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>📝 Contracts</Link>
           <div style={{ padding: "10px 0" }}><LanguageSelector inline /></div>
           {user ? (
             <>
