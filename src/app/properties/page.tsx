@@ -1,40 +1,80 @@
 "use client";
 
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyMap from "@/components/PropertyMap";
 import AIChat from "@/components/AIChat";
-import Link from "next/link";
 
-const TYPE_LIST = ["apartment", "independent-house", "villa", "pg", "commercial"];
-const SORT_LIST = ["recommended", "price_asc", "price_desc", "newest", "area_desc"];
-const FURNISHING_LIST = ["fully-furnished", "semi-furnished", "unfurnished"];
-const BHK_LIST = ["studio", "1", "2", "3", "4+"];
-const LISTING_TYPE = ["rent", "pg"];
+const TYPE_OPTIONS = [
+  { value: "", label: "All Types" },
+  { value: "apartment", label: "Apartment" },
+  { value: "independent-house", label: "House" },
+  { value: "villa", label: "Villa" },
+  { value: "pg", label: "PG / Hostel" },
+  { value: "room", label: "Room" },
+  { value: "office", label: "Office" },
+];
+const BHK_OPTIONS = [
+  { value: "", label: "Any" },
+  { value: "0", label: "Studio" },
+  { value: "1", label: "1 BHK" },
+  { value: "2", label: "2 BHK" },
+  { value: "3", label: "3 BHK" },
+  { value: "4", label: "4+ BHK" },
+];
+const FURNISHING_OPTIONS = [
+  { value: "", label: "Any" },
+  { value: "fully", label: "Fully Furnished" },
+  { value: "semi", label: "Semi Furnished" },
+  { value: "unfurnished", label: "Unfurnished" },
+];
+const SORT_OPTIONS = [
+  { value: "recommended", label: "Recommended" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "newest", label: "Newest First" },
+  { value: "views", label: "Most Viewed" },
+  { value: "area_desc", label: "Largest Area" },
+];
+const PRICE_PRESETS = [
+  { min: 0, max: 5000, label: "Under 5K" },
+  { min: 5000, max: 10000, label: "5K-10K" },
+  { min: 10000, max: 20000, label: "10K-20K" },
+  { min: 20000, max: 35000, label: "20K-35K" },
+  { min: 35000, max: 50000, label: "35K-50K" },
+  { min: 50000, max: 999999, label: "50K+" },
+];
+const AMENITY_OPTIONS = ["WiFi", "AC", "Parking", "Gym", "Pool", "Security", "Lift", "Garden", "Meals", "CCTV"];
+
+interface PropType {
+  id: string; title: string; type: string; price: number; deposit: number;
+  area: string; city: string; bedrooms: number; bathrooms: number;
+  furnishing: string; images: string; isVerified: boolean; isFeatured: boolean;
+  createdAt: string; address: string; lat: number; lng: number;
+  amenities: string[]; views: number; status: string;
+}
 
 function Content() {
   const searchParams = useSearchParams();
   const initialCity = searchParams.get("city") || searchParams.get("location") || "";
-  const initialType = searchParams.get("type") || "";
-  const initialMin = searchParams.get("budget_min") || "";
-  const initialMax = searchParams.get("budget_max") || "";
-  const initialBhk = searchParams.get("bedrooms") || "";
 
-  const [locationQuery, setLocationQuery] = useState(initialCity);
-  const [type, setType] = useState(initialType);
-  const [minPrice, setMinPrice] = useState(initialMin ? Number(initialMin) : 500);
-  const [maxPrice, setMaxPrice] = useState(initialMax ? Number(initialMax) : 100000);
-  const [sort, setSort] = useState("recommended");
-  const [bhk, setBhk] = useState(initialBhk);
+  const [query, setQuery] = useState(initialCity);
+  const [type, setType] = useState("");
+  const [bhk, setBhk] = useState("");
   const [furnishing, setFurnishing] = useState("");
-  const [listingType, setListingType] = useState("rent");
-  const [view, setView] = useState<"grid" | "map">("grid");
-  const [allProperties, setAllProperties] = useState<Array<{id:string;title:string;type:string;price:number;area:string;city:string;bedrooms:number;bathrooms:number;furnishing:string;images:string;isVerified:boolean;isFeatured:boolean;createdAt:string;address:string;lat:number;lng:number}>>([]);
-  const [loading, setLoading] = useState(true);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(999999);
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [sort, setSort] = useState("recommended");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [view, setView] = useState<"grid" | "list" | "map">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [pricePreset, setPricePreset] = useState<string>("");
+  const [allProperties, setAllProperties] = useState<PropType[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/properties")
@@ -43,177 +83,257 @@ function Content() {
       .catch(() => setLoading(false));
   }, []);
 
+  const applyPricePreset = useCallback((preset: typeof PRICE_PRESETS[0], label: string) => {
+    setMinPrice(preset.min);
+    setMaxPrice(preset.max);
+    setPricePreset(label);
+  }, []);
+
+  const toggleAmenity = useCallback((a: string) => {
+    setAmenities(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a]);
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setQuery(""); setType(""); setBhk(""); setFurnishing("");
+    setMinPrice(0); setMaxPrice(999999); setAmenities([]);
+    setSort("recommended"); setVerifiedOnly(false); setPricePreset("");
+  }, []);
+
   const filtered = useMemo(() => {
-    let r = [...allProperties];
-    if (locationQuery) {
-      const q = locationQuery.toLowerCase();
-      r = r.filter((p) => p.city.toLowerCase().includes(q) || p.area.toLowerCase().includes(q) || p.address.toLowerCase().includes(q));
+    let r = allProperties.filter(p => p.status === "active");
+
+    if (query) {
+      const q = query.toLowerCase();
+      r = r.filter(p =>
+        p.city.toLowerCase().includes(q) ||
+        p.area.toLowerCase().includes(q) ||
+        p.address.toLowerCase().includes(q) ||
+        p.title.toLowerCase().includes(q)
+      );
     }
-    if (type) r = r.filter((p) => p.type === type);
+    if (type) r = r.filter(p => p.type === type);
     if (bhk) {
-      if (bhk === "4+") r = r.filter((p) => p.bedrooms >= 4);
-      else if (bhk === "studio") r = r.filter((p) => p.bedrooms === 0);
-      else r = r.filter((p) => p.bedrooms === Number(bhk));
+      const b = Number(bhk);
+      r = bhk === "4" ? r.filter(p => p.bedrooms >= 4) : r.filter(p => p.bedrooms === b);
     }
-    if (furnishing) r = r.filter((p) => p.furnishing === furnishing);
-    r = r.filter((p) => p.price >= minPrice && p.price <= maxPrice);
-    if (sort === "price_asc") r.sort((a, b) => a.price - b.price);
-    else if (sort === "price_desc") r.sort((a, b) => b.price - a.price);
-    else if (sort === "newest") r.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-    else if (sort === "area_desc") r.sort((a, b) => a.title.localeCompare(b.title));
+    if (furnishing) r = r.filter(p => p.furnishing === furnishing);
+    if (verifiedOnly) r = r.filter(p => p.isVerified);
+    if (amenities.length > 0) r = r.filter(p => amenities.every(a => p.amenities?.includes(a)));
+    r = r.filter(p => p.price >= minPrice && p.price <= maxPrice);
+
+    switch (sort) {
+      case "price_asc": r.sort((a, b) => a.price - b.price); break;
+      case "price_desc": r.sort((a, b) => b.price - a.price); break;
+      case "newest": r.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); break;
+      case "views": r.sort((a, b) => (b.views || 0) - (a.views || 0)); break;
+      case "area_desc": r.sort((a, b) => a.title.localeCompare(b.title)); break;
+      default: r.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0) || (b.views || 0) - (a.views || 0));
+    }
     return r;
-  }, [locationQuery, type, minPrice, maxPrice, sort, bhk, furnishing, allProperties]);
+  }, [allProperties, query, type, bhk, furnishing, minPrice, maxPrice, amenities, sort, verifiedOnly]);
 
-  const uniqueCities = [...new Set(allProperties.map((p) => p.city))].sort();
-
-  const activeFilterCount = [type, bhk, furnishing, minPrice > 500, maxPrice < 100000].filter(Boolean).length;
+  const uniqueCities = useMemo(() => [...new Set(allProperties.map(p => p.city))].sort(), [allProperties]);
+  const activeFilterCount = [type, bhk, furnishing, verifiedOnly, minPrice > 0, maxPrice < 999999, amenities.length > 0].filter(Boolean).length;
 
   return (
-    <div style={{ background: "#f7f8fc", minHeight: "calc(100vh - 64px)" }}>
+    <div className="page-cream">
       <div className="container-app" style={{ paddingTop: 20, paddingBottom: 60 }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+        <div className="search-header">
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0b1437" }}>
-              {locationQuery
-                ? `Rentals in ${locationQuery}`
-                : "Browse Maharashtra Rentals"}
+            <h1 className="text-royal" style={{ fontSize: 22, fontWeight: 800 }}>
+              {query ? `Rentals in ${query}` : "Browse Maharashtra Rentals"}
             </h1>
-            <p style={{ color: "#4b5675", fontSize: 14, marginTop: 4 }}>
+            <p style={{ color: "var(--text-muted)", fontSize: 14, marginTop: 4 }}>
               {filtered.length} properties found
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button onClick={() => setShowFilters(!showFilters)} className="btn btn-outline" style={{ padding: "8px 14px", fontSize: 13 }}>
-              🔽 Filters {activeFilterCount > 0 && <span style={{ background: "#0d6efd", color: "white", borderRadius: 999, padding: "1px 7px", fontSize: 11, marginLeft: 4 }}>{activeFilterCount}</span>}
-            </button>
-            <button onClick={() => setView("grid")} className={`btn ${view === "grid" ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px", fontSize: 13 }}>
-              🏠 Grid
-            </button>
-            <button onClick={() => setView("map")} className={`btn ${view === "map" ? "btn-secondary" : "btn-outline"}`} style={{ padding: "8px 14px", fontSize: 13 }}>
-              🗺️ Map
-            </button>
+          <div className="search-view-toggle">
+            <button onClick={() => setView("grid")} className={`btn btn-sm ${view === "grid" ? "btn-primary" : "btn-outline"}`}>Grid</button>
+            <button onClick={() => setView("list")} className={`btn btn-sm ${view === "list" ? "btn-primary" : "btn-outline"}`}>List</button>
+            <button onClick={() => setView("map")} className={`btn btn-sm ${view === "map" ? "btn-primary" : "btn-outline"}`}>Map</button>
           </div>
         </div>
 
-        {/* Search bar */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 14, alignItems: "stretch", flexWrap: "wrap" }}>
-          <div style={{ position: "relative", flex: "1 1 300px" }}>
-            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, color: "#9ca3af" }}>📍</span>
+        {/* Search Bar */}
+        <div className="search-bar-row">
+          <div className="search-input-wrap">
+            <svg className="search-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" /></svg>
             <input
-              className="input"
-              placeholder="Search any city or area in Maharashtra…"
-              value={locationQuery}
-              onChange={(e) => setLocationQuery(e.target.value)}
-              style={{ paddingLeft: 40, height: 44, fontSize: 14, borderRadius: 10, border: "2px solid #e3e7ef" }}
+              className="input search-input"
+              placeholder="Search city, area, or locality..."
+              value={query}
+              onChange={e => setQuery(e.target.value)}
             />
           </div>
-          <select className="input" value={listingType} onChange={(e) => setListingType(e.target.value)} style={{ width: 120, height: 44, borderRadius: 10, border: "2px solid #e3e7ef" }}>
-            {LISTING_TYPE.map((l) => <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>)}
+          <select className="input search-sort" value={sort} onChange={e => setSort(e.target.value)}>
+            {SORT_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
-          <select className="input" value={sort} onChange={(e) => setSort(e.target.value)} style={{ width: 180, height: 44, borderRadius: 10, border: "2px solid #e3e7ef" }}>
-            {SORT_LIST.map((s) => (
-              <option key={s} value={s}>
-                {s === "recommended" ? "Recommended" : s === "price_asc" ? "Price: Low → High" : s === "price_desc" ? "Price: High → Low" : s === "newest" ? "Newest" : "Largest Area"}
-              </option>
-            ))}
-          </select>
+          <button onClick={() => setShowFilters(!showFilters)} className="btn btn-outline search-filter-btn">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" d="M3 4h18M6 9h12M9 14h6M11 19h2" /></svg>
+            Filters
+            {activeFilterCount > 0 && <span className="badge badge-primary" style={{ marginLeft: 4 }}>{activeFilterCount}</span>}
+          </button>
         </div>
 
-        {/* Quick city chips */}
-        {!locationQuery && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-            <button onClick={() => setLocationQuery("")} className={`btn ${!locationQuery ? "btn-secondary" : "btn-outline"}`} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600 }}>
-              All Maharashtra
-            </button>
-            {uniqueCities.slice(0, 10).map((c) => (
-              <button key={c} onClick={() => setLocationQuery(c)} className="btn btn-outline" style={{ padding: "6px 14px", fontSize: 12 }}>
-                {c}
-              </button>
+        {/* Price Preset Chips */}
+        <div className="price-chips">
+          {PRICE_PRESETS.map(p => (
+            <button
+              key={p.label}
+              onClick={() => pricePreset === p.label ? (setMinPrice(0), setMaxPrice(999999), setPricePreset("")) : applyPricePreset(p, p.label)}
+              className={`price-chip ${pricePreset === p.label ? "active" : ""}`}
+            >{p.label}</button>
+          ))}
+        </div>
+
+        {/* City Chips */}
+        {!query && (
+          <div className="city-chips">
+            <button onClick={() => setQuery("")} className={`city-chip ${!query ? "active" : ""}`}>All Maharashtra</button>
+            {uniqueCities.slice(0, 10).map(c => (
+              <button key={c} onClick={() => setQuery(c)} className="city-chip">{c}</button>
             ))}
           </div>
         )}
 
-        {/* Expandable advanced filters */}
+        {/* Advanced Filters Panel */}
         {showFilters && (
-          <div style={{ background: "white", borderRadius: 14, padding: 18, border: "1px solid #e3e7ef", marginBottom: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
+          <div className="filters-panel animate-scale-in">
+            <div className="filters-grid">
               {/* BHK */}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "#4b5675", marginBottom: 6, display: "block" }}>BHK</label>
-                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                  {BHK_LIST.map((b) => (
-                    <button key={b} onClick={() => setBhk(bhk === b ? "" : b)} style={{ padding: "6px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600, border: bhk === b ? "2px solid #0d6efd" : "1px solid #e3e7ef", background: bhk === b ? "#e8f0fe" : "#f7f8fc", color: bhk === b ? "#0d6efd" : "#4b5675", cursor: "pointer" }}>
-                      {b === "studio" ? "Studio" : `${b} BHK`}
-                    </button>
+              <div className="filter-group">
+                <label className="form-label">BHK</label>
+                <div className="filter-chips">
+                  {BHK_OPTIONS.map(b => (
+                    <button key={b.value} onClick={() => setBhk(bhk === b.value ? "" : b.value)}
+                      className={`filter-chip ${bhk === b.value ? "active" : ""}`}>{b.label}</button>
                   ))}
                 </div>
               </div>
 
               {/* Type */}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "#4b5675", marginBottom: 6, display: "block" }}>Property Type</label>
-                <select className="input" value={type} onChange={(e) => setType(e.target.value)} style={{ width: "100%", height: 38, fontSize: 13 }}>
-                  <option value="">Any type</option>
-                  {TYPE_LIST.map((tp) => <option key={tp} value={tp}>{tp.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</option>)}
-                </select>
+              <div className="filter-group">
+                <label className="form-label">Property Type</label>
+                <div className="filter-chips">
+                  {TYPE_OPTIONS.map(t => (
+                    <button key={t.value} onClick={() => setType(type === t.value ? "" : t.value)}
+                      className={`filter-chip ${type === t.value ? "active" : ""}`}>{t.label}</button>
+                  ))}
+                </div>
               </div>
 
               {/* Furnishing */}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "#4b5675", marginBottom: 6, display: "block" }}>Furnishing</label>
-                <select className="input" value={furnishing} onChange={(e) => setFurnishing(e.target.value)} style={{ width: "100%", height: 38, fontSize: 13 }}>
-                  <option value="">Any</option>
-                  {FURNISHING_LIST.map((f) => <option key={f} value={f}>{f.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</option>)}
-                </select>
+              <div className="filter-group">
+                <label className="form-label">Furnishing</label>
+                <div className="filter-chips">
+                  {FURNISHING_OPTIONS.map(f => (
+                    <button key={f.value} onClick={() => setFurnishing(furnishing === f.value ? "" : f.value)}
+                      className={`filter-chip ${furnishing === f.value ? "active" : ""}`}>{f.label}</button>
+                  ))}
+                </div>
               </div>
 
-              {/* Budget */}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "#4b5675", marginBottom: 6, display: "block" }}>Budget</label>
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <input type="number" className="input" value={minPrice} onChange={(e) => setMinPrice(Number(e.target.value))} style={{ width: "50%", height: 38, fontSize: 13 }} placeholder="Min" />
-                  <span style={{ color: "#9ca3af" }}>–</span>
-                  <input type="number" className="input" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} style={{ width: "50%", height: 38, fontSize: 13 }} placeholder="Max" />
+              {/* Budget Range */}
+              <div className="filter-group">
+                <label className="form-label">Budget Range</label>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <input type="number" className="input" value={minPrice || ""} onChange={e => setMinPrice(Number(e.target.value) || 0)} placeholder="Min" style={{ flex: 1 }} />
+                  <span style={{ color: "var(--text-muted)" }}>-</span>
+                  <input type="number" className="input" value={maxPrice === 999999 ? "" : maxPrice} onChange={e => setMaxPrice(Number(e.target.value) || 999999)} placeholder="Max" style={{ flex: 1 }} />
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className="filter-group" style={{ gridColumn: "1 / -1" }}>
+                <label className="form-label">Amenities</label>
+                <div className="filter-chips">
+                  {AMENITY_OPTIONS.map(a => (
+                    <button key={a} onClick={() => toggleAmenity(a)}
+                      className={`filter-chip ${amenities.includes(a) ? "active" : ""}`}>{a}</button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Clear filters */}
-            <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end" }}>
-              <button onClick={() => { setType(""); setBhk(""); setFurnishing(""); setMinPrice(500); setMaxPrice(100000); }} className="btn btn-ghost" style={{ fontSize: 13, color: "#4b5675" }}>
-                Clear all filters
-              </button>
+            {/* Verified Toggle + Clear */}
+            <div className="filters-footer">
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                <input type="checkbox" checked={verifiedOnly} onChange={e => setVerifiedOnly(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: "var(--primary)" }} />
+                Verified owners only
+              </label>
+              <button onClick={clearAll} className="btn btn-ghost btn-sm">Clear all filters</button>
             </div>
           </div>
         )}
 
-        {/* Map view */}
+        {/* Active Filter Tags */}
+        {activeFilterCount > 0 && (
+          <div className="active-tags">
+            {type && <span className="active-tag">{TYPE_OPTIONS.find(t => t.value === type)?.label} <button onClick={() => setType("")}>x</button></span>}
+            {bhk && <span className="active-tag">{bhk === "0" ? "Studio" : `${bhk} BHK`} <button onClick={() => setBhk("")}>x</button></span>}
+            {furnishing && <span className="active-tag">{FURNISHING_OPTIONS.find(f => f.value === furnishing)?.label} <button onClick={() => setFurnishing("")}>x</button></span>}
+            {verifiedOnly && <span className="active-tag">Verified <button onClick={() => setVerifiedOnly(false)}>x</button></span>}
+            {amenities.map(a => <span key={a} className="active-tag">{a} <button onClick={() => toggleAmenity(a)}>x</button></span>)}
+            {(minPrice > 0 || maxPrice < 999999) && <span className="active-tag">Budget: {minPrice > 0 ? `₹${minPrice.toLocaleString("en-IN")}` : "0"} - {maxPrice < 999999 ? `₹${maxPrice.toLocaleString("en-IN")}` : "Any"} <button onClick={() => { setMinPrice(0); setMaxPrice(999999); setPricePreset(""); }}>x</button></span>}
+          </div>
+        )}
+
+        {/* Map View */}
         {view === "map" && (
           <div style={{ marginBottom: 20 }}>
             <PropertyMap
-              properties={filtered.map((p) => ({ ...p, images: typeof p.images === "string" ? JSON.parse(p.images || "[]") : p.images }))}
+              properties={filtered.map(p => ({ ...p, images: typeof p.images === "string" ? JSON.parse(p.images || "[]") : p.images }))}
               height="400px"
-              onPropertyClick={(id) => window.location.href = `/properties/${id}`}
+              onPropertyClick={id => window.location.href = `/properties/${id}`}
             />
           </div>
         )}
 
         {/* Results */}
         {loading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            {[1, 2, 3, 4, 5, 6].map((n) => <div key={n} className="skeleton" style={{ height: 280, borderRadius: 14 }} />)}
+          <div className="properties-grid">
+            {[1, 2, 3, 4, 5, 6].map(n => <div key={n} className="skeleton" style={{ height: 280, borderRadius: 14 }} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ background: "white", borderRadius: 16, padding: 50, textAlign: "center", border: "1px solid #e3e7ef" }}>
-            <div style={{ fontSize: 50, marginBottom: 12 }}>🏚️</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No properties found</h3>
-            <p style={{ color: "#4b5675", marginBottom: 18 }}>Try widening filters, or chat with Ria.</p>
-            <button onClick={() => { setLocationQuery(""); setType(""); setBhk(""); setFurnishing(""); setMinPrice(500); setMaxPrice(100000); }} className="btn btn-secondary">Clear all filters</button>
+          <div className="empty-state">
+            <div className="empty-icon">
+              <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+            </div>
+            <h3>No properties found</h3>
+            <p>Try adjusting your filters or search a different area</p>
+            <button onClick={clearAll} className="btn btn-primary">Clear all filters</button>
+          </div>
+        ) : view === "list" ? (
+          <div className="properties-list">
+            {filtered.map(p => (
+              <a key={p.id} href={`/properties/${p.id}`} className="property-list-item">
+                <div className="property-list-img">
+                  {(() => { const imgs = typeof p.images === "string" ? JSON.parse(p.images || "[]") : p.images; return imgs[0] ? <img src={imgs[0]} alt="" /> : <div className="property-list-placeholder">R</div>; })()}
+                </div>
+                <div className="property-list-body">
+                  <div className="property-list-top">
+                    <div>
+                      <div className="property-list-title">{p.title}</div>
+                      <div className="property-list-location">{p.area}, {p.city}</div>
+                    </div>
+                    <div className="property-list-price">₹{p.price.toLocaleString("en-IN")}<span>/mo</span></div>
+                  </div>
+                  <div className="property-list-meta">
+                    {p.bedrooms > 0 && <span>{p.bedrooms} BHK</span>}
+                    <span>{p.bathrooms} Bath</span>
+                    <span>{p.furnishing === "fully" ? "Fully Furnished" : p.furnishing === "semi" ? "Semi Furnished" : "Unfurnished"}</span>
+                    {p.isVerified && <span className="badge badge-success" style={{ fontSize: 10 }}>Verified</span>}
+                    <span>{p.views || 0} views</span>
+                  </div>
+                </div>
+              </a>
+            ))}
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
-            {filtered.map((p) => (
+          <div className="properties-grid">
+            {filtered.map(p => (
               <PropertyCard key={p.id} property={{ ...p, images: JSON.stringify(p.images) }} />
             ))}
           </div>

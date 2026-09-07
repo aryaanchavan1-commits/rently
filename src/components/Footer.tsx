@@ -24,6 +24,7 @@ export default function Footer() {
             <Link href="/commute" className="footer-link">Commute Search</Link>
             <Link href="/map" className="footer-link">Live Map</Link>
             <Link href="/contracts" className="footer-link">E-Contracts</Link>
+            <Link href="/rent-agreement" className="footer-link">Rent Agreement Template</Link>
           </div>
 
           <div className="footer-col">

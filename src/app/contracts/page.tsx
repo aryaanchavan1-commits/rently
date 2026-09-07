@@ -216,12 +216,19 @@ export default function ContractsPage() {
       <main style={{ padding: "24px 0 60px", background: "var(--rently-cream)", minHeight: "calc(100vh - 66px)" }}>
         <div className="container-app">
           <div style={{ marginBottom: 24 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, color: "var(--rently-text)" }}>
-              📝 {t("ई-कॉन्ट्रैक्ट", "ई-करार", "E-Contracts")}
-            </h1>
-            <p style={{ fontSize: 15, color: "var(--rently-muted)", marginTop: 6 }}>
-              {t("कायदेशीर करार तयार करा, eSign करा आणि PDF डाउनलोड करा", "कानूनी अनुबंध बनाएं, eSign करें और PDF डाउनलोड करें", "Generate legally valid contracts, eSign and download PDF")}
-            </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <h1 style={{ fontSize: 28, fontWeight: 800, color: "var(--rently-text)" }}>
+                  {t("E-Contracts", "ई-करार", "E-Contracts")}
+                </h1>
+                <p style={{ fontSize: 15, color: "var(--rently-muted)", marginTop: 6 }}>
+                  {t("Generate legally valid contracts, eSign and download PDF", "कानूनी अनुबंध बनाएं, eSign करें और PDF डाउनलोड करें", "Generate legally valid contracts, eSign and download PDF")}
+                </p>
+              </div>
+              <a href="/rent-agreement" className="btn btn-outline" style={{ textDecoration: "none" }}>
+                {t("Free Rent Agreement Template", "मोफत भाडे करार टेम्पलेट", "Free Rent Agreement Template")}
+              </a>
+            </div>
           </div>
 
           {step === "select" && (

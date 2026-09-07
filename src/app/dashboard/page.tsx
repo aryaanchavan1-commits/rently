@@ -9,9 +9,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
 import ListingWizard from "@/components/ListingWizard";
+import OwnerAnalytics from "@/components/OwnerAnalytics";
 import type { Property } from "@/lib/properties-store";
 
-type Tab = "overview" | "listings" | "add" | "edit" | "inquiries";
+type Tab = "overview" | "listings" | "add" | "edit" | "inquiries" | "analytics";
 
 interface SubscriptionStatus {
   isActive: boolean;
@@ -98,6 +99,7 @@ export default function OwnerDashboard() {
   const tabs: { key: Tab; label: string }[] = [
     { key: "overview", label: t("Overview", "सारांश", "अवलोकन") },
     { key: "listings", label: t("My Listings", "माझ्या यादी", "मेरी लिस्टिंग") },
+    { key: "analytics", label: t("Analytics", "विश्लेषण", "Analytics") },
     { key: "add", label: t("Add Property", "मालमत्ता जोडा", "प्रॉपर्टी जोड़ें") },
     { key: "inquiries", label: t("Inquiries", "चौकशी", "पूछताछ") },
   ];
@@ -348,6 +350,11 @@ export default function OwnerDashboard() {
               editProperty={editingProperty}
               onDone={() => { setEditingProperty(null); setTab("listings"); loadListings(); }}
             />
+          )}
+
+          {/* Analytics Tab */}
+          {tab === "analytics" && (
+            <OwnerAnalytics properties={listings} />
           )}
 
           {/* Inquiries Tab */}
