@@ -36,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
       </head>
       <body>
         <LangProviderWrap><AuthProviderWrap>{children}</AuthProviderWrap></LangProviderWrap>

@@ -6,6 +6,7 @@ import { useLang } from "@/lib/lang-context";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PaymentModal from "@/components/PaymentModal";
 
 interface Property {
   id: string;
@@ -41,6 +42,8 @@ export default function ContractsPage() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [generating, setGenerating] = useState(false);
   const [step, setStep] = useState<"select" | "details" | "payment" | "esign" | "done">("select");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [contractId, setContractId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     ownerName: "",
@@ -134,36 +137,34 @@ export default function ContractsPage() {
         }),
       });
       const contractData = await contractRes.json();
+      setContractId(contractData.contract?.id);
+      setShowPaymentModal(true);
+    } catch (err) {
+      console.error("Generate error:", err);
+    }
+  }
 
-      const payRes = await fetch("/api/contracts/payment", {
+  async function handlePaymentSuccess(paymentId: string) {
+    if (!contractId) return;
+
+    try {
+      const verifyRes = await fetch("/api/contracts/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contractId: contractData.contract?.id,
-          action: "create_order",
+          contractId,
+          action: "verify_payment",
+          razorpay_payment_id: paymentId,
+          razorpay_order_id: `order_${Date.now()}`,
         }),
       });
-      const payData = await payRes.json();
-
-      if (payData.success) {
-        alert(`Payment of ₹${payData.amount} - Order ID: ${payData.orderId}\n\nIn production, Razorpay checkout would open here.`);
-        const verifyRes = await fetch("/api/contracts/payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contractId: contractData.contract?.id,
-            action: "verify_payment",
-            razorpay_payment_id: `pay_${Date.now()}`,
-            razorpay_order_id: payData.orderId,
-          }),
-        });
-        const verifyData = await verifyRes.json();
-        if (verifyData.success) {
-          setStep("esign");
-        }
+      const verifyData = await verifyRes.json();
+      if (verifyData.success) {
+        setShowPaymentModal(false);
+        setStep("esign");
       }
     } catch (err) {
-      console.error("Payment error:", err);
+      console.error("Verify error:", err);
     }
   }
 
@@ -467,6 +468,18 @@ export default function ContractsPage() {
         </div>
       </main>
       <Footer />
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        amount={50}
+        description="E-Contract Generation"
+        prefill={{
+          name: formData.ownerName,
+          email: formData.ownerEmail,
+          contact: formData.ownerPhone,
+        }}
+      />
     </div>
   );
 }
