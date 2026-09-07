@@ -455,11 +455,146 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
               </div>
             </div>
           </div>
+
+          {/* What's Around This Home - Nearby Places */}
+          {p.lat && p.lng && (
+            <NearbyPlacesSection lat={p.lat} lng={p.lng} />
+          )}
         </div>
       </div>
       <Footer />
       <AIChat />
       <style>{`@media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr !important; } }`}</style>
+    </div>
+  );
+}
+
+const NEARBY_CATS = [
+  { key: "education", label: "Education", color: "#3b82f6", query: "['amenity'~'school|college|university']" },
+  { key: "healthcare", label: "Healthcare", color: "#ef4444", query: "['amenity'~'hospital|clinic|pharmacy']" },
+  { key: "shopping", label: "Shopping", color: "#8b5cf6", query: "['shop'~'supermarket|mall|market']" },
+  { key: "food", label: "Food & Dining", color: "#f59e0b", query: "['amenity'~'restaurant|cafe|fast_food']" },
+  { key: "transport", label: "Transport", color: "#10b981", query: "['railway'='station']|['public_transport'~'station']" },
+  { key: "parks", label: "Parks", color: "#22c55e", query: "['leisure'~'park|garden']" },
+];
+
+function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function NearbyPlacesSection({ lat, lng }: { lat: number; lng: number }) {
+  const [places, setPlaces] = useState<{ name: string; category: string; distance: number; color: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchAll() {
+      const all: { name: string; category: string; distance: number; color: string }[] = [];
+      for (const cat of NEARBY_CATS) {
+        try {
+          const query = `[out:json][timeout:6];(node${cat.query}(${lat - 0.01},${lng - 0.01},${lat + 0.01},${lng + 0.01});way${cat.query}(${lat - 0.01},${lng - 0.01},${lat + 0.01},${lng + 0.01}););out center 8;`;
+          const res = await fetch("https://overpass-api.de/api/interpreter", {
+            method: "POST",
+            body: `data=${encodeURIComponent(query)}`,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          });
+          const data = await res.json();
+          for (const el of data.elements || []) {
+            const elLat = el.lat || el.center?.lat;
+            const elLng = el.lon || el.center?.lon;
+            if (!elLat || !elLng) continue;
+            const dist = haversine(lat, lng, elLat, elLng);
+            if (dist > 5) continue;
+            all.push({
+              name: el.tags?.name || el.tags?.["name:en"] || `${cat.label} nearby`,
+              category: cat.key,
+              distance: dist,
+              color: cat.color,
+            });
+          }
+        } catch { /* skip */ }
+      }
+      all.sort((a, b) => a.distance - b.distance);
+      if (!cancelled) { setPlaces(all); setLoading(false); }
+    }
+    fetchAll();
+    return () => { cancelled = true; };
+  }, [lat, lng]);
+
+  const filtered = activeFilter ? places.filter((p) => p.category === activeFilter) : places;
+  const grouped = NEARBY_CATS.map((cat) => ({
+    ...cat,
+    count: places.filter((p) => p.category === cat.key).length,
+    nearest: places.filter((p) => p.category === cat.key).sort((a, b) => a.distance - b.distance)[0],
+  })).filter((g) => g.count > 0);
+
+  if (loading) {
+    return (
+      <div style={{ marginTop: 30 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>What&apos;s Around This Home</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <div key={n} className="skeleton" style={{ height: 70, borderRadius: 12 }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 30 }}>
+      <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>What&apos;s Around This Home</h3>
+      <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>{places.length} places found within 5 km via OpenStreetMap</p>
+
+      {/* Category cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 10, marginBottom: 16 }}>
+        {grouped.map((g) => (
+          <button
+            key={g.key}
+            onClick={() => setActiveFilter(activeFilter === g.key ? null : g.key)}
+            style={{
+              padding: "12px 14px", borderRadius: 12, border: `1.5px solid ${activeFilter === g.key ? g.color : "var(--border)"}`,
+              background: activeFilter === g.key ? `${g.color}10` : "var(--surface)",
+              cursor: "pointer", textAlign: "left", transition: "all 0.15s",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+              <span style={{ width: 24, height: 24, borderRadius: "50%", background: g.color, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, fontFamily: "Inter, system-ui" }}>{g.count}</span>
+              {g.nearest && <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "Inter, system-ui" }}>{(g.nearest.distance * 1000).toFixed(0)}m</span>}
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", fontFamily: "Inter, system-ui" }}>{g.label}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Places list */}
+      {filtered.length > 0 && (
+        <div style={{ display: "grid", gap: 6, maxHeight: 300, overflowY: "auto" }}>
+          {filtered.slice(0, 20).map((place, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10,
+              border: "1px solid var(--border)", background: "var(--surface)", fontSize: 13,
+            }}>
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: place.color, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 800, flexShrink: 0, fontFamily: "Inter, system-ui" }}>
+                {NEARBY_CATS.find((c) => c.key === place.category)?.label?.[0] || "?"}
+              </span>
+              <span style={{ flex: 1, color: "var(--text)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "Inter, system-ui" }}>{place.name}</span>
+              <span style={{ color: "var(--text-muted)", fontSize: 12, flexShrink: 0, fontFamily: "Inter, system-ui" }}>
+                {place.distance < 1 ? `${(place.distance * 1000).toFixed(0)}m` : `${place.distance.toFixed(1)}km`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {filtered.length === 0 && !loading && (
+        <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: 20 }}>No nearby places found for this filter.</p>
+      )}
     </div>
   );
 }
