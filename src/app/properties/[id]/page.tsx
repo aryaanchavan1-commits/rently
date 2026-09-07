@@ -10,7 +10,8 @@ import { useAuth } from "@/lib/auth-context";
 interface PropData {
   id: string; title: string; type: string; price: number; deposit: number;
   maintenance: number; parking: number;
-  address: string; area: string; city: string; bedrooms: number; bathrooms: number;
+  address: string; area: string; city: string; lat: number; lng: number;
+  bedrooms: number; bathrooms: number;
   furnishing: string; availableFrom: string; images: string[]; amenities: string[];
   rules: string; description: string; contactPhone: string;
   ownerName: string; ownerId: string; isVerified: boolean; views: number;

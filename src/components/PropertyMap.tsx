@@ -124,7 +124,7 @@ export default function PropertyMap({
         style: MAP_STYLES[mapStyle].url,
         center: [getMapCenter()[1], getMapCenter()[0]],
         zoom: getMapZoom(),
-        attributionControl: true,
+        attributionControl: true as any,
       });
 
       map.addControl(new maplibregl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: false }), "top-right");
