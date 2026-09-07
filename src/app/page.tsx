@@ -125,27 +125,26 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section style={{
-        background: "linear-gradient(135deg, #1a365d 0%, #2c5282 40%, #2b6cb0 100%)",
-        padding: "80px 20px 100px",
+        background: "linear-gradient(135deg, #0f1b2d 0%, #1a365d 30%, #2c5282 60%, #2b6cb0 100%)",
+        padding: "100px 20px 120px",
         position: "relative",
         overflow: "hidden",
       }}>
-        <div style={{
-          position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-          backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 50%)",
-        }} />
+        {/* Decorative orbs */}
+        <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,148,74,0.15) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: -80, left: -80, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)" }} />
         <div className="container-app" style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
-          <div style={{
-            display: "inline-block", padding: "6px 16px", borderRadius: 999,
-            background: "rgba(255,255,255,0.15)", color: "white", fontSize: 13,
-            fontWeight: 600, marginBottom: 20, backdropFilter: "blur(4px)",
+          <div className="animate-slide-up" style={{
+            display: "inline-block", padding: "8px 20px", borderRadius: 999,
+            background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", fontSize: 13,
+            fontWeight: 600, marginBottom: 24, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)",
           }}>
-            🏠 {t("महाराष्ट्रातील #1 भाडे प्लॅटफॉर्म", "महाराष्ट्र का #1 किराया प्लेटफॉर्म", "Maharashtra's #1 Rental Platform")}
+            🏠 {t("महाराष्ट्रातील #1 भाडे प्लॅटफॉर्म", "महाराष्ट्र का #1 किराया प्लेटफॉर्म", "Maharashtra's #1 Rental Platform")} — <span style={{ color: "#C9944A" }}>{t("आर्यनॉक्सटेक द्वारे", "Arynoxtech द्वारा", "by Arynoxtech")}</span>
           </div>
 
-          <h1 style={{
-            fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 900, color: "white",
-            lineHeight: 1.1, marginBottom: 16, letterSpacing: -1,
+          <h1 className="animate-slide-up" style={{
+            fontSize: "clamp(34px, 5.5vw, 60px)", fontWeight: 900, color: "white",
+            lineHeight: 1.08, marginBottom: 20, letterSpacing: -1.5,
           }}>
             {t("तुमचे आदर्श घर", "आपका आदर्श घर", "Find Your")}{" "}
             <span style={{ color: "#C9944A" }}>{t("शोधा", "खोजें", "Dream Home")}</span>
@@ -153,9 +152,9 @@ export default function HomePage() {
             {t("महाराष्ट्रात", "महाराष्ट्र में", "in Maharashtra")}
           </h1>
 
-          <p style={{
-            fontSize: "clamp(15px, 2vw, 18px)", color: "rgba(255,255,255,0.85)",
-            maxWidth: 600, margin: "0 auto 32px", lineHeight: 1.6,
+          <p className="animate-slide-up" style={{
+            fontSize: "clamp(15px, 2vw, 18px)", color: "rgba(255,255,255,0.75)",
+            maxWidth: 600, margin: "0 auto 40px", lineHeight: 1.7,
           }}>
             {t(
               "AI-शक्तीचे शोध, करार, eSign आणि नकाशा — सर्व एका ठिकाणी",
@@ -203,11 +202,13 @@ export default function HomePage() {
           </div>
 
           {/* Quick city links */}
-          <div style={{ marginTop: 20, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ marginTop: 24, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             {["Mumbai", "Pune", "Thane", "Nagpur", "Nashik"].map((c) => (
               <Link key={c} href={`/properties?type=${searchType}&q=${c}`} style={{
-                padding: "6px 14px", borderRadius: 999, background: "rgba(255,255,255,0.15)",
-                color: "white", fontSize: 13, textDecoration: "none", backdropFilter: "blur(4px)",
+                padding: "8px 18px", borderRadius: 999, background: "rgba(255,255,255,0.1)",
+                color: "rgba(255,255,255,0.85)", fontSize: 13, textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.12)", transition: "all 0.2s",
+              }}
               }}>
                 {c}
               </Link>
@@ -217,20 +218,24 @@ export default function HomePage() {
       </section>
 
       {/* Stats */}
-      <section style={{ padding: "0 20px", marginTop: -40, position: "relative", zIndex: 2 }}>
+      <section style={{ padding: "0 20px", marginTop: -44, position: "relative", zIndex: 2 }}>
         <div className="container-app" style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{
+          <div className="animate-scale-in" style={{
             display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0,
-            background: "white", borderRadius: 20, boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-            overflow: "hidden",
+            background: "white", borderRadius: 20, boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
+            overflow: "hidden", border: "1px solid rgba(255,255,255,0.8)",
           }}>
             {STATS.map((s, i) => (
               <div key={i} style={{
-                padding: "24px 16px", textAlign: "center",
+                padding: "28px 16px", textAlign: "center",
                 borderRight: i < 3 ? "1px solid #f0f0f0" : "none",
-              }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: "var(--rently-primary)" }}>{s.value}</div>
-                <div style={{ fontSize: 13, color: "#666", marginTop: 4 }}>{s.label[lang as "mr" | "hi" | "en"] || s.label.en}</div>
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rently-cream)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                <div style={{ fontSize: 30, fontWeight: 900, background: "linear-gradient(135deg, var(--rently-primary), var(--rently-accent))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: "var(--rently-muted)", marginTop: 4, fontWeight: 500 }}>{s.label[lang as "mr" | "hi" | "en"] || s.label.en}</div>
               </div>
             ))}
           </div>
@@ -241,28 +246,31 @@ export default function HomePage() {
       <section style={{ padding: "80px 20px" }}>
         <div className="container-app" style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div className="gold-line" style={{ width: 60, margin: "0 auto 16px" }} />
             <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: "#1a365d" }}>
-              {t("का Rently निवडाल?", "क्यों Rently चुनें?", "Why Choose Rently?")}
+              {t("का Rently (आर्यनॉक्सटेक) निवडाल?", "क्यों Rently (Arynoxtech) चुनें?", "Why Choose Rently by Arynoxtech?")}
             </h2>
-            <p style={{ fontSize: 16, color: "#666", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>
+            <p style={{ fontSize: 16, color: "var(--rently-muted)", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>
               {t("महाराष्ट्रातील सर्वोत्तम भाडे अनुभव", "महाराष्ट्र में सर्वोत्तम किराया अनुभव", "The best rental experience in Maharashtra")}
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 20 }}>
+          <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 20 }}>
             {FEATURES.map((f, i) => (
-              <div key={i} style={{
-                padding: 28, borderRadius: 18, border: "1px solid #f0f0f0",
-                background: "white", transition: "all 0.2s", cursor: "default",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.08)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}
-              >
-                <div style={{ fontSize: 36, marginBottom: 14 }}>{f.icon}</div>
+              <div key={i} className="animate-slide-up card-hover" style={{
+                padding: 28, borderRadius: 18, border: "1px solid var(--rently-border-light)",
+                background: "white", cursor: "default",
+              }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 16,
+                  background: "linear-gradient(135deg, var(--rently-primary-light), var(--rently-cream))",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 28, marginBottom: 16,
+                }}>{f.icon}</div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1a365d", marginBottom: 8 }}>
                   {f.title[lang as "mr" | "hi" | "en"] || f.title.en}
                 </h3>
-                <p style={{ fontSize: 14, color: "#666", lineHeight: 1.6 }}>
+                <p style={{ fontSize: 14, color: "var(--rently-muted)", lineHeight: 1.7 }}>
                   {f.desc[lang as "mr" | "hi" | "en"] || f.desc.en}
                 </p>
               </div>
@@ -272,50 +280,50 @@ export default function HomePage() {
       </section>
 
       {/* E-Contract Feature */}
-      <section style={{ padding: "60px 20px", background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)" }}>
+      <section style={{ padding: "80px 20px", background: "linear-gradient(135deg, #f8f9fa 0%, #eef1f5 100%)" }}>
         <div className="container-app" style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 50, alignItems: "center" }}>
             <div>
-              <div style={{ display: "inline-block", padding: "4px 12px", borderRadius: 999, background: "#C9944A20", color: "#C9944A", fontSize: 12, fontWeight: 700, marginBottom: 12 }}>
-                📝 {t("नवीन", "नया", "NEW")}
+              <div style={{ display: "inline-block", padding: "6px 16px", borderRadius: 999, background: "var(--rently-accent-light)", color: "var(--rently-accent-dark)", fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
+                📝 {t("नवीन वैशिष्ट्य", "नया फ़ीचर", "NEW FEATURE")}
               </div>
-              <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d", marginBottom: 12 }}>
+              <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d", marginBottom: 14 }}>
                 {t("AI-शक्तीचे ई-कॉन्ट्रैक्ट", "AI-संचालित ई-करार", "AI-Powered E-Contracts")}
               </h2>
-              <p style={{ fontSize: 15, color: "#666", lineHeight: 1.7, marginBottom: 20 }}>
+              <p style={{ fontSize: 15, color: "var(--rently-muted)", lineHeight: 1.8, marginBottom: 24 }}>
                 {t(
                   "कायदेशीर करार तयार करा, Aadhaar ने eSign करा आणि PDF डाउनलोड करा. फक्त ₹50!",
                   "कानूनी समझौता बनाएं, Aadhaar से eSign करें और PDF डाउनलोड करें। केवल ₹50!",
                   "Generate legally valid contracts, eSign with Aadhaar & download PDF. Just ₹50!"
                 )}
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
                   { en: "AI generates Maharashtra-format rental agreement", mr: "AI महाराष्ट्र स्वरूपात भाडे करार तयार करतो", hi: "AI महाराष्ट्र प्रारूप में किराया समझौता बनाता है" },
                   { en: "Both owner & tenant eSign via Aadhaar OTP", mr: "मालक आणि भाडेकर दोघेही Aadhaar OTP ने eSign करतात", hi: "मालिक और किरायेदार दोनों Aadhaar OTP से eSign करते हैं" },
                   { en: "Download signed PDF instantly", mr: "स्वाक्षरित PDF तुरंत डाउनलोड करा", hi: "तुरंत साइन किया हुआ PDF डाउनलोड करें" },
                   { en: "Legally valid under IT Act 2000", mr: "IT कायदा 2000 अंतर्गत कायदेशीर वैध", hi: "IT अधिनियम 2000 के तहत कानूनी रूप से मान्य" },
                 ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#444" }}>
-                    <span style={{ color: "var(--rently-success)", fontWeight: 700 }}>✓</span>
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--rently-text)", padding: "8px 12px", borderRadius: 10, background: "rgba(56,161,105,0.06)" }}>
+                    <span style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--rently-success)", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>✓</span>
                     {item[lang as "mr" | "hi" | "en"] || item.en}
                   </div>
                 ))}
               </div>
               <Link href="/contracts" style={{
-                display: "inline-block", marginTop: 24, padding: "14px 32px", borderRadius: 14,
-                background: "linear-gradient(135deg, #1a365d, #2c5282)", color: "white",
-                fontWeight: 700, fontSize: 15, textDecoration: "none",
+                display: "inline-block", marginTop: 28, padding: "16px 36px", borderRadius: 14,
+                background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))", color: "white",
+                fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(44,82,130,0.3)",
               }}>
                 {t("आता वापरा", "अभी उपयोग करें", "Try Now")} →
               </Link>
             </div>
             <div style={{
-              background: "white", borderRadius: 20, padding: 32, boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-              border: "1px solid #f0f0f0",
+              background: "white", borderRadius: 20, padding: 36, boxShadow: "0 12px 40px rgba(0,0,0,0.08)",
+              border: "1px solid var(--rently-border-light)",
             }}>
-              <div style={{ fontSize: 48, textAlign: "center", marginBottom: 16 }}>📄✍️</div>
-              <div style={{ display: "grid", gap: 12 }}>
+              <div style={{ fontSize: 48, textAlign: "center", marginBottom: 20 }}>📄✍️</div>
+              <div style={{ display: "grid", gap: 10 }}>
                 {[
                   { step: "1", label: t("माहिती भरा", "जानकारी भरें", "Fill Details") },
                   { step: "2", label: t("AI करार तयार करतो", "AI करार बनाता है", "AI Generates") },
@@ -323,9 +331,9 @@ export default function HomePage() {
                   { step: "4", label: t("Aadhaar OTP ने eSign", "Aadhaar OTP से eSign", "eSign with Aadhaar") },
                   { step: "5", label: t("PDF डाउनलोड करा", "PDF डाउनलोड करें", "Download PDF") },
                 ].map((s) => (
-                  <div key={s.step} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 10, background: "#f8f9fa" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--rently-primary)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{s.step}</div>
-                    <span style={{ fontSize: 14, color: "#444" }}>{s.label}</span>
+                  <div key={s.step} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, background: "var(--rently-cream)", border: "1px solid var(--rently-border-light)" }}>
+                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{s.step}</div>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: "var(--rently-text)" }}>{s.label}</span>
                   </div>
                 ))}
               </div>
@@ -335,33 +343,36 @@ export default function HomePage() {
       </section>
 
       {/* Popular Cities */}
-      <section style={{ padding: "60px 20px" }}>
+      <section style={{ padding: "80px 20px" }}>
         <div className="container-app" style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div className="gold-line" style={{ width: 60, margin: "0 auto 16px" }} />
             <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d" }}>
               {t("लोकप्रिय शहरे", "लोकप्रिय शहर", "Popular Cities")}
             </h2>
-            <p style={{ fontSize: 15, color: "#666", marginTop: 6 }}>
+            <p style={{ fontSize: 15, color: "var(--rently-muted)", marginTop: 8 }}>
               {t("महाराष्ट्रातील सर्व शहरांमध्ये मालमत्ता शोधा", "महाराष्ट्र के सभी शहरों में प्रॉपर्टी खोजें", "Find properties across all Maharashtra cities")}
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
+          <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14 }}>
             {MAHARASHTRA_CITIES.map((city) => (
-              <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} style={{
-                padding: 20, borderRadius: 16, border: "1px solid #f0f0f0",
-                background: "white", textDecoration: "none", transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--rently-primary)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(44,82,130,0.1)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#f0f0f0"; e.currentTarget.style.boxShadow = "none"; }}
-              >
-                <div style={{ fontSize: 20, marginBottom: 6 }}>📍</div>
+              <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} className="animate-slide-up card-hover" style={{
+                padding: "22px 18px", borderRadius: 16, border: "1px solid var(--rently-border-light)",
+                background: "white", textDecoration: "none",
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 14,
+                  background: "linear-gradient(135deg, var(--rently-primary-light), var(--rently-cream))",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 20, marginBottom: 12,
+                }}>📍</div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: "#1a365d" }}>{city.name}</div>
-                <div style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "var(--rently-muted)", marginTop: 2 }}>
                   {lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : city.name}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--rently-primary)", marginTop: 6, fontWeight: 600 }}>
-                  {city.count.toLocaleString("en-IN")}+ {t("मालमत्ता", "प्रॉपर्टी", "Properties")}
+                <div style={{ fontSize: 11, color: "var(--rently-primary)", marginTop: 8, fontWeight: 700 }}>
+                  {city.count.toLocaleString("en-IN")}+ {t("मालमत्ता", "प्रॉपर्टी", "listings")}
                 </div>
               </Link>
             ))}
@@ -375,55 +386,75 @@ export default function HomePage() {
         background: "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
       }}>
         <div className="container-app" style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏠</div>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "white", marginBottom: 12 }}>
+          <div className="animate-glow" style={{
+            width: 72, height: 72, borderRadius: 24, background: "rgba(255,255,255,0.12)",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontSize: 36, marginBottom: 24, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)",
+          }}>🏠</div>
+          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 900, color: "white", marginBottom: 14 }}>
             {t("मालक आहात?", "मालिक हैं?", "Property Owner?")}
           </h2>
-          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.8)", marginBottom: 24, maxWidth: 500, margin: "0 auto 24px" }}>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.75)", marginBottom: 32, maxWidth: 500, margin: "0 auto 32px", lineHeight: 1.7 }}>
             {t(
-              "तुमची मालमत्ता Rently वर यादी करा. AI तुमचा करार तयार करेल. eSign करा. किराया मिळवा!",
-              "अपनी प्रॉपर्टी Rently पर लिस्ट करें। AI आपका करार बनाएगा। eSign करें। किराया कमाएं!",
-              "List your property on Rently. AI generates contracts. eSign & earn rent!"
+              "तुमची मालमत्ता Rently (आर्यनॉक्सटेक) वर यादी करा. AI तुमचा करार तयार करेल. eSign करा. किराया मिळवा!",
+              "अपनी प्रॉपर्टी Rently (Arynoxtech) पर लिस्ट करें। AI आपका करार बनाएगा। eSign करें। किराया कमाएं!",
+              "List your property on Rently by Arynoxtech. AI generates contracts. eSign & earn rent!"
             )}
           </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/owner" style={{
-              padding: "14px 32px", borderRadius: 14, background: "white", color: "#1a365d",
-              fontWeight: 700, fontSize: 15, textDecoration: "none",
+              padding: "16px 36px", borderRadius: 14, background: "white", color: "#1a365d",
+              fontWeight: 800, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              transition: "all 0.2s",
             }}>
               {t("मालक म्हणून सुरू करा", "मालिक के रूप में शुरू करें", "Start as Owner")} →
             </Link>
-            <Link href="/dashboard" style={{
-              padding: "14px 32px", borderRadius: 14, border: "2px solid rgba(255,255,255,0.3)",
+            <Link href="/pricing" style={{
+              padding: "16px 36px", borderRadius: 14, border: "2px solid rgba(255,255,255,0.25)",
               color: "white", fontWeight: 700, fontSize: 15, textDecoration: "none",
+              backdropFilter: "blur(4px)", transition: "all 0.2s",
             }}>
-              {t("डॅशबोर्ड", "डैशबोर्ड", "Dashboard")}
+              {t("किंमत पहा", "कीमत देखें", "View Pricing")}
             </Link>
           </div>
         </div>
       </section>
 
       {/* How it Works */}
-      <section style={{ padding: "60px 20px" }}>
+      <section style={{ padding: "80px 20px" }}>
         <div className="container-app" style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ textAlign: "center", marginBottom: 44 }}>
+            <div className="gold-line" style={{ width: 60, margin: "0 auto 16px" }} />
             <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d" }}>
               {t("कसे काम करते?", "कैसे काम करता है?", "How it Works?")}
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 24 }}>
+          <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 24 }}>
             {[
               { icon: "🔍", step: "1", title: t("शोधा", "खोजें", "Search"), desc: t("तुमचे क्षेत्र, बजेट आणि गरजा निवडा", "अपना क्षेत्र, बजट और जरूरतें चुनें", "Choose your area, budget & needs") },
               { icon: "🏠", step: "2", title: t("तपासा", "जांचें", "Explore"), desc: t("मालमत्तांचे तपशील, फोटो आणि नकाशा पहा", "प्रॉपर्टी का विवरण, फ़ोटो और मानचित्र देखें", "See property details, photos & map") },
               { icon: "📝", step: "3", title: t("करार", "करार", "Contract"), desc: t("AI-शक्तीचा करार तयार करा, eSign करा", "AI-संचालित करार बनाएं, eSign करें", "Generate AI contract, eSign it") },
               { icon: "🔑", step: "4", title: t("स्थानांतर", "स्थानांतरण", "Move In"), desc: t("किराया भरा आणि नवीन घरात जा", "किराया भरें और नए घर में जाएं", "Pay rent & move to your new home") },
             ].map((s) => (
-              <div key={s.step} style={{ textAlign: "center", padding: 20 }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>{s.icon}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--rently-primary)", marginBottom: 4 }}>STEP {s.step}</div>
+              <div key={s.step} className="animate-slide-up" style={{
+                textAlign: "center", padding: "28px 20px",
+                background: "white", borderRadius: 18,
+                border: "1px solid var(--rently-border-light)",
+              }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: 20,
+                  background: "linear-gradient(135deg, var(--rently-primary-light), var(--rently-cream))",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 30, marginBottom: 16,
+                }}>{s.icon}</div>
+                <div style={{
+                  display: "inline-block", padding: "3px 10px", borderRadius: 999,
+                  background: "var(--rently-accent-light)", color: "var(--rently-accent-dark)",
+                  fontSize: 11, fontWeight: 700, marginBottom: 10, letterSpacing: 0.5,
+                }}>STEP {s.step}</div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1a365d", marginBottom: 6 }}>{s.title}</h3>
-                <p style={{ fontSize: 13, color: "#666" }}>{s.desc}</p>
+                <p style={{ fontSize: 13, color: "var(--rently-muted)", lineHeight: 1.6 }}>{s.desc}</p>
               </div>
             ))}
           </div>

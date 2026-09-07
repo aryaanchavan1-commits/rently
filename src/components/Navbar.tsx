@@ -37,9 +37,12 @@ export default function Navbar() {
             color: "white", display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: 900, fontSize: 18, boxShadow: "0 4px 12px rgba(44, 82, 130, 0.3)",
           }}>R</div>
-          <span style={{ fontSize: 22, fontWeight: 800, color: "var(--rently-primary-dark)", letterSpacing: -0.5 }}>
-            Rent<span style={{ color: "var(--rently-accent)" }}>ly</span>
-          </span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 22, fontWeight: 800, color: "var(--rently-primary-dark)", letterSpacing: -0.5, lineHeight: 1 }}>
+              Rent<span style={{ color: "var(--rently-accent)" }}>ly</span>
+            </span>
+            <span style={{ fontSize: 9, color: "var(--rently-muted)", fontWeight: 600, letterSpacing: 0.5, marginTop: -1 }}>by Arynoxtech</span>
+          </div>
         </Link>
 
         {/* Desktop nav */}

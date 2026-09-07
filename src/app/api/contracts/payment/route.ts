@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         amount: RENTLY_ECONTRACT_PRICE,
         currency: "INR",
         key: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
-        name: "Rently",
+        name: "Rently by Arynoxtech",
         description: `E-Contract for ${contract.propertyTitle}`,
         prefill: {
           name: contract.ownerName,

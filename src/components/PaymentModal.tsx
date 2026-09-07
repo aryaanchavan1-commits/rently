@@ -49,7 +49,7 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, amount, descr
         key: data.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
         amount: data.amount,
         currency: data.currency || "INR",
-        name: "Rently",
+        name: "Rently by Arynoxtech",
         description,
         order_id: data.orderId,
         handler: function (response: any) {

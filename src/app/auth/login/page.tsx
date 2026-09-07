@@ -41,7 +41,7 @@ export default function LoginPage() {
       <div className="hero-gradient" style={{ minHeight: "calc(100vh - 66px)", display: "flex", alignItems: "center", padding: "40px 0" }}>
         <div className="container-app" style={{ display: "flex", justifyContent: "center" }}>
           <div className="fade-in" style={{ background: "white", borderRadius: 18, padding: 36, width: "100%", maxWidth: 440, boxShadow: "0 14px 40px rgba(11,20,55,0.10)" }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>{t.auth.welcomeBack} <span className="mark">Rently</span></h1>
+            <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>{t.auth.welcomeBack} <span className="mark">Rently</span> <span style={{ fontSize: 16, fontWeight: 600, color: "var(--rently-muted)" }}>by Arynoxtech</span></h1>
             <p style={{ color: "#4b5675", fontSize: 14, marginBottom: 24 }}>{t.auth.loginSubtitle}</p>
 
             {error && (

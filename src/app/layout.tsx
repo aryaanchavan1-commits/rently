@@ -14,19 +14,24 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Rently — Find Your Perfect Rental in Maharashtra",
-  description: "Zero brokerage rental platform with AI-powered search. Find rooms, apartments, houses & PGs across Mumbai, Pune, Thane, Nagpur, Nashik, Kolhapur, Aurangabad, and 100+ cities in Maharashtra.",
-  keywords: ["rental properties", "Maharashtra", "Mumbai", "Pune", "Nagpur", "Nashik", "Kolhapur", "Aurangabad", "rooms for rent", "apartment", "no brokerage", "rent house", "PG", "hostel"],
+  title: "Rently by Arynoxtech — Find Your Perfect Rental in Maharashtra",
+  description: "Zero brokerage rental platform with AI-powered search by Arynoxtech. Find rooms, apartments, houses & PGs across Mumbai, Pune, Thane, Nagpur, Nashik, Kolhapur, Aurangabad, and 100+ cities in Maharashtra.",
+  keywords: ["rental properties", "Maharashtra", "Mumbai", "Pune", "Nagpur", "Nashik", "Kolhapur", "Aurangabad", "rooms for rent", "apartment", "no brokerage", "rent house", "PG", "hostel", "Arynoxtech"],
   openGraph: {
-    title: "Rently — Find Your Perfect Rental in Maharashtra",
+    title: "Rently by Arynoxtech — Find Your Perfect Rental in Maharashtra",
     description: "Zero brokerage rental platform with AI-powered property search",
     type: "website",
     locale: "en_IN",
+    siteName: "Rently - Arynoxtech",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Rently",
+  },
+  other: {
+    "company": "Arynoxtech",
+    "product": "Rently",
   },
 };
 

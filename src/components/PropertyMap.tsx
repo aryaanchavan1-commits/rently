@@ -260,7 +260,7 @@ export default function PropertyMap({
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + " Maharashtra India")}&format=json&limit=6&countrycodes=in`,
-        { headers: { "User-Agent": "Rently/1.0" } }
+        { headers: { "User-Agent": "Rently-Arynoxtech/1.0" } }
       );
       const data = await res.json();
       setSearchResults(data.map((r: any) => ({

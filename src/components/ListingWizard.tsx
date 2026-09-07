@@ -120,7 +120,7 @@ export default function ListingWizard({ editProperty, onDone }: Props) {
       try {
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + " Maharashtra")}&format=json&limit=6&countrycodes=in`,
-          { headers: { "User-Agent": "Rently/1.0" } }
+          { headers: { "User-Agent": "Rently-Arynoxtech/1.0" } }
         );
         const data = await res.json();
         setLocationResults(data.map((r: { lat: string; lon: string; display_name: string; type: string }) => ({

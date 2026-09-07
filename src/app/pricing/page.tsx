@@ -58,10 +58,10 @@ export default function PricingPage() {
 
           {/* Comparison */}
           <div style={{ marginTop: 60, background: "white", borderRadius: 20, padding: 32, border: "1px solid #e3e7ef" }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0b1437", textAlign: "center", marginBottom: 24 }}>Rently vs Traditional Broker</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0b1437", textAlign: "center", marginBottom: 24 }}>Rently by Arynoxtech vs Traditional Broker</h2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, fontSize: 14 }} className="compare-row">
               <div style={{ fontWeight: 700, color: "#0b1437" }}>Cost Item</div>
-              <div style={{ fontWeight: 700, color: "#10b981", textAlign: "center" }}>Rently</div>
+              <div style={{ fontWeight: 700, color: "#10b981", textAlign: "center" }}>Rently (Arynoxtech)</div>
               <div style={{ fontWeight: 700, color: "#b91c1c", textAlign: "center" }}>Local Broker</div>
               {[["Upfront cost", "₹49/week", "1–2 months rent"], ["For ₹25K rent", "₹196/month", "₹25,000–50,000"], ["Tenant reach", "All Maharashtra", "Local area only"], ["Phone shown to tenants", "✓ Direct", "✓ Via broker"], ["Verification", "✓ Phone & ID", "✗ Often none"], ["Renewals & visits", "0 fees", "Extra charges"]].map((row, i) => (
                 <div key={i} style={{ display: "contents" }}>
