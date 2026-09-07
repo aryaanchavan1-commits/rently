@@ -14,7 +14,7 @@ interface UserProfile {
 interface AuthCtx {
   user: UserProfile | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ error?: string }>;
+  login: (email: string, password: string) => Promise<{ error?: string; user?: UserProfile }>;
   signup: (email: string, password: string, name: string, phone: string, role: "tenant" | "owner") => Promise<{ error?: string }>;
   logout: () => Promise<void>;
 }
