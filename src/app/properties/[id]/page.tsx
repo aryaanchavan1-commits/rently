@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
+import TrustScoreCard from "@/components/TrustScoreCard";
 import { useAuth } from "@/lib/auth-context";
 
 interface PropData {
@@ -393,6 +394,9 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
                   </a>
                 )}
               </div>
+
+              {/* Trust Score */}
+              <TrustScoreCard propertyId={id} />
 
               {/* Chat / Contact Owner */}
               <div style={{ background: "white", borderRadius: 18, padding: 24, border: "1px solid #e3e7ef" }}>

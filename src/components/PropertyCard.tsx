@@ -7,6 +7,7 @@ interface Property {
   title: string;
   type: string;
   price: number;
+  deposit?: number;
   address: string;
   area: string;
   city: string;
@@ -44,6 +45,9 @@ export default function PropertyCard({ property }: { property: Property }) {
   const views = getViewCount(property.views);
   const isNew = daysListed <= 3;
   const isHot = views > 50;
+  const isCommercial = property.type === "office" || property.type === "commercial";
+  const depositCap = isCommercial ? 6 : 2;
+  const depositExceeds = property.deposit && property.deposit > property.price * depositCap;
 
   return (
     <Link
@@ -78,6 +82,7 @@ export default function PropertyCard({ property }: { property: Property }) {
           {property.isFeatured && <span className="badge badge-warn">⭐ Featured</span>}
           {isNew && <span className="badge badge-primary">🆕 Just Listed</span>}
           {isHot && !isNew && <span className="badge badge-danger">🔥 Hot</span>}
+          {depositExceeds && <span className="badge badge-danger" title={`Deposit exceeds Maharashtra's ${depositCap}-month legal cap`}>⚠ Deposit exceeds cap</span>}
         </div>
         <div
           style={{
@@ -145,6 +150,7 @@ export default function PropertyCard({ property }: { property: Property }) {
         }}>
           <span>👁 {views} views</span>
           {property.isVerified && <span style={{ color: "#10b981" }}>✓ Owner verified</span>}
+          {property.deposit ? <span>Deposit: ₹{property.deposit.toLocaleString("en-IN")}</span> : null}
           {daysListed > 0 && <span>{daysListed}d ago</span>}
         </div>
         <div
