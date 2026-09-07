@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
       setUser(data.user);
-      return {};
+      return { user: data.user };
     } catch {
       return { error: "Network error. Please try again." };
     }

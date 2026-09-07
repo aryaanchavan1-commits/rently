@@ -48,7 +48,7 @@ export default function SignupPage() {
       <div className="hero-gradient" style={{ minHeight: "calc(100vh - 66px)", display: "flex", alignItems: "center", padding: "40px 0" }}>
         <div className="container-app" style={{ display: "flex", justifyContent: "center" }}>
           <div className="fade-in" style={{ background: "white", borderRadius: 18, padding: 36, width: "100%", maxWidth: 500, boxShadow: "0 14px 40px rgba(11,20,55,0.10)" }}>
-            <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>{t.auth.createTitle} <span className="mark">Rently</span> {lang === "en" ? "by Arynoxtech account" : lang === "mr" ? "आर्यनॉक्सटेक खाते" : "Arynoxtech खाता"}</h1>
+            <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>{t.auth.createTitle} <span style={{ background: "linear-gradient(135deg, var(--primary), var(--accent))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Rently</span> {lang === "en" ? "by Arynoxtech account" : lang === "mr" ? "आर्यनॉक्सटेक खाते" : "Arynoxtech खाता"}</h1>
             <p style={{ color: "#4b5675", fontSize: 14, marginBottom: 22 }}>{t.auth.signupSubtitle}</p>
 
             {success && (

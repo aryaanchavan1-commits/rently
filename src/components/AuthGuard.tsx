@@ -54,14 +54,23 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (loading || !checked) {
     return (
       <div style={{
-        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-        background: "var(--rently-cream)",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--bg, #f8fafc)",
       }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12, animation: "spin 1s linear infinite" }}>⏳</div>
-          <div style={{ fontSize: 14, color: "var(--rently-muted)" }}>Loading…</div>
+          <div style={{
+            width: 40, height: 40, borderRadius: "50%",
+            border: "3px solid var(--border, #e2e8f0)",
+            borderTopColor: "var(--primary, #1a56db)",
+            animation: "spin 0.8s linear infinite",
+            margin: "0 auto 16px",
+          }} />
+          <div style={{ fontSize: 14, color: "var(--text-muted, #94a3b8)" }}>Loading…</div>
         </div>
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
