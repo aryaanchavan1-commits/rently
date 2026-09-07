@@ -135,10 +135,6 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
       setChatSending(false);
     }
   }
-    } finally {
-      setSending(false);
-    }
-  }
 
   if (loading) {
     return (
