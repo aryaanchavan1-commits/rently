@@ -208,7 +208,6 @@ export default function HomePage() {
                 padding: "8px 18px", borderRadius: 999, background: "rgba(255,255,255,0.1)",
                 color: "rgba(255,255,255,0.85)", fontSize: 13, textDecoration: "none",
                 border: "1px solid rgba(255,255,255,0.12)", transition: "all 0.2s",
-              }}
               }}>
                 {c}
               </Link>
