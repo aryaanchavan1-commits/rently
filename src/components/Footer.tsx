@@ -2,145 +2,100 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer
-      style={{
-        background: "linear-gradient(135deg, #0b1437 0%, #1a2744 100%)",
-        color: "white",
-        marginTop: 80,
-        padding: "60px 0 24px",
-      }}
-    >
+    <footer className="footer">
       <div className="container-app">
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: 40,
-          }}
-        >
-          {/* Brand */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 12,
-                background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: 900, fontSize: 18, color: "white",
-              }}>R</div>
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <Link href="/" className="footer-logo">
+              <div className="footer-logo-icon">R</div>
               <div>
-                <span style={{ fontSize: 22, fontWeight: 800 }}>Rent<span style={{ color: "#C9944A" }}>ly</span></span>
-                <div style={{ fontSize: 11, color: "#a8b1c8", marginTop: -2 }}>by Arynoxtech</div>
+                <span className="footer-logo-text">Rent<span className="footer-logo-accent">ly</span></span>
+                <span className="footer-logo-byline">by Arynoxtech</span>
               </div>
-            </div>
-            <p style={{ color: "#a8b1c8", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
-              Maharashtra&apos;s modern rental platform. Find flats, houses & PGs
-              across Mumbai, Pune, Thane, Nagpur, Nashik, Kolhapur, Aurangabad,
-              and 100+ cities — with zero brokerage and AI-powered search.
+            </Link>
+            <p className="footer-tagline">
+              Zero brokerage rental platform connecting tenants directly with verified owners across Maharashtra. AI-powered search, e-contracts, and secure payments.
             </p>
-            <div style={{ display: "flex", gap: 10 }}>
-              {["Twitter", "LinkedIn", "Instagram"].map((s) => (
-                <a key={s} href="#" style={{
-                  width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.08)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#a8b1c8", fontSize: 14, textDecoration: "none", transition: "all 0.15s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; e.currentTarget.style.color = "white"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#a8b1c8"; }}
-                >
-                  {s[0]}
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Explore */}
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 16, color: "#C9944A" }}>
-              Explore
-            </h4>
-            <FooterLink href="/properties?type=rent">Rent in Mumbai</FooterLink>
-            <FooterLink href="/properties?type=rent">Rent in Pune</FooterLink>
-            <FooterLink href="/properties?type=rent">Rent in Thane</FooterLink>
-            <FooterLink href="/properties?type=rent">Rent in Nagpur</FooterLink>
-            <FooterLink href="/properties?type=rent">Rent in Nashik</FooterLink>
-            <FooterLink href="/properties">Browse All Maharashtra →</FooterLink>
+          <div className="footer-col">
+            <h4 className="footer-col-title">For Tenants</h4>
+            <Link href="/properties?type=rent" className="footer-link">Rent a Property</Link>
+            <Link href="/properties?type=buy" className="footer-link">Buy a Property</Link>
+            <Link href="/commute" className="footer-link">Commute Search</Link>
+            <Link href="/map" className="footer-link">Live Map</Link>
+            <Link href="/contracts" className="footer-link">E-Contracts</Link>
           </div>
 
-          {/* For Owners */}
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 16, color: "#C9944A" }}>
-              For Owners
-            </h4>
-            <FooterLink href="/pricing">Pricing (₹49/week)</FooterLink>
-            <FooterLink href="/owner">List Your Property</FooterLink>
-            <FooterLink href="/dashboard">Owner Dashboard</FooterLink>
-            <FooterLink href="/contracts">E-Contracts (₹50)</FooterLink>
+          <div className="footer-col">
+            <h4 className="footer-col-title">For Owners</h4>
+            <Link href="/owner" className="footer-link">List Property</Link>
+            <Link href="/dashboard" className="footer-link">Owner Dashboard</Link>
+            <Link href="/pricing" className="footer-link">Pricing Plans</Link>
+            <Link href="/contracts" className="footer-link">E-Contract Service</Link>
           </div>
 
-          {/* Resources */}
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 16, color: "#C9944A" }}>
-              Resources
-            </h4>
-            <FooterLink href="/commute">Commute Search</FooterLink>
-            <FooterLink href="/map">Live Map</FooterLink>
-            <FooterLink href="/contracts">AI Contracts</FooterLink>
-            <FooterLink href="/inbox">Messages</FooterLink>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 16, color: "#C9944A" }}>
-              Company
-            </h4>
-            <FooterLink href="#">About Arynoxtech</FooterLink>
-            <FooterLink href="#">Terms of Service</FooterLink>
-            <FooterLink href="#">Privacy Policy</FooterLink>
-            <FooterLink href="#">Help Center</FooterLink>
-            <FooterLink href="mailto:support@arynoxtech.com">Contact Us</FooterLink>
+          <div className="footer-col">
+            <h4 className="footer-col-title">Company</h4>
+            <Link href="#" className="footer-link">About Arynoxtech</Link>
+            <Link href="#" className="footer-link">Terms of Service</Link>
+            <Link href="#" className="footer-link">Privacy Policy</Link>
+            <Link href="mailto:support@arynoxtech.com" className="footer-link">Contact Us</Link>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div
-          style={{
-            marginTop: 40,
-            paddingTop: 20,
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 12,
-            color: "#a8b1c8",
-            fontSize: 13,
-          }}
-        >
-          <div>
-            &copy; {new Date().getFullYear()} <span style={{ fontWeight: 700, color: "white" }}>Arynoxtech</span>. All rights reserved. | Rently is a product of Arynoxtech.
+        <div className="footer-bottom">
+          <div className="footer-copyright">
+            &copy; {new Date().getFullYear()} <strong>Arynoxtech</strong>. All rights reserved. | Rently is a product of Arynoxtech.
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            Made with ❤️ in Maharashtra, India
-          </div>
+          <div className="footer-made">Made in Maharashtra, India</div>
         </div>
       </div>
-    </footer>
-  );
-}
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      style={{
-        display: "block",
-        color: "#a8b1c8",
-        fontSize: 14,
-        padding: "5px 0",
-        transition: "color 0.15s",
-      }}
-    >
-      {children}
-    </Link>
+      <style>{`
+        .footer { background: #0f172a; color: #94a3b8; margin-top: 0; padding: 56px 0 0; }
+        .footer-grid {
+          display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+          gap: 40px; padding-bottom: 40px;
+        }
+        .footer-brand {}
+        .footer-logo {
+          display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 14px;
+        }
+        .footer-logo-icon {
+          width: 36px; height: 36px; border-radius: var(--radius);
+          background: var(--primary); color: white;
+          display: flex; align-items: center; justify-content: center;
+          font-weight: 800; font-size: 16px;
+        }
+        .footer-logo-text { font-size: 20px; font-weight: 800; color: white; display: block; line-height: 1.1; }
+        .footer-logo-accent { color: var(--primary); }
+        .footer-logo-byline { font-size: 10px; color: #64748b; display: block; margin-top: 1px; }
+        .footer-tagline { font-size: 14px; line-height: 1.7; color: #94a3b8; max-width: 300px; }
+        .footer-col-title {
+          font-size: 13px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.5px; color: white; margin-bottom: 14px;
+        }
+        .footer-link {
+          display: block; font-size: 14px; color: #94a3b8;
+          padding: 4px 0; transition: color 0.15s; text-decoration: none;
+        }
+        .footer-link:hover { color: white; }
+        .footer-bottom {
+          display: flex; justify-content: space-between; align-items: center;
+          padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08);
+          font-size: 13px; flex-wrap: wrap; gap: 8px;
+        }
+        .footer-copyright { color: #64748b; }
+        .footer-copyright strong { color: white; }
+        .footer-made { color: #64748b; }
+        @media (max-width: 768px) {
+          .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+          .footer-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+    </footer>
   );
 }

@@ -23,218 +23,99 @@ const MAHARASHTRA_CITIES = [
 ];
 
 const FEATURES = [
-  {
-    icon: "🔍",
-    title: { en: "Smart Search", mr: "स्मार्ट शोध", hi: "स्मार्ट खोज" },
-    desc: {
-      en: "Find properties by location, budget, BHK, commute time. AI-powered recommendations.",
-      mr: "स्थान, बजेट, BHK, प्रवास वेळेनुसार शोधा. AI-शक्तीच्या शिफारसी.",
-      hi: "स्थान, बजट, BHK, यात्रा के समय से खोजें। AI-संचालित सुझाव।",
-    },
-  },
-  {
-    icon: "🤖",
-    title: { en: "Ria AI Assistant", mr: "रिआ AI सहाय्यक", hi: "रिआ AI सहायक" },
-    desc: {
-      en: "Chat with Ria in Marathi, Hindi or English. She finds properties, answers questions.",
-      mr: "रिआशी मराठी, हिंदी किंवा इंग्रजीत चॅट करा. ती मालमत्ता शोधते, प्रश्नांचे उत्तर देते.",
-      hi: "रिआ से मराठी, हिंदी या अंग्रेजी में चैट करें। वह प्रॉपर्टी खोजती है, सवालों के जवाब देती है।",
-    },
-  },
-  {
-    icon: "📝",
-    title: { en: "E-Contracts", mr: "ई-करार", hi: "ई-करार" },
-    desc: {
-      en: "Generate AI-powered rental agreements. eSign with Aadhaar. Download PDF. Just ₹50.",
-      mr: "AI-शक्तीचे भाडे करार तयार करा. Aadhaar ने eSign करा. PDF डाउनलोड करा. फक्त ₹50.",
-      hi: "AI-संचालित किराया समझौता बनाएं। Aadhaar से eSign करें। PDF डाउनलोड करें। केवल ₹50।",
-    },
-  },
-  {
-    icon: "🗺️",
-    title: { en: "Live Map", mr: "लाइव्ह नकाशा", hi: "लाइव मानचित्र" },
-    desc: {
-      en: "Explore properties on interactive map. See nearby schools, hospitals, metro.",
-      mr: "इंटरॅक्टिव्ह नकाशावर मालमत्ता शोधा. जवळचे शाळा, रुग्णालये, मेट्रो पहा.",
-      hi: "इंटरैक्टिव मानचित्र पर प्रॉपर्टी खोजें। पास के स्कूल, अस्पताल, मेट्रो देखें।",
-    },
-  },
-  {
-    icon: "🚌",
-    title: { en: "Commute Search", mr: "प्रवास शोध", hi: "यात्रा खोज" },
-    desc: {
-      en: "Find properties near your workplace. 35+ destinations. Real travel time.",
-      mr: "तुमच्या कार्यालयाजवळील मालमत्ता शोधा. 35+ गंतव्ये. खरी प्रवास वेळ.",
-      hi: "अपने कार्यालय के पास प्रॉपर्टी खोजें। 35+ गंतव्य। वास्तविक यात्रा का समय।",
-    },
-  },
-  {
-    icon: "💰",
-    title: { en: "True Cost", mr: "खरी किंमत", hi: "सही कीमत" },
-    desc: {
-      en: "See actual monthly cost including deposit, maintenance, utilities.",
-      mr: "भांडवल, देखभाल, उपयोगिता सहित वास्तविक मासिक खर्च पहा.",
-      hi: "जमा, रखरखाव, उपयोगिताओं सहित वास्तविक मासिक लागत देखें।",
-    },
-  },
-  {
-    icon: "📱",
-    title: { en: "Trilingual Support", mr: "त्रिभाषिक समर्थन", hi: "त्रिभाषी समर्थन" },
-    desc: {
-      en: "Full app in Marathi, Hindi and English. Choose your language.",
-      mr: "मराठी, हिंदी आणि इंग्रजीत संपूर्ण ॲप. तुमची भाषा निवडा.",
-      hi: "मराठी, हिंदी और अंग्रेजी में पूरा ऐप। अपनी भाषा चुनें।",
-    },
-  },
-  {
-    icon: "🔐",
-    title: { en: "Verified Listings", mr: "सत्यापित यादी", hi: "सत्यापित लिस्टिंग" },
-    desc: {
-      en: "Every property verified. Trust scores. Social proof.",
-      mr: "प्रत्येक मालमत्ता सत्यापित. विश्वास स्कोअर. सामाजिक प्रमाण.",
-      hi: "हर प्रॉपर्टी सत्यापित। ट्रस्ट स्कोर। सामाजिक प्रमाण।",
-    },
-  },
+  { icon: "0", title: { en: "Zero Brokerage", mr: "शून्य ब्रोकरेज", hi: "ज़ीरो ब्रोकरेज" }, desc: { en: "Connect directly with verified owners. No middlemen, no commission.", mr: "पडताळलेल्या मालकांशी थेट जोडा. कोणताही मध्यस्थ नाही, कमिशन नाही.", hi: "सत्यापित मालिकों से सीधे जुड़ें। कोई बिचौलिया, कोई कमीशन नहीं।" }, color: "#059669" },
+  { icon: "AI", title: { en: "AI Property Match", mr: "AI मालमत्ता जुळवा", hi: "AI प्रॉपर्टी मैच" }, desc: { en: "Ria AI finds properties matching your budget, location & preferences.", mr: "रिआ AI तुमच्या बजेट, स्थान आणि प्राधान्यांनुसार मालमत्ता शोधते.", hi: "रिआ AI आपके बजट, स्थान और प्राथमिकताओं से मेल खाती प्रॉपर्टी खोजता है।" }, color: "#1a56db" },
+  { icon: "E", title: { en: "E-Contracts & eSign", mr: "ई-करार आणि eSign", hi: "ई-कॉन्ट्रैक्ट और eSign" }, desc: { en: "Legally valid rental agreements. eSign via Aadhaar OTP. Download PDF.", mr: "कायदेशीर भाडे करार. Aadhaar OTP ने eSign. PDF डाउनलोड करा.", hi: "कानूनी रूप से मान्य किराया समझौते। Aadhaar OTP से eSign। PDF डाउनलोड करें।" }, color: "#7c3aed" },
+  { icon: "M", title: { en: "Live Map Search", mr: "लाइव्ह नकाशा शोध", hi: "लाइव मैप खोज" }, desc: { en: "Search on interactive map. Find nearby schools, hospitals, transit.", mr: "इंटरॅक्टिव्ह नकाशावर शोधा. जवळचे शाळा, रुग्णालये, ट्रान्झिट शोधा.", hi: "इंटरैक्टिव मानचित्र पर खोजें। पास के स्कूल, अस्पताल, ट्रांज़िट खोजें।" }, color: "#0891b2" },
+  { icon: "C", title: { en: "Commute Search", mr: "प्रवास शोध", hi: "यात्रा खोज" }, desc: { en: "Find properties by commute time to your office. 35+ destinations.", mr: "तुमच्या कार्यालयापर्यंतच्या प्रवास वेळेनुसार मालमत्ता शोधा.", hi: "अपने कार्यालय तक की यात्रा के समय के अनुसार प्रॉपर्टी खोजें।" }, color: "#ca8a04" },
+  { icon: "S", title: { en: "Secure Payments", mr: "सुरक्षित पेमेंट्स", hi: "सुरक्षित भुगतान" }, desc: { en: "Razorpay-powered secure payments. Track all transactions.", mr: "Razorpay-शक्तीचे सुरक्षित पेमेंट्स. सर्व व्यवहार ट्रॅक करा.", hi: "Razorpay-संचालित सुरक्षित भुगतान। सभी लेनदेन ट्रैक करें।" }, color: "#dc2626" },
 ];
 
 const STATS = [
-  { value: "30,000+", label: { en: "Properties", mr: "मालमत्ता", hi: "प्रॉपर्टी" } },
-  { value: "13+", label: { en: "Cities", mr: "शहरे", hi: "शहर" } },
-  { value: "50,000+", label: { en: "Happy Users", mr: "समाधान वापरकर्ते", hi: "खुश उपयोगकर्ता" } },
-  { value: "₹50", label: { en: "E-Contract", mr: "ई-करार", hi: "ई-करार" } },
+  { value: "30,000+", label: { en: "Active Listings", mr: "सक्रिय यादी", hi: "सक्रिय लिस्टिंग" } },
+  { value: "13+", label: { en: "Cities Covered", mr: "शहरे कव्हर", hi: "शहर कवर" } },
+  { value: "50,000+", label: { en: "Happy Tenants", mr: "समाधान भाडेदार", hi: "खुश किरायेदार" } },
+  { value: "0%", label: { en: "Brokerage", mr: "ब्रोकरेज", hi: "ब्रोकरेज" } },
 ];
 
 export default function HomePage() {
   const { lang } = useLang();
   const [searchType, setSearchType] = useState<"rent" | "buy" | "pg">("rent");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentIdx, setCurrentIdx] = useState(0);
 
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % MAHARASHTRA_CITIES.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
-    <div className="app">
+    <div>
       <Navbar />
 
-      {/* Hero Section */}
-      <section style={{
-        background: "linear-gradient(135deg, #0f1b2d 0%, #1a365d 30%, #2c5282 60%, #2b6cb0 100%)",
-        padding: "100px 20px 120px",
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {/* Decorative orbs */}
-        <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,148,74,0.15) 0%, transparent 70%)" }} />
-        <div style={{ position: "absolute", bottom: -80, left: -80, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)" }} />
-        <div className="container-app" style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
-          <div className="animate-slide-up" style={{
-            display: "inline-block", padding: "8px 20px", borderRadius: 999,
-            background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)", fontSize: 13,
-            fontWeight: 600, marginBottom: 24, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)",
-          }}>
-            🏠 {t("महाराष्ट्रातील #1 भाडे प्लॅटफॉर्म", "महाराष्ट्र का #1 किराया प्लेटफॉर्म", "Maharashtra's #1 Rental Platform")} — <span style={{ color: "#C9944A" }}>{t("आर्यनॉक्सटेक द्वारे", "Arynoxtech द्वारा", "by Arynoxtech")}</span>
+      {/* Hero */}
+      <section className="hero-section">
+        <div className="hero-bg" />
+        <div className="container-app hero-content">
+          <div className="hero-badge">
+            Maharashtra&apos;s #1 Rental Platform
           </div>
-
-          <h1 className="animate-slide-up" style={{
-            fontSize: "clamp(34px, 5.5vw, 60px)", fontWeight: 900, color: "white",
-            lineHeight: 1.08, marginBottom: 20, letterSpacing: -1.5,
-          }}>
-            {t("तुमचे आदर्श घर", "आपका आदर्श घर", "Find Your")}{" "}
-            <span style={{ color: "#C9944A" }}>{t("शोधा", "खोजें", "Dream Home")}</span>
+          <h1 className="hero-title">
+            {t("Find Your Perfect Home", "तुमचे आदर्श घर शोधा", "अपना सही घर खोजें")}
             <br />
-            {t("महाराष्ट्रात", "महाराष्ट्र में", "in Maharashtra")}
+            <span className="hero-title-accent">{t("Without the Broker", "ब्रोकरशिवाय", "बिना ब्रोकर के")}</span>
           </h1>
-
-          <p className="animate-slide-up" style={{
-            fontSize: "clamp(15px, 2vw, 18px)", color: "rgba(255,255,255,0.75)",
-            maxWidth: 600, margin: "0 auto 40px", lineHeight: 1.7,
-          }}>
+          <p className="hero-subtitle">
             {t(
-              "AI-शक्तीचे शोध, करार, eSign आणि नकाशा — सर्व एका ठिकाणी",
-              "AI-संचालित खोज, करार, eSign और मानचित्र — सब एक जगह",
-              "AI-powered search, contracts, eSign & maps — all in one place"
+              "Connect directly with verified owners across Maharashtra. Zero brokerage, AI-powered search, e-contracts.",
+              "महाराष्ट्रातील पडताळलेल्या मालकांशी थेट जोडा. शून्य ब्रोकरेज, AI-शोध, ई-करार.",
+              "महाराष्ट्र भर के सत्यापित मालिकों से सीधे जुड़ें। ज़ीरो ब्रोकरेज, AI-संचालित खोज, ई-कॉन्ट्रैक्ट।"
             )}
           </p>
 
           {/* Search Box */}
-          <div style={{
-            background: "white", borderRadius: 20, padding: 8,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxWidth: 700, margin: "0 auto",
-          }}>
-            <div style={{ display: "flex", gap: 4, padding: "4px 8px", borderBottom: "1px solid #f0f0f0" }}>
+          <div className="hero-search">
+            <div className="hero-search-tabs">
               {(["rent", "buy", "pg"] as const).map((type) => (
-                <button key={type} onClick={() => setSearchType(type)} style={{
-                  padding: "10px 20px", borderRadius: 12, border: "none", cursor: "pointer",
-                  background: searchType === type ? "var(--rently-primary)" : "transparent",
-                  color: searchType === type ? "white" : "#666",
-                  fontWeight: 700, fontSize: 14, transition: "all 0.2s",
-                }}>
-                  {type === "rent" ? t("भाडे", "किराया", "Rent") : type === "buy" ? t("खरेदी", "खरीददारी", "Buy") : "PG"}
+                <button
+                  key={type}
+                  onClick={() => setSearchType(type)}
+                  className={`hero-search-tab ${searchType === type ? "active" : ""}`}
+                >
+                  {type === "rent" ? "Rent" : type === "buy" ? "Buy" : "PG"}
                 </button>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 8, padding: "8px 12px", alignItems: "center" }}>
-              <span style={{ fontSize: 20, color: "#999" }}>📍</span>
+            <div className="hero-search-input-row">
+              <svg className="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <input
-                placeholder={t("शहर, ठिकाण किंवा पिन कोड शोधा…", "शहर, स्थान या पिन कोड खोजें…", "Search city, area or pincode…")}
+                className="hero-search-input"
+                placeholder={t("Search by city, area or pincode…", "शहर, भाग किंवा पिन कोड शोधा…", "शहर, इलाका या पिन कोड खोजें…")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ flex: 1, border: "none", outline: "none", fontSize: 16, padding: "12px 0", color: "#333" }}
               />
               <Link
                 href={`/properties?type=${searchType}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`}
-                style={{
-                  padding: "12px 28px", borderRadius: 14, border: "none", cursor: "pointer",
-                  background: "linear-gradient(135deg, #C9944A, #b8860b)", color: "white",
-                  fontWeight: 700, fontSize: 15, textDecoration: "none", whiteSpace: "nowrap",
-                }}
+                className="hero-search-btn"
               >
-                🔍 {t("शोधा", "खोजें", "Search")}
+                {t("Search", "शोधा", "खोजें")}
               </Link>
             </div>
           </div>
 
-          {/* Quick city links */}
-          <div style={{ marginTop: 24, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="hero-cities">
+            <span className="hero-cities-label">{t("Popular:", "लोकप्रिय:", "लोकप्रिय:")}</span>
             {["Mumbai", "Pune", "Thane", "Nagpur", "Nashik"].map((c) => (
-              <Link key={c} href={`/properties?type=${searchType}&q=${c}`} style={{
-                padding: "8px 18px", borderRadius: 999, background: "rgba(255,255,255,0.1)",
-                color: "rgba(255,255,255,0.85)", fontSize: 13, textDecoration: "none",
-                border: "1px solid rgba(255,255,255,0.12)", transition: "all 0.2s",
-              }}>
-                {c}
-              </Link>
+              <Link key={c} href={`/properties?type=${searchType}&q=${c}`} className="hero-city-chip">{c}</Link>
             ))}
           </div>
         </div>
       </section>
 
       {/* Stats */}
-      <section style={{ padding: "0 20px", marginTop: -44, position: "relative", zIndex: 2 }}>
-        <div className="container-app" style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div className="animate-scale-in" style={{
-            display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0,
-            background: "white", borderRadius: 20, boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
-            overflow: "hidden", border: "1px solid rgba(255,255,255,0.8)",
-          }}>
+      <section className="stats-section">
+        <div className="container-app">
+          <div className="stats-grid">
             {STATS.map((s, i) => (
-              <div key={i} style={{
-                padding: "28px 16px", textAlign: "center",
-                borderRight: i < 3 ? "1px solid #f0f0f0" : "none",
-                transition: "background 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rently-cream)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-              >
-                <div style={{ fontSize: 30, fontWeight: 900, background: "linear-gradient(135deg, var(--rently-primary), var(--rently-accent))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: "var(--rently-muted)", marginTop: 4, fontWeight: 500 }}>{s.label[lang as "mr" | "hi" | "en"] || s.label.en}</div>
+              <div key={i} className="stat-item">
+                <div className="stat-value">{s.value}</div>
+                <div className="stat-label">{s.label[lang as "mr" | "hi" | "en"] || s.label.en}</div>
               </div>
             ))}
           </div>
@@ -242,36 +123,42 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section style={{ padding: "80px 20px" }}>
-        <div className="container-app" style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <div className="gold-line" style={{ width: 60, margin: "0 auto 16px" }} />
-            <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 900, color: "#1a365d" }}>
-              {t("का Rently (आर्यनॉक्सटेक) निवडाल?", "क्यों Rently (Arynoxtech) चुनें?", "Why Choose Rently by Arynoxtech?")}
-            </h2>
-            <p style={{ fontSize: 16, color: "var(--rently-muted)", marginTop: 8, maxWidth: 500, margin: "8px auto 0" }}>
-              {t("महाराष्ट्रातील सर्वोत्तम भाडे अनुभव", "महाराष्ट्र में सर्वोत्तम किराया अनुभव", "The best rental experience in Maharashtra")}
-            </p>
+      <section className="section">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-title">{t("Why Rently?", "रेंटली का?", "Rently क्यों?")}</h2>
+            <p className="section-subtitle">{t("Built for Maharashtra, designed for you.", "महाराष्ट्रासाठी बनवले, तुमच्यासाठी डिझाइन केले.", "महाराष्ट्र के लिए बनाया, आपके लिए डिज़ाइन किया।")}</p>
           </div>
-
-          <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 20 }}>
+          <div className="features-grid">
             {FEATURES.map((f, i) => (
-              <div key={i} className="animate-slide-up card-hover" style={{
-                padding: 28, borderRadius: 18, border: "1px solid var(--rently-border-light)",
-                background: "white", cursor: "default",
-              }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: 16,
-                  background: "linear-gradient(135deg, var(--rently-primary-light), var(--rently-cream))",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 28, marginBottom: 16,
-                }}>{f.icon}</div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1a365d", marginBottom: 8 }}>
-                  {f.title[lang as "mr" | "hi" | "en"] || f.title.en}
-                </h3>
-                <p style={{ fontSize: 14, color: "var(--rently-muted)", lineHeight: 1.7 }}>
-                  {f.desc[lang as "mr" | "hi" | "en"] || f.desc.en}
-                </p>
+              <div key={i} className="feature-card card card-hover">
+                <div className="feature-icon" style={{ background: `${f.color}10`, color: f.color }}>
+                  {f.icon}
+                </div>
+                <h3 className="feature-title">{f.title[lang as "mr" | "hi" | "en"] || f.title.en}</h3>
+                <p className="feature-desc">{f.desc[lang as "mr" | "hi" | "en"] || f.desc.en}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works */}
+      <section className="section section-alt">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-title">{t("How it Works", "कसे काम करते", "कैसे काम करता है")}</h2>
+          </div>
+          <div className="steps-grid">
+            {[
+              { num: "01", title: t("Search Properties", "मालमत्ता शोधा", "प्रॉपर्टी खोजें"), desc: t("Enter your city, budget & preferences. AI finds the best matches.", "तुमचे शहर, बजेट आणि प्राधान्य टाका. AI सर्वोत्तम जोडपे शोधते.", "अपना शहर, बजट और प्राथमिकताएं दर्ज करें। AI सर्वोत्तम मैच खोजता है।") },
+              { num: "02", title: t("Visit & Connect", "भेटा आणि जोडा", "मिलें और जुड़ें"), desc: t("Schedule visits. Chat directly with owners. No broker in between.", "भेटी शेड्यूल करा. मालकांशी थेट चॅट करा. कोणताही ब्रोकर नाही.", "भेट शेड्यूल करें। मालिकों से सीधे चैट करें। कोई ब्रोकर नहीं।") },
+              { num: "03", title: t("Sign & Move In", "साइन करा आणि स्थानांतर", "साइन करें और शिफ्ट हों"), desc: t("AI generates the contract. eSign with Aadhaar. Move into your new home.", "AI करार तयार करतो. Aadhaar ने eSign. नवीन घरात स्थानांतर.", "AI समझौता बनाता है। Aadhaar से eSign। अपने नए घर में शिफ्ट हों।") },
+            ].map((s) => (
+              <div key={s.num} className="step-card">
+                <div className="step-num">{s.num}</div>
+                <h3 className="step-title">{s.title}</h3>
+                <p className="step-desc">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -279,60 +166,51 @@ export default function HomePage() {
       </section>
 
       {/* E-Contract Feature */}
-      <section style={{ padding: "80px 20px", background: "linear-gradient(135deg, #f8f9fa 0%, #eef1f5 100%)" }}>
-        <div className="container-app" style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 50, alignItems: "center" }}>
-            <div>
-              <div style={{ display: "inline-block", padding: "6px 16px", borderRadius: 999, background: "var(--rently-accent-light)", color: "var(--rently-accent-dark)", fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
-                📝 {t("नवीन वैशिष्ट्य", "नया फ़ीचर", "NEW FEATURE")}
-              </div>
-              <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d", marginBottom: 14 }}>
-                {t("AI-शक्तीचे ई-कॉन्ट्रैक्ट", "AI-संचालित ई-करार", "AI-Powered E-Contracts")}
-              </h2>
-              <p style={{ fontSize: 15, color: "var(--rently-muted)", lineHeight: 1.8, marginBottom: 24 }}>
+      <section className="section">
+        <div className="container-app">
+          <div className="econtract-grid">
+            <div className="econtract-content">
+              <div className="badge badge-accent">New Feature</div>
+              <h2 className="econtract-title">{t("AI-Powered E-Contracts", "AI-शक्तीचे ई-करार", "AI-संचालित ई-कॉन्ट्रैक्ट")}</h2>
+              <p className="econtract-desc">
                 {t(
-                  "कायदेशीर करार तयार करा, Aadhaar ने eSign करा आणि PDF डाउनलोड करा. फक्त ₹50!",
-                  "कानूनी समझौता बनाएं, Aadhaar से eSign करें और PDF डाउनलोड करें। केवल ₹50!",
-                  "Generate legally valid contracts, eSign with Aadhaar & download PDF. Just ₹50!"
+                  "Generate legally valid rental agreements in Maharashtra format. eSign via Aadhaar OTP. Download signed PDF instantly.",
+                  "महाराष्ट्र स्वरूपात कायदेशीर भाडे करार तयार करा. Aadhaar OTP ने eSign. स्वाक्षरित PDF तुरंत डाउनलोड करा.",
+                  "महाराष्ट्र प्रारूप में कानूनी किराया समझौते बनाएं। Aadhaar OTP से eSign। तुरंत साइन किया हुआ PDF डाउनलोड करें।"
                 )}
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <ul className="econtract-list">
                 {[
-                  { en: "AI generates Maharashtra-format rental agreement", mr: "AI महाराष्ट्र स्वरूपात भाडे करार तयार करतो", hi: "AI महाराष्ट्र प्रारूप में किराया समझौता बनाता है" },
-                  { en: "Both owner & tenant eSign via Aadhaar OTP", mr: "मालक आणि भाडेकर दोघेही Aadhaar OTP ने eSign करतात", hi: "मालिक और किरायेदार दोनों Aadhaar OTP से eSign करते हैं" },
-                  { en: "Download signed PDF instantly", mr: "स्वाक्षरित PDF तुरंत डाउनलोड करा", hi: "तुरंत साइन किया हुआ PDF डाउनलोड करें" },
-                  { en: "Legally valid under IT Act 2000", mr: "IT कायदा 2000 अंतर्गत कायदेशीर वैध", hi: "IT अधिनियम 2000 के तहत कानूनी रूप से मान्य" },
+                  t("Valid under IT Act 2000", "IT कायदा 2000 अंतर्गत वैध", "IT अधिनियम 2000 के तहत मान्य"),
+                  t("Maharashtra rental format", "महाराष्ट्र भाडे स्वरूप", "महाराष्ट्र किराया प्रारूप"),
+                  t("Aadhaar-based eSign", "Aadhaar-आधारित eSign", "Aadhaar-आधारित eSign"),
+                  t("Instant PDF download", "तुरंत PDF डाउनलोड", "तुरंत PDF डाउनलोड"),
                 ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--rently-text)", padding: "8px 12px", borderRadius: 10, background: "rgba(56,161,105,0.06)" }}>
-                    <span style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--rently-success)", color: "white", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>✓</span>
-                    {item[lang as "mr" | "hi" | "en"] || item.en}
-                  </div>
+                  <li key={i} className="econtract-list-item">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="9" fill="#059669" opacity="0.1"/><path d="M5.5 9l2.5 2.5 4.5-5" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    {item}
+                  </li>
                 ))}
-              </div>
-              <Link href="/contracts" style={{
-                display: "inline-block", marginTop: 28, padding: "16px 36px", borderRadius: 14,
-                background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))", color: "white",
-                fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(44,82,130,0.3)",
-              }}>
-                {t("आता वापरा", "अभी उपयोग करें", "Try Now")} →
+              </ul>
+              <Link href="/contracts" className="btn btn-primary" style={{ marginTop: 24, padding: "12px 28px" }}>
+                {t("Try E-Contracts", "ई-करार वापरा", "ई-कॉन्ट्रैक्ट आज़माएं")} →
               </Link>
             </div>
-            <div style={{
-              background: "white", borderRadius: 20, padding: 36, boxShadow: "0 12px 40px rgba(0,0,0,0.08)",
-              border: "1px solid var(--rently-border-light)",
-            }}>
-              <div style={{ fontSize: 48, textAlign: "center", marginBottom: 20 }}>📄✍️</div>
-              <div style={{ display: "grid", gap: 10 }}>
+            <div className="econtract-steps">
+              <div className="econtract-steps-card">
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "var(--text)" }}>
+                  {t("5-Step Process", "५-टप्प्यांची प्रक्रिया", "५-चरण प्रक्रिया")}
+                </h3>
                 {[
-                  { step: "1", label: t("माहिती भरा", "जानकारी भरें", "Fill Details") },
-                  { step: "2", label: t("AI करार तयार करतो", "AI करार बनाता है", "AI Generates") },
-                  { step: "3", label: t("₹50 भरा", "₹50 भरें", "Pay ₹50") },
-                  { step: "4", label: t("Aadhaar OTP ने eSign", "Aadhaar OTP से eSign", "eSign with Aadhaar") },
-                  { step: "5", label: t("PDF डाउनलोड करा", "PDF डाउनलोड करें", "Download PDF") },
+                  { num: "1", label: t("Fill Details", "तपशील भरा", "विवरण भरें") },
+                  { num: "2", label: t("AI Generates Contract", "AI करार तयार करतो", "AI कॉन्ट्रैक्ट बनाता है") },
+                  { num: "3", label: t("Pay ₹50", "₹50 भरा", "₹50 भरें") },
+                  { num: "4", label: t("eSign via Aadhaar", "Aadhaar ने eSign", "Aadhaar से eSign") },
+                  { num: "5", label: t("Download PDF", "PDF डाउनलोड करा", "PDF डाउनलोड करें") },
                 ].map((s) => (
-                  <div key={s.step} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, background: "var(--rently-cream)", border: "1px solid var(--rently-border-light)" }}>
-                    <div style={{ width: 30, height: 30, borderRadius: "50%", background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{s.step}</div>
-                    <span style={{ fontSize: 14, fontWeight: 500, color: "var(--rently-text)" }}>{s.label}</span>
+                  <div key={s.num} className="econtract-step">
+                    <div className="econtract-step-num">{s.num}</div>
+                    <span className="econtract-step-label">{s.label}</span>
                   </div>
                 ))}
               </div>
@@ -341,127 +219,227 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Popular Cities */}
-      <section style={{ padding: "80px 20px" }}>
-        <div className="container-app" style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div className="gold-line" style={{ width: 60, margin: "0 auto 16px" }} />
-            <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d" }}>
-              {t("लोकप्रिय शहरे", "लोकप्रिय शहर", "Popular Cities")}
-            </h2>
-            <p style={{ fontSize: 15, color: "var(--rently-muted)", marginTop: 8 }}>
-              {t("महाराष्ट्रातील सर्व शहरांमध्ये मालमत्ता शोधा", "महाराष्ट्र के सभी शहरों में प्रॉपर्टी खोजें", "Find properties across all Maharashtra cities")}
-            </p>
+      {/* Cities */}
+      <section className="section section-alt">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-title">{t("Explore by City", "शहरानुसार शोधा", "शहर के अनुसार खोजें")}</h2>
+            <p className="section-subtitle">{t("Find properties in all major Maharashtra cities", "सर्व प्रमुख महाराष्ट्र शहरांमध्ये मालमत्ता शोधा", "सभी प्रमुख महाराष्ट्र शहरों में प्रॉपर्टी खोजें")}</p>
           </div>
-
-          <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14 }}>
+          <div className="cities-grid">
             {MAHARASHTRA_CITIES.map((city) => (
-              <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} className="animate-slide-up card-hover" style={{
-                padding: "22px 18px", borderRadius: 16, border: "1px solid var(--rently-border-light)",
-                background: "white", textDecoration: "none",
-              }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 14,
-                  background: "linear-gradient(135deg, var(--rently-primary-light), var(--rently-cream))",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 20, marginBottom: 12,
-                }}>📍</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#1a365d" }}>{city.name}</div>
-                <div style={{ fontSize: 12, color: "var(--rently-muted)", marginTop: 2 }}>
-                  {lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : city.name}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--rently-primary)", marginTop: 8, fontWeight: 700 }}>
-                  {city.count.toLocaleString("en-IN")}+ {t("मालमत्ता", "प्रॉपर्टी", "listings")}
-                </div>
+              <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} className="city-card card card-hover">
+                <div className="city-name">{city.name}</div>
+                <div className="city-name-local">{lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : city.name}</div>
+                <div className="city-count">{city.count.toLocaleString("en-IN")}+ {t("listings", "यादी", "लिस्टिंग")}</div>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA for Owners */}
-      <section style={{
-        padding: "60px 20px",
-        background: "linear-gradient(135deg, #1a365d 0%, #2c5282 100%)",
-      }}>
-        <div className="container-app" style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <div className="animate-glow" style={{
-            width: 72, height: 72, borderRadius: 24, background: "rgba(255,255,255,0.12)",
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            fontSize: 36, marginBottom: 24, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)",
-          }}>🏠</div>
-          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 900, color: "white", marginBottom: 14 }}>
-            {t("मालक आहात?", "मालिक हैं?", "Property Owner?")}
-          </h2>
-          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.75)", marginBottom: 32, maxWidth: 500, margin: "0 auto 32px", lineHeight: 1.7 }}>
-            {t(
-              "तुमची मालमत्ता Rently (आर्यनॉक्सटेक) वर यादी करा. AI तुमचा करार तयार करेल. eSign करा. किराया मिळवा!",
-              "अपनी प्रॉपर्टी Rently (Arynoxtech) पर लिस्ट करें। AI आपका करार बनाएगा। eSign करें। किराया कमाएं!",
-              "List your property on Rently by Arynoxtech. AI generates contracts. eSign & earn rent!"
-            )}
-          </p>
-          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/owner" style={{
-              padding: "16px 36px", borderRadius: 14, background: "white", color: "#1a365d",
-              fontWeight: 800, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-              transition: "all 0.2s",
-            }}>
-              {t("मालक म्हणून सुरू करा", "मालिक के रूप में शुरू करें", "Start as Owner")} →
-            </Link>
-            <Link href="/pricing" style={{
-              padding: "16px 36px", borderRadius: 14, border: "2px solid rgba(255,255,255,0.25)",
-              color: "white", fontWeight: 700, fontSize: 15, textDecoration: "none",
-              backdropFilter: "blur(4px)", transition: "all 0.2s",
-            }}>
-              {t("किंमत पहा", "कीमत देखें", "View Pricing")}
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section style={{ padding: "80px 20px" }}>
-        <div className="container-app" style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 44 }}>
-            <div className="gold-line" style={{ width: 60, margin: "0 auto 16px" }} />
-            <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 900, color: "#1a365d" }}>
-              {t("कसे काम करते?", "कैसे काम करता है?", "How it Works?")}
-            </h2>
-          </div>
-
-          <div className="stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 24 }}>
-            {[
-              { icon: "🔍", step: "1", title: t("शोधा", "खोजें", "Search"), desc: t("तुमचे क्षेत्र, बजेट आणि गरजा निवडा", "अपना क्षेत्र, बजट और जरूरतें चुनें", "Choose your area, budget & needs") },
-              { icon: "🏠", step: "2", title: t("तपासा", "जांचें", "Explore"), desc: t("मालमत्तांचे तपशील, फोटो आणि नकाशा पहा", "प्रॉपर्टी का विवरण, फ़ोटो और मानचित्र देखें", "See property details, photos & map") },
-              { icon: "📝", step: "3", title: t("करार", "करार", "Contract"), desc: t("AI-शक्तीचा करार तयार करा, eSign करा", "AI-संचालित करार बनाएं, eSign करें", "Generate AI contract, eSign it") },
-              { icon: "🔑", step: "4", title: t("स्थानांतर", "स्थानांतरण", "Move In"), desc: t("किराया भरा आणि नवीन घरात जा", "किराया भरें और नए घर में जाएं", "Pay rent & move to your new home") },
-            ].map((s) => (
-              <div key={s.step} className="animate-slide-up" style={{
-                textAlign: "center", padding: "28px 20px",
-                background: "white", borderRadius: 18,
-                border: "1px solid var(--rently-border-light)",
-              }}>
-                <div style={{
-                  width: 64, height: 64, borderRadius: 20,
-                  background: "linear-gradient(135deg, var(--rently-primary-light), var(--rently-cream))",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 30, marginBottom: 16,
-                }}>{s.icon}</div>
-                <div style={{
-                  display: "inline-block", padding: "3px 10px", borderRadius: 999,
-                  background: "var(--rently-accent-light)", color: "var(--rently-accent-dark)",
-                  fontSize: 11, fontWeight: 700, marginBottom: 10, letterSpacing: 0.5,
-                }}>STEP {s.step}</div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1a365d", marginBottom: 6 }}>{s.title}</h3>
-                <p style={{ fontSize: 13, color: "var(--rently-muted)", lineHeight: 1.6 }}>{s.desc}</p>
-              </div>
-            ))}
+      {/* Owner CTA */}
+      <section className="owner-cta-section">
+        <div className="container-app">
+          <div className="owner-cta-content">
+            <h2 className="owner-cta-title">{t("Own a Property?", "मालक आहात?", "प्रॉपर्टी के मालिक हैं?")}</h2>
+            <p className="owner-cta-desc">
+              {t(
+                "List on Rently by Arynoxtech. Reach thousands of verified tenants. AI handles contracts. Zero brokerage.",
+                "Rently (आर्यनॉक्सटेक) वर यादी करा. हजारो पडताळलेल्या भाडेदारांपर्यंत पोहोचा. AI करार हाताळतो. शून्य ब्रोकरेज.",
+                "Rently (Arynoxtech) पर लिस्ट करें। हजारो सत्यापित किरायेदारों तक पहुंचें। AI समझौते संभालता है। ज़ीरो ब्रोकरेज।"
+              )}
+            </p>
+            <div className="owner-cta-buttons">
+              <Link href="/owner" className="btn btn-primary" style={{ background: "white", color: "var(--primary)", borderColor: "white", padding: "14px 32px", fontSize: 15, fontWeight: 700 }}>
+                {t("List Your Property", "तुमची मालमत्ता यादी करा", "अपनी प्रॉपर्टी लिस्ट करें")} →
+              </Link>
+              <Link href="/pricing" className="btn btn-outline" style={{ borderColor: "rgba(255,255,255,0.3)", color: "white", padding: "14px 32px", fontSize: 15 }}>
+                {t("View Pricing", "किंमत पहा", "कीमत देखें")}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       <Footer />
       <AIChat />
+
+      <style>{`
+        .hero-section {
+          position: relative;
+          background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1a56db 100%);
+          padding: 80px 20px 100px;
+          overflow: hidden;
+        }
+        .hero-bg {
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse at 30% 20%, rgba(26,86,219,0.2) 0%, transparent 60%),
+                      radial-gradient(ellipse at 70% 80%, rgba(245,158,11,0.1) 0%, transparent 60%);
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; text-align: center; }
+        .hero-badge {
+          display: inline-block; padding: 6px 16px; border-radius: 999px;
+          background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9);
+          font-size: 13px; font-weight: 600; margin-bottom: 28px;
+          border: 1px solid rgba(255,255,255,0.12);
+        }
+        .hero-title {
+          font-size: clamp(32px, 5vw, 52px); font-weight: 800; color: white;
+          line-height: 1.1; margin-bottom: 18px; letter-spacing: -1px;
+        }
+        .hero-title-accent { color: var(--accent); }
+        .hero-subtitle {
+          font-size: 16px; color: rgba(255,255,255,0.7);
+          max-width: 560px; margin: 0 auto 36px; line-height: 1.7;
+        }
+
+        .hero-search {
+          background: white; border-radius: var(--radius-lg);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.25); overflow: hidden;
+        }
+        .hero-search-tabs {
+          display: flex; gap: 0; padding: 4px 8px; border-bottom: 1px solid var(--border-light);
+        }
+        .hero-search-tab {
+          padding: 10px 20px; border-radius: var(--radius); border: none;
+          background: transparent; color: var(--text-muted);
+          font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.15s;
+        }
+        .hero-search-tab.active {
+          background: var(--primary); color: white;
+        }
+        .hero-search-tab:hover:not(.active) { background: var(--surface-hover); color: var(--text); }
+        .hero-search-input-row {
+          display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+        }
+        .hero-search-icon { width: 20px; height: 20px; color: var(--text-muted); flex-shrink: 0; }
+        .hero-search-input {
+          flex: 1; border: none; outline: none; font-size: 15px; padding: 10px 0;
+          color: var(--text); background: transparent;
+        }
+        .hero-search-input::placeholder { color: var(--text-muted); }
+        .hero-search-btn {
+          padding: 12px 28px; border-radius: var(--radius); border: none;
+          background: var(--accent); color: white; font-weight: 700; font-size: 14px;
+          cursor: pointer; text-decoration: none; white-space: nowrap; transition: all 0.15s;
+        }
+        .hero-search-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+
+        .hero-cities {
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          margin-top: 20px; flex-wrap: wrap;
+        }
+        .hero-cities-label { color: rgba(255,255,255,0.5); font-size: 13px; }
+        .hero-city-chip {
+          padding: 6px 14px; border-radius: 999px;
+          background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);
+          font-size: 13px; font-weight: 500; text-decoration: none;
+          border: 1px solid rgba(255,255,255,0.1); transition: all 0.15s;
+        }
+        .hero-city-chip:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        .stats-section {
+          padding: 0 20px; margin-top: -40px; position: relative; z-index: 2;
+        }
+        .stats-grid {
+          display: grid; grid-template-columns: repeat(4, 1fr);
+          background: white; border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--border-light);
+          max-width: 800px; margin: 0 auto;
+        }
+        .stat-item {
+          padding: 24px 16px; text-align: center;
+          border-right: 1px solid var(--border-light);
+          transition: background 0.15s;
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-item:hover { background: var(--surface-hover); }
+        .stat-value { font-size: 28px; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+        .section { padding: 72px 20px; }
+        .section-alt { background: var(--surface-hover); }
+        .section-header { text-align: center; margin-bottom: 40px; }
+        .section-title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; color: var(--text); }
+        .section-subtitle { font-size: 15px; color: var(--text-muted); margin-top: 8px; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .feature-card { padding: 28px; }
+        .feature-icon {
+          width: 48px; height: 48px; border-radius: var(--radius);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 18px; font-weight: 800; margin-bottom: 16px;
+        }
+        .feature-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+        .feature-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .step-card {
+          background: white; border-radius: var(--radius-lg);
+          padding: 32px 28px; border: 1px solid var(--border);
+          transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .step-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .step-num {
+          font-size: 14px; font-weight: 800; color: var(--primary);
+          background: var(--primary-light); display: inline-block;
+          padding: 4px 12px; border-radius: var(--radius-full); margin-bottom: 16px;
+        }
+        .step-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+        .step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+
+        .econtract-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+        .econtract-title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; color: var(--text); margin: 16px 0 12px; }
+        .econtract-desc { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+        .econtract-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+        .econtract-list-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-secondary); }
+        .econtract-steps-card {
+          background: white; border-radius: var(--radius-lg);
+          padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+        }
+        .econtract-step {
+          display: flex; align-items: center; gap: 12px;
+          padding: 12px 14px; border-radius: var(--radius);
+          background: var(--surface-hover); margin-bottom: 8px;
+        }
+        .econtract-step:last-child { margin-bottom: 0; }
+        .econtract-step-num {
+          width: 28px; height: 28px; border-radius: 50%;
+          background: var(--primary); color: white;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; font-weight: 700; flex-shrink: 0;
+        }
+        .econtract-step-label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+
+        .cities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+        .city-card {
+          padding: 20px 16px; text-align: left; text-decoration: none;
+        }
+        .city-name { font-size: 16px; font-weight: 700; color: var(--text); }
+        .city-name-local { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+        .city-count { font-size: 12px; color: var(--primary); font-weight: 600; margin-top: 8px; }
+
+        .owner-cta-section {
+          padding: 72px 20px;
+          background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1a56db 100%);
+        }
+        .owner-cta-content { text-align: center; max-width: 600px; margin: 0 auto; }
+        .owner-cta-title { font-size: clamp(24px, 3.5vw, 34px); font-weight: 800; color: white; margin-bottom: 14px; }
+        .owner-cta-desc { font-size: 16px; color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 28px; }
+        .owner-cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        @media (max-width: 768px) {
+          .steps-grid { grid-template-columns: 1fr; }
+          .econtract-grid { grid-template-columns: 1fr; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .stat-item:nth-child(2) { border-right: none; }
+        }
+        @media (max-width: 480px) {
+          .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .features-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </div>
   );
 }
