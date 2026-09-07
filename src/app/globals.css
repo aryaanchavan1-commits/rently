@@ -41,6 +41,20 @@
   --radius-lg: 14px;
   --radius-xl: 20px;
   --radius-full: 9999px;
+
+  /* Legacy aliases (used by older components) */
+  --rently-primary: var(--primary);
+  --rently-primary-dark: var(--primary-hover);
+  --rently-primary-light: var(--primary-light);
+  --rently-accent: var(--accent);
+  --rently-success: var(--success);
+  --rently-text: var(--text);
+  --rently-muted: var(--text-muted);
+  --rently-border: var(--border);
+  --rently-border-light: var(--border-light);
+  --rently-card: var(--surface);
+  --rently-cream: var(--bg);
+  --rently-cream-dark: var(--surface-hover);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -340,9 +354,26 @@ textarea.input { resize: vertical; min-height: 90px; }
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.85); }
 }
+/* ── Layout utility classes ─────────────────────── */
+.page-cream { background: var(--bg); min-height: 100vh; }
+.card-cream { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.text-royal { color: var(--text); }
+.hero-gradient { background: linear-gradient(135deg, var(--primary) 0%, #1e40af 50%, #1e3a8a 100%); }
+.badge-warn { background: var(--warning-light); color: var(--warning); }
+
+/* ── Skeleton loading ───────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--surface-hover) 50%, var(--border-light) 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radius);
+}
+
+/* ── Page transitions ───────────────────────────── */
 .fade-in { animation: fadeIn 0.3s ease-out both; }
 .animate-slide-up { animation: slideUp 0.4s ease-out both; }
 .animate-scale-in { animation: scaleIn 0.3s ease-out both; }
+.page-enter { animation: fadeIn 0.3s ease-out both; }
 
 .typing-dot {
   display: inline-block; width: 6px; height: 6px;
@@ -351,13 +382,6 @@ textarea.input { resize: vertical; min-height: 90px; }
 }
 .typing-dot:nth-child(2) { animation-delay: 0.16s; }
 .typing-dot:nth-child(3) { animation-delay: 0.32s; }
-
-.skeleton {
-  background: linear-gradient(90deg, var(--border-light) 0%, #e8ecf1 50%, var(--border-light) 100%);
-  background-size: 200px 100%;
-  animation: shimmer 1.4s linear infinite;
-  border-radius: var(--radius);
-}
 
 /* ── Property Card ──────────────────────────────── */
 .property-card {
