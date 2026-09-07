@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { translations, type LangKey } from "@/lib/translations";
 
 type AnyTranslation = typeof translations["en"] | typeof translations["mr"] | typeof translations["hi"];
@@ -9,31 +9,35 @@ interface LangCtx {
   lang: LangKey;
   setLang: (l: LangKey) => void;
   t: AnyTranslation;
+  mounted: boolean;
 }
 
 const LangContext = createContext<LangCtx>({
-  lang: "mr",
+  lang: "en",
   setLang: () => {},
-  t: translations.mr,
+  t: translations.en,
+  mounted: false,
 });
 
 export function LangProvider({ children, defaultLang }: { children: ReactNode; defaultLang?: LangKey }) {
-  const [lang, setLangState] = useState<LangKey>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("rently-lang") as LangKey) || defaultLang || "mr";
+  const [lang, setLangState] = useState<LangKey>(defaultLang || "en");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("rently-lang") as LangKey;
+    if (saved && (saved === "en" || saved === "mr" || saved === "hi")) {
+      setLangState(saved);
     }
-    return defaultLang || "mr";
-  });
+    setMounted(true);
+  }, []);
 
   const setLang = useCallback((l: LangKey) => {
     setLangState(l);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("rently-lang", l);
-    }
+    localStorage.setItem("rently-lang", l);
   }, []);
 
   return (
-    <LangContext.Provider value={{ lang, setLang, t: translations[lang] as AnyTranslation }}>
+    <LangContext.Provider value={{ lang, setLang, t: translations[lang] as AnyTranslation, mounted }}>
       {children}
     </LangContext.Provider>
   );

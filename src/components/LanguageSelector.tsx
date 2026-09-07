@@ -1,17 +1,22 @@
 "use client";
 
 import { useLang } from "@/lib/lang-context";
-import { translations, type LangKey } from "@/lib/translations";
 
-const flags: Record<LangKey, string> = {
+const flags: Record<string, string> = {
   en: "🇬🇧",
   mr: "🇮🇳",
   hi: "🇮🇳",
 };
 
+const labels: Record<string, string> = {
+  en: "EN",
+  mr: "MR",
+  hi: "HI",
+};
+
 export default function LanguageSelector({ inline = false }: { inline?: boolean }) {
-  const { lang, setLang } = useLang();
-  const options: LangKey[] = ["en", "mr", "hi"];
+  const { lang, setLang, mounted } = useLang();
+  const options = ["en", "mr", "hi"] as const;
 
   if (inline) {
     return (
@@ -23,16 +28,16 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
             style={{
               padding: "6px 10px",
               borderRadius: 8,
-              border: lang === l ? "2px solid #0d6efd" : "1px solid #e3e7ef",
-              background: lang === l ? "rgba(13,110,253,0.08)" : "white",
-              color: "#0b1437",
+              border: lang === l ? "2px solid var(--rently-primary)" : "1px solid var(--rently-border-light)",
+              background: lang === l ? "var(--rently-primary-light)" : "white",
+              color: "var(--rently-text)",
               fontSize: 12,
               fontWeight: lang === l ? 700 : 500,
               cursor: "pointer",
               transition: "all 0.15s",
             }}
           >
-            {flags[l]} {l.toUpperCase()}
+            {flags[l]} {labels[l]}
           </button>
         ))}
       </div>
@@ -42,7 +47,7 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
   return (
     <select
       value={lang}
-      onChange={(e) => setLang(e.target.value as LangKey)}
+      onChange={(e) => setLang(e.target.value as "en" | "mr" | "hi")}
       className="input"
       style={{
         width: "auto",
@@ -56,7 +61,7 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
     >
       {options.map((l) => (
         <option key={l} value={l}>
-          {flags[l]} {translations[l].lang}
+          {flags[l]} {l === "en" ? "English" : l === "mr" ? "मराठी" : "हिन्दी"}
         </option>
       ))}
     </select>
