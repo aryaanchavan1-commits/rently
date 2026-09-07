@@ -29,7 +29,7 @@ export function createContract(data: ContractFormData, propertyTitle: string, pr
     duration: calculateDuration(data.leaseStart, data.leaseEnd),
     specialClauses: data.specialClauses,
     status: "draft",
-    paymentAmount: 99,
+    paymentAmount: 50,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

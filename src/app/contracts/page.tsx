@@ -227,9 +227,9 @@ export default function ContractsPage() {
             <div className="fade-in">
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16, marginBottom: 24 }}>
                 {[
-                  { icon: "🏠", title: t("भाडे करार", "भाड़ा करार", "Rental Agreement"), desc: t("भाडेकर आणि मालक यांच्यातील करार", "किरायेदार और मालिक के बीच करार", "Agreement between tenant and owner"), price: 99 },
-                  { icon: "🏨", title: t("PG करार", "PG करार", "PG Agreement"), desc: t("पीजी/हॉस्टल करार", "PG/हॉस्टल करार", "PG/Hostel agreement"), price: 99 },
-                  { icon: "💼", title: t("व्यावसायिक करार", "व्यावसायिक करार", "Commercial Lease"), desc: t("ऑफिस/दुकान करार", "ऑफिस/दुकान करार", "Office/Shop lease"), price: 149 },
+                  { icon: "🏠", title: t("भाडे करार", "भाड़ा करार", "Rental Agreement"), desc: t("भाडेकर आणि मालक यांच्यातील करार", "किरायेदार और मालिक के बीच करार", "Agreement between tenant and owner"), price: 50 },
+                  { icon: "🏨", title: t("PG करार", "PG करार", "PG Agreement"), desc: t("पीजी/हॉस्टल करार", "PG/हॉस्टल करार", "PG/Hostel agreement"), price: 50 },
+                  { icon: "💼", title: t("व्यावसायिक करार", "व्यावसायिक करार", "Commercial Lease"), desc: t("ऑफिस/दुकान करार", "ऑफिस/दुकान करार", "Office/Shop lease"), price: 50 },
                 ].map((tpl) => (
                   <button key={tpl.title} onClick={() => setShowCreateForm(true)} style={{
                     padding: 24, borderRadius: 16, textAlign: "left", cursor: "pointer",
@@ -410,12 +410,12 @@ export default function ContractsPage() {
                 {t("पेमेंट आवश्यक", "भुगतान आवश्यक", "Payment Required")}
               </h2>
               <p style={{ fontSize: 14, color: "var(--rently-muted)", marginBottom: 20 }}>
-                {t("करार तयार करण्यासाठी ₹99 भरा", "करार बनाने के लिए ₹99 भरें", "Pay ₹99 to generate your contract")}
+                {t("करार तयार करण्यासाठी ₹50 भरा", "करार बनाने के लिए ₹50 भरें", "Pay ₹50 to generate your contract")}
               </p>
               <div style={{ background: "var(--rently-cream-dark)", borderRadius: 12, padding: 16, marginBottom: 20, textAlign: "left" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                   <span style={{ fontSize: 14, color: "var(--rently-muted)" }}>{t("करार शुल्क", "करार शुल्क", "Contract Fee")}</span>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>₹99</span>
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>₹50</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "var(--rently-muted)" }}>
                   <span>{t("शामिल आहे", "शामिल है", "Includes")}</span>
@@ -423,7 +423,7 @@ export default function ContractsPage() {
                 </div>
               </div>
               <button onClick={handlePayment} className="btn btn-primary" style={{ width: "100%", padding: "14px", fontSize: 15 }}>
-                💳 {t("₹99 भरा", "₹99 भरें", "Pay ₹99")}
+                💳 {t("₹50 भरा", "₹50 भरें", "Pay ₹50")}
               </button>
             </div>
           )}

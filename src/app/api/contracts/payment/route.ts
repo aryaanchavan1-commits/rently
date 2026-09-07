@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getContract, updateContract } from "@/lib/contracts-store";
 
-const RENTLY_ECONTRACT_PRICE = 99;
+const RENTLY_ECONTRACT_PRICE = 50;
 const RENTLY_COMMISSION = 5;
 
 export async function POST(request: NextRequest) {
