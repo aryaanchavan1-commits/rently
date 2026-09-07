@@ -13,6 +13,13 @@ import type { Property } from "@/lib/properties-store";
 
 type Tab = "overview" | "listings" | "add" | "edit" | "inquiries";
 
+interface SubscriptionStatus {
+  isActive: boolean;
+  daysLeft: number;
+  needsRenewal: boolean;
+  isExpired: boolean;
+}
+
 export default function OwnerDashboard() {
   const { user } = useAuth();
   const { lang } = useLang();
@@ -22,11 +29,26 @@ export default function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
 
   useEffect(() => {
     if (!user) { router.push("/auth/login"); return; }
     loadListings();
+    checkSubscription();
   }, [user, router]);
+
+  async function checkSubscription() {
+    if (!user) return;
+    try {
+      const res = await fetch(`/api/subscription?ownerId=${user.id}`);
+      const data = await res.json();
+      if (data.success) {
+        setSubscription(data);
+      }
+    } catch (err) {
+      console.error("Subscription check error:", err);
+    }
+  }
 
   const loadListings = useCallback(async () => {
     if (!user) return;
@@ -304,7 +326,22 @@ export default function OwnerDashboard() {
 
           {/* Add Property Tab */}
           {tab === "add" && (
-            <ListingWizard onDone={() => { setTab("listings"); loadListings(); }} />
+            subscription?.isActive ? (
+              <ListingWizard onDone={() => { setTab("listings"); loadListings(); }} />
+            ) : (
+              <div className="fade-in" style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: 18, border: "1px solid #e3e7ef" }}>
+                <div style={{ fontSize: 48, marginBottom: 14 }}>⭐</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: "#0b1437", marginBottom: 8 }}>
+                  {t("Subscription Required", "सदस्यता आवश्यक", "Subscription Required")}
+                </h3>
+                <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 18 }}>
+                  {t("You need an active subscription to list properties. Start at just ₹49/week.", "मालमत्ता यादी करण्यासाठी सक्रिय सदस्यता आवश्यक आहे. फक्त ₹49/आठवडा.", "You need an active subscription to list properties. Start at just ₹49/week.")}
+                </p>
+                <Link href="/pricing" className="btn btn-primary">
+                  {t("⭐ Get Subscription", "सदस्यता घ्या", "Get Subscription")}
+                </Link>
+              </div>
+            )
           )}
 
           {/* Edit Property Tab */}

@@ -2,13 +2,14 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import LangProviderWrap from "@/components/LangProviderWrap";
 import AuthProviderWrap from "@/components/AuthProviderWrap";
+import ClientLayout from "@/components/ClientLayout";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0b1437",
+  themeColor: "#1a365d",
   viewportFit: "cover",
 };
 
@@ -39,7 +40,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
       </head>
       <body>
-        <LangProviderWrap><AuthProviderWrap>{children}</AuthProviderWrap></LangProviderWrap>
+        <LangProviderWrap>
+          <AuthProviderWrap>
+            <ClientLayout>{children}</ClientLayout>
+          </AuthProviderWrap>
+        </LangProviderWrap>
       </body>
     </html>
   );
