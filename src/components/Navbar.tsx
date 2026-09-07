@@ -31,7 +31,6 @@ export default function Navbar() {
         {/* Desktop nav */}
         <nav className="navbar-nav">
           <Link href="/properties?type=rent" className="navbar-link">Rent</Link>
-          <Link href="/properties?type=buy" className="navbar-link">Buy</Link>
           <Link href="/commute" className="navbar-link">Commute</Link>
           <Link href="/map" className="navbar-link">Map</Link>
           <Link href="/inbox" className="navbar-link">Inbox</Link>

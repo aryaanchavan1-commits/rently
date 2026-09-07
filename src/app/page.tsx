@@ -47,7 +47,7 @@ const STATS = [
 
 export default function HomePage() {
   const { lang } = useLang();
-  const [searchType, setSearchType] = useState<"rent" | "buy" | "pg">("rent");
+  const [searchType, setSearchType] = useState<"rent" | "pg">("rent");
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState<Stats>({ listings: 30, cities: 13, views: 50000, owners: 0 });
 
@@ -94,13 +94,13 @@ export default function HomePage() {
           {/* Search Box */}
           <div className="hero-search">
             <div className="hero-search-tabs">
-              {(["rent", "buy", "pg"] as const).map((type) => (
+              {(["rent", "pg"] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setSearchType(type)}
                   className={`hero-search-tab ${searchType === type ? "active" : ""}`}
                 >
-                  {type === "rent" ? "Rent" : type === "buy" ? "Buy" : "PG"}
+                  {type === "rent" ? "Rent" : "PG"}
                 </button>
               ))}
             </div>

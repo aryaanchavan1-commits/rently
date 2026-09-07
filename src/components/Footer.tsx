@@ -21,7 +21,6 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-col-title">For Tenants</h4>
             <Link href="/properties?type=rent" className="footer-link">Rent a Property</Link>
-            <Link href="/properties?type=buy" className="footer-link">Buy a Property</Link>
             <Link href="/commute" className="footer-link">Commute Search</Link>
             <Link href="/map" className="footer-link">Live Map</Link>
             <Link href="/contracts" className="footer-link">E-Contracts</Link>

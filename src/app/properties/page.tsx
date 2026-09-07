@@ -13,7 +13,7 @@ const TYPE_LIST = ["apartment", "independent-house", "villa", "pg", "commercial"
 const SORT_LIST = ["recommended", "price_asc", "price_desc", "newest", "area_desc"];
 const FURNISHING_LIST = ["fully-furnished", "semi-furnished", "unfurnished"];
 const BHK_LIST = ["studio", "1", "2", "3", "4+"];
-const LISTING_TYPE = ["rent", "buy", "pg"];
+const LISTING_TYPE = ["rent", "pg"];
 
 function Content() {
   const searchParams = useSearchParams();
