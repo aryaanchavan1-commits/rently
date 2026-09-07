@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
+import { useAuth } from "@/lib/auth-context";
 
 interface PropData {
   id: string; title: string; type: string; price: number; deposit: number;
@@ -17,16 +18,30 @@ interface PropData {
   freshness: { available: boolean; rentConfirmed: boolean; photosUpdated: boolean; locationChecked: boolean; lastVerified: string };
 }
 
+interface ChatMessage {
+  id: string;
+  conversationId: string;
+  sender: "tenant" | "owner";
+  senderName: string;
+  content: string;
+  createdAt: string;
+  readByTenant: boolean;
+  readByOwner: boolean;
+}
+
 export default function PropertyDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { user } = useAuth();
   const [p, setP] = useState<PropData | null>(null);
   const [loading, setLoading] = useState(true);
   const [allProperties, setAllProperties] = useState<PropData[]>([]);
 
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatSending, setChatSending] = useState(false);
+  const [chatError, setChatError] = useState("");
+  const [chatSent, setChatSent] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -65,38 +80,61 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
   const viewerCount = useMemo(() => p ? Math.floor(Math.random() * 8 + 3) : 0, [p]);
   const inquiredToday = useMemo(() => p ? Math.floor(Math.random() * 5 + 1) : 0, [p]);
 
-  async function handleInquiry(e: React.FormEvent) {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      setError("Please fill in your name, email, and message.");
-      return;
+  const conversationId = `prop-${id}-${p?.ownerId || "owner"}`;
+
+  useEffect(() => {
+    if (chatOpen && p) {
+      loadChat();
+      const interval = setInterval(loadChat, 3000);
+      return () => clearInterval(interval);
     }
-    setSending(true);
-    setError("");
+  }, [chatOpen, p]);
+
+  async function loadChat() {
     try {
-      const res = await fetch("/api/inquiries", {
+      const res = await fetch(`/api/messages?conversationId=${conversationId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setChatMessages(data);
+          if (user) {
+            fetch(`/api/messages?conversationId=${conversationId}&markRead=true&readBy=${user.role === "owner" ? "owner" : "tenant"}`);
+          }
+        }
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function handleSendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!chatMessage.trim() || !user) return;
+    setChatSending(true);
+    setChatError("");
+    try {
+      const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          propertyId: id,
-          propertyTitle: p?.title,
-          tenantName: form.name,
-          tenantEmail: form.email,
-          tenantPhone: form.phone,
-          tenantMessage: form.message,
-          ownerName: p?.ownerName,
-          ownerId: p?.ownerId,
+          conversationId,
+          sender: user.role,
+          senderName: user.name || user.email.split("@")[0],
+          content: chatMessage.trim(),
         }),
       });
       const data = await res.json();
       if (data.success) {
-        setSent(true);
-        setForm({ name: "", email: "", phone: "", message: "" });
+        setChatMessages((prev) => [...prev, data.message]);
+        setChatMessage("");
+        setChatSent(true);
       } else {
-        setError(data.error || "Failed to send inquiry");
+        setChatError(data.error || "Failed to send");
       }
     } catch {
-      setError("Network error. Please try again.");
+      setChatError("Network error");
+    } finally {
+      setChatSending(false);
+    }
+  }
     } finally {
       setSending(false);
     }
@@ -359,42 +397,60 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
                 )}
               </div>
 
-              {/* Inquiry Form */}
+              {/* Chat / Contact Owner */}
               <div style={{ background: "white", borderRadius: 18, padding: 24, border: "1px solid #e3e7ef" }}>
-                <h3 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>Contact Owner</h3>
-                <p style={{ fontSize: 13, color: "#4b5675", marginBottom: 16 }}>Send your details directly to {p.ownerName}. No brokerage.</p>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: "#0b1437", marginBottom: 4 }}>Chat with Owner</h3>
+                <p style={{ fontSize: 13, color: "#4b5675", marginBottom: 16 }}>Send a message to {p.ownerName}. Direct, no brokerage.</p>
 
-                {sent ? (
-                  <div style={{ textAlign: "center", padding: 30, background: "#f0fdf4", borderRadius: 14, border: "1px solid #bbf7d0" }}>
-                    <div style={{ fontSize: 40, marginBottom: 10 }}>✅</div>
-                    <h3 style={{ fontSize: 17, fontWeight: 700, color: "#047857", marginBottom: 6 }}>Inquiry Sent!</h3>
-                    <p style={{ fontSize: 14, color: "#047857", marginBottom: 16 }}>{p.ownerName} typically responds within 2 hours. Check your inbox for updates.</p>
-                    <Link href="/inbox" className="btn btn-secondary" style={{ fontSize: 14 }}>View Inbox →</Link>
+                {!user ? (
+                  <div style={{ textAlign: "center", padding: 20, background: "#f4f6fb", borderRadius: 14 }}>
+                    <p style={{ fontSize: 14, color: "#4b5675", marginBottom: 12 }}>Login to chat with the owner</p>
+                    <Link href={`/auth/login?redirect=${encodeURIComponent(`/properties/${id}`)}`} className="btn btn-primary" style={{ fontSize: 14 }}>Login to Chat</Link>
+                  </div>
+                ) : chatSent ? (
+                  <div style={{ textAlign: "center", padding: 20, background: "#f0fdf4", borderRadius: 14, border: "1px solid #bbf7d0" }}>
+                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#059669", color: "white", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px", fontSize: 18 }}>✓</div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: "#047857", marginBottom: 4 }}>Message Sent!</h3>
+                    <p style={{ fontSize: 13, color: "#047857", marginBottom: 12 }}>{p.ownerName} will respond shortly.</p>
+                    <Link href="/inbox" style={{ fontSize: 13, fontWeight: 600, color: "var(--primary)", textDecoration: "none" }}>View Inbox →</Link>
                   </div>
                 ) : (
-                  <form onSubmit={handleInquiry} style={{ display: "grid", gap: 12 }}>
-                    <div>
-                      <label className="form-label">Your Name *</label>
-                      <input className="input" placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                    </div>
-                    <div>
-                      <label className="form-label">Email *</label>
-                      <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-                    </div>
-                    <div>
-                      <label className="form-label">Phone</label>
-                      <input className="input" placeholder="+91 98765 43210" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                    </div>
-                    <div>
-                      <label className="form-label">Message *</label>
-                      <textarea className="input" rows={3} placeholder={`Hi, I'm interested in "${p.title}". Is it still available? I'd like to schedule a visit.`} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required style={{ resize: "vertical", minHeight: 90 }} />
-                    </div>
-                    {error && <div style={{ background: "rgba(239,68,68,0.08)", color: "#b91c1c", padding: "10px 14px", borderRadius: 10, fontSize: 14 }}>{error}</div>}
-                    <button type="submit" className="btn btn-primary" disabled={sending} style={{ width: "100%", padding: "13px", fontSize: 15 }}>
-                      {sending ? "Sending…" : "📩 Send Inquiry"}
-                    </button>
-                    <p style={{ fontSize: 11, color: "#4b5675", textAlign: "center" }}>🔒 Your info is safe. Direct to owner only. Zero brokerage.</p>
-                  </form>
+                  <>
+                    {chatMessages.length > 0 && (
+                      <div style={{ maxHeight: 250, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, marginBottom: 12, padding: 12, background: "#f8fafc", borderRadius: 12, border: "1px solid #e3e7ef" }}>
+                        {chatMessages.map((msg) => (
+                          <div key={msg.id} style={{
+                            maxWidth: "80%", padding: "10px 14px", borderRadius: 14,
+                            background: msg.sender === (user?.role || "tenant") ? "#1a56db" : "white",
+                            color: msg.sender === (user?.role || "tenant") ? "white" : "#0b1437",
+                            border: msg.sender === (user?.role || "tenant") ? "none" : "1px solid #e3e7ef",
+                            alignSelf: msg.sender === (user?.role || "tenant") ? "flex-end" : "flex-start",
+                            fontSize: 14, lineHeight: 1.5,
+                          }}>
+                            {msg.content}
+                            <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4 }}>
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleSendMessage} style={{ display: "flex", gap: 8 }}>
+                      <input
+                        className="input"
+                        placeholder={`Message ${p.ownerName}…`}
+                        value={chatMessage}
+                        onChange={(e) => setChatMessage(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <button type="submit" className="btn btn-primary" disabled={chatSending || !chatMessage.trim()} style={{ padding: "10px 18px" }}>
+                        {chatSending ? "…" : "Send"}
+                      </button>
+                    </form>
+                    {chatError && <div style={{ color: "#dc2626", fontSize: 13, marginTop: 8 }}>{chatError}</div>}
+                    <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 8, textAlign: "center" }}>Direct to owner. Zero brokerage. Free messaging.</p>
+                  </>
                 )}
               </div>
             </div>

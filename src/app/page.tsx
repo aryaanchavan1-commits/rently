@@ -7,6 +7,13 @@ import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
 import { useLang } from "@/lib/lang-context";
 
+interface Stats {
+  listings: number;
+  cities: number;
+  views: number;
+  owners: number;
+}
+
 const MAHARASHTRA_CITIES = [
   { name: "Mumbai", nameMr: "मुंबई", nameHi: "मुंबई", count: 12500 },
   { name: "Pune", nameMr: "पुणे", nameHi: "पुणे", count: 8200 },
@@ -32,18 +39,33 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: "30,000+", label: { en: "Active Listings", mr: "सक्रिय यादी", hi: "सक्रिय लिस्टिंग" } },
-  { value: "13+", label: { en: "Cities Covered", mr: "शहरे कव्हर", hi: "शहर कवर" } },
-  { value: "50,000+", label: { en: "Happy Tenants", mr: "समाधान भाडेदार", hi: "खुश किरायेदार" } },
-  { value: "0%", label: { en: "Brokerage", mr: "ब्रोकरेज", hi: "ब्रोकरेज" } },
+  { value: () => `0`, label: { en: "Active Listings", mr: "सक्रिय यादी", hi: "सक्रिय लिस्टिंग" } },
+  { value: () => `0`, label: { en: "Cities Covered", mr: "शहरे कव्हर", hi: "शहर कवर" } },
+  { value: () => `0`, label: { en: "Happy Tenants", mr: "समाधान भाडेदार", hi: "खुश किरायेदार" } },
+  { value: () => `0`, label: { en: "Brokerage", mr: "ब्रोकरेज", hi: "ब्रोकरेज" } },
 ];
 
 export default function HomePage() {
   const { lang } = useLang();
   const [searchType, setSearchType] = useState<"rent" | "buy" | "pg">("rent");
   const [searchQuery, setSearchQuery] = useState("");
+  const [stats, setStats] = useState<Stats>({ listings: 30, cities: 13, views: 50000, owners: 0 });
 
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        setStats({
+          listings: data.listings || 30,
+          cities: data.cities || 13,
+          views: data.views || 50000,
+          owners: data.owners || 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div>
@@ -112,7 +134,12 @@ export default function HomePage() {
       <section className="stats-section">
         <div className="container-app">
           <div className="stats-grid">
-            {STATS.map((s, i) => (
+            {[
+              { value: stats.listings.toLocaleString("en-IN") + "+", label: { en: "Active Listings", mr: "सक्रिय यादी", hi: "सक्रिय लिस्टिंग" } },
+              { value: stats.cities + "+", label: { en: "Cities", mr: "शहरे", hi: "शहर" } },
+              { value: stats.views.toLocaleString("en-IN") + "+", label: { en: "Views", mr: "दृश्य", hi: "व्यूज" } },
+              { value: "0%", label: { en: "Brokerage", mr: "ब्रोकरेज", hi: "ब्रोकरेज" } },
+            ].map((s, i) => (
               <div key={i} className="stat-item">
                 <div className="stat-value">{s.value}</div>
                 <div className="stat-label">{s.label[lang as "mr" | "hi" | "en"] || s.label.en}</div>
@@ -251,10 +278,10 @@ export default function HomePage() {
               )}
             </p>
             <div className="owner-cta-buttons">
-              <Link href="/owner" className="btn btn-primary" style={{ background: "white", color: "var(--primary)", borderColor: "white", padding: "14px 32px", fontSize: 15, fontWeight: 700 }}>
+              <Link href="/owner" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "14px 32px", borderRadius: "var(--radius)", fontWeight: 700, fontSize: 15, background: "white", color: "var(--primary)", textDecoration: "none", transition: "all 0.15s", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
                 {t("List Your Property", "तुमची मालमत्ता यादी करा", "अपनी प्रॉपर्टी लिस्ट करें")} →
               </Link>
-              <Link href="/pricing" className="btn btn-outline" style={{ borderColor: "rgba(255,255,255,0.3)", color: "white", padding: "14px 32px", fontSize: 15 }}>
+              <Link href="/pricing" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "14px 32px", borderRadius: "var(--radius)", fontWeight: 600, fontSize: 15, background: "transparent", color: "white", border: "2px solid rgba(255,255,255,0.3)", textDecoration: "none", transition: "all 0.15s" }}>
                 {t("View Pricing", "किंमत पहा", "कीमत देखें")}
               </Link>
             </div>
