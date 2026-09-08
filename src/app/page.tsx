@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
@@ -54,7 +55,7 @@ export default function HomePage() {
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
 
   useEffect(() => {
-    fetch("/api/stats")
+    fetch(apiUrl("/api/stats"))
       .then((r) => r.json())
       .then((data) => {
         setStats({

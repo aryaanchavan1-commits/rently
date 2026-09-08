@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
@@ -49,8 +50,8 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
     async function load() {
       try {
         const [propRes, allRes] = await Promise.all([
-          fetch(`/api/properties/${id}`),
-          fetch("/api/properties"),
+          fetch(apiUrl(`/api/properties/${id}`)),
+          fetch(apiUrl("/api/properties")),
         ]);
         if (propRes.ok) {
           const data = await propRes.json();
@@ -94,13 +95,13 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
 
   async function loadChat() {
     try {
-      const res = await fetch(`/api/messages?conversationId=${conversationId}`);
+      const res = await fetch(apiUrl(`/api/messages?conversationId=${conversationId}`));
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
           setChatMessages(data);
           if (user) {
-            fetch(`/api/messages?conversationId=${conversationId}&markRead=true&readBy=${user.role === "owner" ? "owner" : "tenant"}`);
+            fetch(apiUrl(`/api/messages?conversationId=${conversationId}&markRead=true&readBy=${user.role === "owner" ? "owner" : "tenant"}`));
           }
         }
       }
@@ -113,7 +114,7 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
     setChatSending(true);
     setChatError("");
     try {
-      const res = await fetch("/api/messages", {
+      const res = await fetch(apiUrl("/api/messages"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

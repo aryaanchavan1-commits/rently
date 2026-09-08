@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/lang-context";
+import { apiUrl } from "@/lib/api";
 
 interface Message {
   role: "user" | "assistant";
@@ -185,7 +186,7 @@ export default function AIChat() {
 
   async function fetchSearch(filters: Record<string, unknown>): Promise<SearchResult[]> {
     try {
-      const res = await fetch("/api/properties/search", {
+      const res = await fetch(apiUrl("/api/properties/search"), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filters),
       });
@@ -196,7 +197,7 @@ export default function AIChat() {
 
   async function fetchCommute(dest: string, maxMin: number): Promise<CommuteResult[]> {
     try {
-      const res = await fetch("/api/commute", {
+      const res = await fetch(apiUrl("/api/commute"), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ destination: dest, maxMinutes: maxMin }),
       });

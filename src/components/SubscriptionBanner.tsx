@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { apiUrl } from "@/lib/api";
 import { useLang } from "@/lib/lang-context";
 
 interface SubscriptionStatus {
@@ -29,7 +30,7 @@ export default function SubscriptionBanner() {
 
     async function checkSubscription() {
       try {
-        const res = await fetch(`/api/subscription?ownerId=${user?.id}`);
+        const res = await fetch(apiUrl(`/api/subscription?ownerId=${user?.id}`));
         const data = await res.json();
         if (data.success) {
           setStatus(data);

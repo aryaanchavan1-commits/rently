@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/lang-context";
+import { apiUrl } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -67,8 +68,8 @@ export default function ContractsPage() {
   async function loadData() {
     try {
       const [propRes, contractRes] = await Promise.all([
-        fetch("/api/properties"),
-        fetch("/api/contracts"),
+        fetch(apiUrl("/api/properties")),
+        fetch(apiUrl("/api/contracts")),
       ]);
       const propData = await propRes.json();
       const contractData = await contractRes.json();
@@ -95,7 +96,7 @@ export default function ContractsPage() {
     setGenerating(true);
 
     try {
-      const res = await fetch("/api/contracts", {
+      const res = await fetch(apiUrl("/api/contracts"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +124,7 @@ export default function ContractsPage() {
     if (!selectedProperty) return;
 
     try {
-      const contractRes = await fetch("/api/contracts", {
+      const contractRes = await fetch(apiUrl("/api/contracts"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +149,7 @@ export default function ContractsPage() {
     if (!contractId) return;
 
     try {
-      const verifyRes = await fetch("/api/contracts/payment", {
+      const verifyRes = await fetch(apiUrl("/api/contracts/payment"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -170,7 +171,7 @@ export default function ContractsPage() {
 
   async function handleInitiateESign() {
     try {
-      const res = await fetch("/api/contracts/esign", {
+      const res = await fetch(apiUrl("/api/contracts/esign"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

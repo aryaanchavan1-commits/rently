@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
@@ -41,7 +42,7 @@ export default function MapPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/properties");
+        const res = await fetch(apiUrl("/api/properties"));
         const data = await res.json();
         setProperties(Array.isArray(data) ? data : []);
       } catch { /* ignore */ }

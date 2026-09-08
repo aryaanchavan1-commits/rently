@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { apiUrl } from "@/lib/api";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, amount, descr
     setError("");
 
     try {
-      const res = await fetch("/api/payment/create-order", {
+      const res = await fetch(apiUrl("/api/payment/create-order"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount, description }),
@@ -84,7 +85,7 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, amount, descr
 
   async function verifyPayment(paymentId: string, orderId: string, signature: string) {
     try {
-      const res = await fetch("/api/payment/verify", {
+      const res = await fetch(apiUrl("/api/payment/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ paymentId, orderId, signature }),

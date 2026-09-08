@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/lang-context";
+import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
@@ -41,7 +42,7 @@ export default function OwnerDashboard() {
   async function checkSubscription() {
     if (!user) return;
     try {
-      const res = await fetch(`/api/subscription?ownerId=${user.id}`);
+      const res = await fetch(apiUrl(`/api/subscription?ownerId=${user.id}`));
       const data = await res.json();
       if (data.success) setSubscription(data);
     } catch { /* ignore */ }
@@ -51,7 +52,7 @@ export default function OwnerDashboard() {
     if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/properties?ownerId=${user.id}`);
+      const res = await fetch(apiUrl(`/api/properties?ownerId=${user.id}`));
       const data = await res.json();
       setListings(Array.isArray(data) ? data : []);
     } catch { /* ignore */ }
@@ -62,7 +63,7 @@ export default function OwnerDashboard() {
     if (!confirm("Delete this listing?")) return;
     setDeleting(id);
     try {
-      await fetch(`/api/properties/${id}`, { method: "DELETE" });
+      await fetch(apiUrl(`/api/properties/${id}`), { method: "DELETE" });
       setListings((prev) => prev.filter((p) => p.id !== id));
     } finally { setDeleting(null); }
   }
@@ -70,7 +71,7 @@ export default function OwnerDashboard() {
   async function handleStatusToggle(id: string, currentStatus: string) {
     const newStatus = currentStatus === "active" ? "rented" : "active";
     try {
-      const res = await fetch(`/api/properties/${id}`, {
+      const res = await fetch(apiUrl(`/api/properties/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

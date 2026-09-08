@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiUrl } from "@/lib/api";
 
 interface TrustFactor {
   id: string;
@@ -61,7 +62,7 @@ export default function TrustScoreCard({ propertyId }: { propertyId: string }) {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/trust-score?propertyId=${propertyId}`)
+    fetch(apiUrl(`/api/trust-score?propertyId=${propertyId}`))
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false); })
       .catch(() => setLoading(false));

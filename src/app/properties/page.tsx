@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
@@ -77,7 +78,7 @@ function Content() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/properties")
+    fetch(apiUrl("/api/properties"))
       .then(r => r.json())
       .then(d => { setAllProperties(Array.isArray(d) ? d : []); setLoading(false); })
       .catch(() => setLoading(false));

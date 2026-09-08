@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
@@ -51,7 +52,7 @@ export default function CommutePage() {
     setSearched(true);
     setSearchedDest(d);
     try {
-      const res = await fetch("/api/commute", {
+      const res = await fetch(apiUrl("/api/commute"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ destination: d, maxMinutes }),
