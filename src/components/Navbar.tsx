@@ -35,11 +35,11 @@ export default function Navbar() {
           <nav className="navbar-nav">
             <Link href="/properties?type=rent" className="navbar-link">Rent</Link>
             <Link href="/properties?type=pg" className="navbar-link">PG</Link>
+            <Link href="/favorites" className="navbar-link">Favorites</Link>
+            <Link href="/compare" className="navbar-link">Compare</Link>
             <Link href="/commute" className="navbar-link">Commute</Link>
             <Link href="/map" className="navbar-link">Map</Link>
             <Link href="/inbox" className="navbar-link">Inbox</Link>
-            <Link href="/owner" className="navbar-link">For Owners</Link>
-            <Link href="/pricing" className="navbar-link">Pricing</Link>
             <Link href="/contracts" className="navbar-link">Contracts</Link>
           </nav>
 
@@ -83,11 +83,11 @@ export default function Navbar() {
           <div className="mobile-menu">
             <Link href="/properties?type=rent" onClick={() => setOpen(false)} className="mobile-menu-link">Rent</Link>
             <Link href="/properties?type=pg" onClick={() => setOpen(false)} className="mobile-menu-link">PG</Link>
+            <Link href="/favorites" onClick={() => setOpen(false)} className="mobile-menu-link">Favorites</Link>
+            <Link href="/compare" onClick={() => setOpen(false)} className="mobile-menu-link">Compare</Link>
             <Link href="/commute" onClick={() => setOpen(false)} className="mobile-menu-link">Commute</Link>
             <Link href="/map" onClick={() => setOpen(false)} className="mobile-menu-link">Map</Link>
             <Link href="/inbox" onClick={() => setOpen(false)} className="mobile-menu-link">Inbox</Link>
-            <Link href="/owner" onClick={() => setOpen(false)} className="mobile-menu-link">For Owners</Link>
-            <Link href="/pricing" onClick={() => setOpen(false)} className="mobile-menu-link">Pricing</Link>
             <Link href="/contracts" onClick={() => setOpen(false)} className="mobile-menu-link">Contracts</Link>
             <div className="mobile-menu-divider" />
             <div className="mobile-menu-lang">

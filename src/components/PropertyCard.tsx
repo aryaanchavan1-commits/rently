@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import FavoriteButton from "@/components/FavoriteButton";
+import ShareButton from "@/components/ShareButton";
 
 interface Property {
   id: string;
@@ -78,11 +80,15 @@ export default function PropertyCard({ property }: { property: Property }) {
           }}
         />
         <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {property.isVerified && <span className="badge badge-success">✓ Verified</span>}
-          {property.isFeatured && <span className="badge badge-warn">⭐ Featured</span>}
-          {isNew && <span className="badge badge-primary">🆕 Just Listed</span>}
-          {isHot && !isNew && <span className="badge badge-danger">🔥 Hot</span>}
-          {depositExceeds && <span className="badge badge-danger" title={`Deposit exceeds Maharashtra's ${depositCap}-month legal cap`}>⚠ Deposit exceeds cap</span>}
+          {property.isVerified && <span className="badge badge-success">Verified</span>}
+          {property.isFeatured && <span className="badge badge-warn">Featured</span>}
+          {isNew && <span className="badge badge-primary">Just Listed</span>}
+          {isHot && !isNew && <span className="badge badge-danger">Hot</span>}
+          {depositExceeds && <span className="badge badge-danger" title={`Deposit exceeds Maharashtra's ${depositCap}-month legal cap`}>Deposit exceeds cap</span>}
+        </div>
+        <div style={{ position: "absolute", top: 12, right: 12, display: "flex", gap: 6 }}>
+          <FavoriteButton propertyId={property.id} />
+          <ShareButton propertyId={property.id} title={property.title} />
         </div>
         <div
           style={{
