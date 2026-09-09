@@ -456,14 +456,33 @@ export default function HomePage() {
         .owner-cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         @media (max-width: 768px) {
-          .steps-grid { grid-template-columns: 1fr; }
-          .econtract-grid { grid-template-columns: 1fr; }
-          .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .hero-section { padding: 60px 16px 80px; }
+          .hero-title { font-size: 28px; }
+          .hero-subtitle { font-size: 15px; margin-bottom: 28px; }
+          .hero-search-input-row { flex-direction: column; }
+          .hero-search-btn { width: 100%; text-align: center; }
+          .hero-cities { gap: 6px; }
+          .hero-city-chip { padding: 5px 12px; font-size: 12px; }
+          .steps-grid { grid-template-columns: 1fr; gap: 16px; }
+          .econtract-grid { grid-template-columns: 1fr; gap: 28px; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr); margin: 0 16px; }
           .stat-item:nth-child(2) { border-right: none; }
+          .stat-item { padding: 18px 12px; }
+          .stat-value { font-size: 22px; }
+          .stat-label { font-size: 11px; }
+          .section { padding: 48px 16px; }
+          .cities-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+          .city-card { padding: 14px 12px; }
+          .owner-cta-section { padding: 48px 16px; }
+          .owner-cta-buttons { flex-direction: column; }
+          .owner-cta-buttons a { width: 100%; text-align: center; }
         }
         @media (max-width: 480px) {
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
           .features-grid { grid-template-columns: 1fr; }
+          .feature-card { padding: 20px; }
+          .cities-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+          .city-card { padding: 12px 10px; }
         }
       `}</style>
     </div>

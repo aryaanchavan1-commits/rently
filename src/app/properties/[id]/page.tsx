@@ -464,7 +464,14 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
         </div>
       </div>
       <Footer />
-      <style>{`@media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr !important; } }`}</style>
+      <style>{`
+        @media (max-width: 900px) {
+          .detail-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 768px) {
+          .detail-grid { gap: 16px !important; }
+        }
+      `}</style>
     </div>
   );
 }

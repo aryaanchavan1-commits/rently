@@ -390,3 +390,9 @@ function StatCard({ icon, label, value, color, accent }: { icon: React.ReactNode
     </div>
   );
 }
+
+<style>{`
+  @media (max-width: 768px) {
+    .dashboard-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  }
+`}</style>

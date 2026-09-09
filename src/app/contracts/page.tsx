@@ -234,7 +234,7 @@ export default function ContractsPage() {
 
           {step === "select" && (
             <div className="fade-in">
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16, marginBottom: 24 }}>
+              <div className="contracts-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16, marginBottom: 24 }}>
                 {[
                   { icon: "🏠", title: t("भाडे करार", "भाड़ा करार", "Rental Agreement"), desc: t("भाडेकर आणि मालक यांच्यातील करार", "किरायेदार और मालिक के बीच करार", "Agreement between tenant and owner"), price: 50 },
                   { icon: "🏨", title: t("PG करार", "PG करार", "PG Agreement"), desc: t("पीजी/हॉस्टल करार", "PG/हॉस्टल करार", "PG/Hostel agreement"), price: 50 },
@@ -313,10 +313,10 @@ export default function ContractsPage() {
                     📝 {t("AI तुमचा करार आपोआप तयार करेल", "AI आपका करार स्वचालित रूप से बनाएगा", "AI will automatically generate your contract")}
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
-                        {t("मालकाचे नाव", "मालिक का नाम", "Owner Name")} *
+                   <div className="contracts-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                     <div>
+                       <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
+                         {t("मालकाचे नाव", "मालिक का नाम", "Owner Name")} *
                       </label>
                       <input className="input" value={formData.ownerName} onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })} placeholder="Rajesh Kumar" />
                     </div>
@@ -335,10 +335,10 @@ export default function ContractsPage() {
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--rently-border-light)", paddingTop: 14 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                      <div>
-                        <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
-                          {t("भाडेकराचे नाव", "किरायेदार का नाम", "Tenant Name")} *
+                   <div className="contracts-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                     <div>
+                       <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
+                         {t("भाडेकराचे नाव", "किरायेदार का नाम", "Tenant Name")} *
                         </label>
                         <input className="input" value={formData.tenantName} onChange={(e) => setFormData({ ...formData, tenantName: e.target.value })} placeholder="Amit Patil" />
                       </div>
@@ -358,7 +358,7 @@ export default function ContractsPage() {
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--rently-border-light)", paddingTop: 14 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                    <div className="contracts-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
                       <div>
                         <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
                           {t("मासिक भाडे", "मासिक किराया", "Monthly Rent")} *
@@ -381,10 +381,10 @@ export default function ContractsPage() {
                   </div>
 
                   <div style={{ borderTop: "1px solid var(--rently-border-light)", paddingTop: 14 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                      <div>
-                        <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
-                          {t("सुरू होण्याची तारीख", "शुरू होने की तिथि", "Start Date")} *
+                   <div className="contracts-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                     <div>
+                       <label style={{ fontSize: 13, fontWeight: 600, color: "var(--rently-text)", display: "block", marginBottom: 4 }}>
+                         {t("सुरू होण्याची तारीख", "शुरू होने की तिथि", "Start Date")} *
                         </label>
                         <input className="input" type="date" value={formData.leaseStart} onChange={(e) => setFormData({ ...formData, leaseStart: e.target.value })} />
                       </div>

@@ -10,6 +10,7 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   android: {
+    allowMixedContent: true,
     buildOptions: {
       keystorePath: undefined,
       keystoreAlias: undefined,
@@ -22,6 +23,14 @@ const config: CapacitorConfig = {
       backgroundColor: '#1a56db',
       showSpinner: true,
       spinnerColor: '#ffffff',
+    },
+    StatusBar: {
+      style: 'LIGHT',
+      backgroundColor: '#1a56db',
+    },
+    Keyboard: {
+      resize: 'body',
+      resizeOnFullScreen: true,
     },
   },
 };
