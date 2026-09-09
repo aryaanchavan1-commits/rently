@@ -66,7 +66,7 @@ export default function SearchBar({ variant = "hero" }: { variant?: "hero" | "co
   return (
     <form
       onSubmit={submit}
-      className="search-bar"
+      className="search-bar search-bar-grid"
       style={{
         background: "white",
         borderRadius: 16,

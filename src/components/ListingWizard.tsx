@@ -296,7 +296,7 @@ export default function ListingWizard({ editProperty, onDone }: Props) {
                   <input className="input" type="number" placeholder={t("आपोआप: 2x भाडे", "अपने आप: 2x किराया", "Auto: 2x rent")} value={form.deposit} onChange={(e) => update("deposit", e.target.value)} />
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+              <div className="wizard-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
                 <div>
                   <label className="form-label">{t("बेडरूम", "बेडरूम", "Bedrooms")}</label>
                   <select className="input" value={form.bedrooms} onChange={(e) => update("bedrooms", e.target.value)}>

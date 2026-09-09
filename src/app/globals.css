@@ -682,6 +682,12 @@ textarea.input { resize: vertical; min-height: 90px; }
 
   /* Auth cards mobile */
   .auth-card { padding: 24px 20px !important; margin: 0 16px; }
+
+  /* Form grids mobile */
+  .wizard-grid-3 { grid-template-columns: 1fr !important; }
+  .search-bar-grid { grid-template-columns: 1fr !important; }
+  .contracts-grid-2 { grid-template-columns: 1fr !important; }
+  .contracts-grid-3 { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 480px) {
   .analytics-grid { grid-template-columns: 1fr; }
