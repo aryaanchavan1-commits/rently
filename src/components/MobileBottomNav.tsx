@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { haptics } from "@/lib/haptics";
+import MobileMoreSheet from "@/components/MobileMoreSheet";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -52,17 +54,6 @@ export default function MobileBottomNav() {
         </svg>
       ),
     },
-    {
-      href: profileHref,
-      label: "Profile",
-      active: pathname === "/dashboard" || pathname === "/owner",
-      svg: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      ),
-    },
   ];
 
   return (
@@ -72,11 +63,13 @@ export default function MobileBottomNav() {
           key={tab.href}
           href={tab.href}
           className={`mobile-bottom-tab ${tab.active ? "active" : ""}`}
+          onClick={() => haptics.light()}
         >
           <span className="mobile-bottom-icon">{tab.svg}</span>
           <span className="mobile-bottom-label">{tab.label}</span>
         </Link>
       ))}
+      <MobileMoreSheet />
     </nav>
   );
 }

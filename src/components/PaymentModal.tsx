@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { apiUrl } from "@/lib/api";
 
 interface PaymentModalProps {
@@ -25,6 +25,20 @@ declare global {
 export default function PaymentModal({ isOpen, onClose, onSuccess, amount, description, prefill }: PaymentModalProps) {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onResize = () => {
+      if (window.visualViewport) {
+        const keyboardHeight = window.innerHeight - window.visualViewport.height;
+        setKeyboardOffset(Math.max(0, keyboardHeight - 20));
+      }
+    };
+    window.visualViewport?.addEventListener("resize", onResize);
+    return () => window.visualViewport?.removeEventListener("resize", onResize);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -109,9 +123,10 @@ export default function PaymentModal({ isOpen, onClose, onSuccess, amount, descr
       background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
       justifyContent: "center", zIndex: 10000, padding: 20,
     }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{
+      <div ref={modalRef} onClick={(e) => e.stopPropagation()} style={{
         background: "white", borderRadius: 20, padding: 32, maxWidth: 420, width: "100%",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.3)", marginBottom: keyboardOffset,
+        transition: "margin-bottom 0.2s ease",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <h3 style={{ fontSize: 20, fontWeight: 700, color: "#1a365d" }}>Payment</h3>

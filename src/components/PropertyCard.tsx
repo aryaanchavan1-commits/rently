@@ -54,7 +54,7 @@ export default function PropertyCard({ property }: { property: Property }) {
   return (
     <Link
       href={`/properties/${property.id}`}
-      className="property-card"
+      className="property-card touch-feedback"
       style={{
         background: "white",
         borderRadius: 16,
@@ -64,6 +64,7 @@ export default function PropertyCard({ property }: { property: Property }) {
         flexDirection: "column",
         textDecoration: "none",
         color: "inherit",
+        WebkitTapHighlightColor: "transparent",
       }}
     >
       <div style={{ position: "relative", paddingTop: "65%", background: "#f0f2f7", overflow: "hidden" }}>
@@ -71,6 +72,7 @@ export default function PropertyCard({ property }: { property: Property }) {
           src={images[0]}
           alt={property.title}
           loading="lazy"
+          className="img-fade-in"
           style={{
             position: "absolute",
             inset: 0,

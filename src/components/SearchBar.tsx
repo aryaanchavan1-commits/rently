@@ -48,9 +48,7 @@ export default function SearchBar({ variant = "hero" }: { variant?: "hero" | "co
           {showSuggestions && filtered.length > 0 && (
             <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "white", border: "1px solid #e3e7ef", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.1)", zIndex: 50, maxHeight: 200, overflowY: "auto", marginTop: 4 }}>
               {filtered.slice(0, 8).map((c) => (
-                <button key={c} type="button" onClick={() => pickCity(c)} style={{ display: "block", width: "100%", padding: "10px 14px", textAlign: "left", fontSize: 14, background: "white", border: "none", cursor: "pointer", color: "#0b1437", borderBottom: "1px solid #f0f2f7" }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "#f4f6fb"; }}
-                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "white"; }}
+                <button key={c} type="button" onClick={() => pickCity(c)} className="touch-feedback" style={{ display: "block", width: "100%", padding: "10px 14px", textAlign: "left", fontSize: 14, background: "white", border: "none", cursor: "pointer", color: "#0b1437", borderBottom: "1px solid #f0f2f7", WebkitTapHighlightColor: "transparent", minHeight: 44 }}
                 >
                   📍 {c}
                 </button>
@@ -100,9 +98,7 @@ export default function SearchBar({ variant = "hero" }: { variant?: "hero" | "co
               </div>
             )}
             {filtered.slice(0, 10).map((c) => (
-              <button key={c} type="button" onClick={() => pickCity(c)} style={{ display: "block", width: "100%", padding: "10px 14px", textAlign: "left", fontSize: 14, background: "white", border: "none", cursor: "pointer", color: "#0b1437", borderBottom: "1px solid #f0f2f7" }}
-                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "#f4f6fb"; }}
-                onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "white"; }}
+              <button key={c} type="button" onClick={() => pickCity(c)} className="touch-feedback" style={{ display: "block", width: "100%", padding: "10px 14px", textAlign: "left", fontSize: 14, background: "white", border: "none", cursor: "pointer", color: "#0b1437", borderBottom: "1px solid #f0f2f7", WebkitTapHighlightColor: "transparent", minHeight: 44 }}
               >
                 📍 {c}
               </button>

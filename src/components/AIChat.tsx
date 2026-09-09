@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useLang } from "@/lib/lang-context";
 import { apiUrl } from "@/lib/api";
+import { haptics } from "@/lib/haptics";
 
 interface Message {
   role: "user" | "assistant";
@@ -552,11 +553,12 @@ export default function AIChat() {
 
   return (
     <>
-      <button onClick={() => setIsOpen(!isOpen)} className="ai-fab" style={{
+      <button onClick={() => { haptics.tap(); setIsOpen(!isOpen); }} className="ai-fab" style={{
         position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%",
         background: "linear-gradient(135deg,#0d6efd,#0a58ca)", color: "white", border: "none",
         cursor: "pointer", boxShadow: "0 4px 16px rgba(13,110,253,0.4)", zIndex: 9999,
         display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
+        transition: "transform 0.15s",
       }}>
         {isOpen ? "✕" : "💬"}
       </button>
@@ -598,13 +600,12 @@ export default function AIChat() {
                 {searchState.step === "purpose" && i === messages.length - 1 && m.role === "assistant" && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8, maxWidth: "95%" }}>
                     {purposeButtons.map((b) => (
-                      <button key={b.key} onClick={() => processInput(b.key)} style={{
+                      <button key={b.key} onClick={() => { haptics.light(); processInput(b.key); }} style={{
                         padding: "8px 14px", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer",
                         border: "1px solid #e3e7ef", background: "white", color: "#0b1437",
-                        transition: "all 0.15s",
+                        transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
                       }}
-                        onMouseEnter={(e) => { (e.target as HTMLElement).style.borderColor = "#0d6efd"; (e.target as HTMLElement).style.background = "rgba(13,110,253,0.06)"; }}
-                        onMouseLeave={(e) => { (e.target as HTMLElement).style.borderColor = "#e3e7ef"; (e.target as HTMLElement).style.background = "white"; }}
+                        className="touch-feedback"
                       >
                         {b.icon} {t(b.en, b.mr, b.hi)}
                       </button>
@@ -648,7 +649,7 @@ export default function AIChat() {
               className="input"
               style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #e3e7ef", fontSize: 14, outline: "none" }}
             />
-            <button onClick={handleSend} disabled={!input.trim() || isTyping} style={{
+            <button onClick={() => { haptics.light(); handleSend(); }} disabled={!input.trim() || isTyping} style={{
               width: 40, height: 40, borderRadius: 10, border: "none",
               background: input.trim() ? "linear-gradient(135deg,#0d6efd,#0a58ca)" : "#e3e7ef",
               color: input.trim() ? "white" : "#9ca3af", cursor: input.trim() ? "pointer" : "default",
