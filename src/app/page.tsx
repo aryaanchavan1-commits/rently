@@ -12,21 +12,22 @@ interface Stats {
   cities: number;
   views: number;
   owners: number;
+  cityCounts: Record<string, number>;
 }
 
 const MAHARASHTRA_CITIES = [
-  { name: "Mumbai", nameMr: "मुंबई", nameHi: "मुंबई", count: 12500 },
-  { name: "Pune", nameMr: "पुणे", nameHi: "पुणे", count: 8200 },
-  { name: "Thane", nameMr: "ठाणे", nameHi: "ठाणे", count: 4100 },
-  { name: "Nagpur", nameMr: "नागपूर", nameHi: "नागपुर", count: 3200 },
-  { name: "Nashik", nameMr: "नाशिक", nameHi: "नासिक", count: 2100 },
-  { name: "Aurangabad", nameMr: "औरंगाबाद", nameHi: "औरंगाबाद", count: 1800 },
-  { name: "Kolhapur", nameMr: "कोल्हापूर", nameHi: "कोल्हापुर", count: 1500 },
-  { name: "Solapur", nameMr: "सोलापूर", nameHi: "सोलापुर", count: 1200 },
-  { name: "Satara", nameMr: "सातारा", nameHi: "सातारा", count: 800 },
-  { name: "Nanded", nameMr: "नांदेड", nameHi: "नांदेड", count: 700 },
-  { name: "Amravati", nameMr: "अमरावती", nameHi: "अमरावती", count: 600 },
-  { name: "Ratnagiri", nameMr: "रत्नागिरी", nameHi: "रत्नागिरि", count: 400 },
+  { name: "Mumbai", nameMr: "मुंबई", nameHi: "मुंबई" },
+  { name: "Pune", nameMr: "पुणे", nameHi: "पुणे" },
+  { name: "Thane", nameMr: "ठाणे", nameHi: "ठाणे" },
+  { name: "Nagpur", nameMr: "नागपूर", nameHi: "नागपुर" },
+  { name: "Nashik", nameMr: "नाशिक", nameHi: "नासिक" },
+  { name: "Aurangabad", nameMr: "औरंगाबाद", nameHi: "औरंगाबाद" },
+  { name: "Kolhapur", nameMr: "कोल्हापूर", nameHi: "कोल्हापुर" },
+  { name: "Solapur", nameMr: "सोलापूर", nameHi: "सोलापुर" },
+  { name: "Satara", nameMr: "सातारा", nameHi: "सातारा" },
+  { name: "Nanded", nameMr: "नांदेड", nameHi: "नांदेड" },
+  { name: "Amravati", nameMr: "अमरावती", nameHi: "अमरावती" },
+  { name: "Ratnagiri", nameMr: "रत्नागिरी", nameHi: "रत्नागिरि" },
 ];
 
 const FEATURES = [
@@ -49,7 +50,7 @@ export default function HomePage() {
   const { lang } = useLang();
   const [searchType, setSearchType] = useState<"rent" | "pg">("rent");
   const [searchQuery, setSearchQuery] = useState("");
-  const [stats, setStats] = useState<Stats>({ listings: 30, cities: 13, views: 50000, owners: 0 });
+  const [stats, setStats] = useState<Stats>({ listings: 0, cities: 0, views: 0, owners: 0, cityCounts: {} });
 
   const t = (en: string, mr: string, hi: string) => lang === "mr" ? mr : lang === "hi" ? hi : en;
 
@@ -58,10 +59,11 @@ export default function HomePage() {
       .then((r) => r.json())
       .then((data) => {
         setStats({
-          listings: data.listings || 30,
-          cities: data.cities || 13,
-          views: data.views || 50000,
+          listings: data.listings || 0,
+          cities: data.cities || 0,
+          views: data.views || 0,
           owners: data.owners || 0,
+          cityCounts: data.cityCounts || {},
         });
       })
       .catch(() => {});
@@ -136,7 +138,7 @@ export default function HomePage() {
           <div className="stats-grid">
             {[
               { value: stats.listings.toLocaleString("en-IN") + "+", label: { en: "Active Listings", mr: "सक्रिय यादी", hi: "सक्रिय लिस्टिंग" } },
-              { value: stats.cities + "+", label: { en: "Cities", mr: "शहरे", hi: "शहर" } },
+              { value: stats.cities.toLocaleString("en-IN") + "+", label: { en: "Cities", mr: "शहरे", hi: "शहर" } },
               { value: stats.views.toLocaleString("en-IN") + "+", label: { en: "Views", mr: "दृश्य", hi: "व्यूज" } },
               { value: "0%", label: { en: "Brokerage", mr: "ब्रोकरेज", hi: "ब्रोकरेज" } },
             ].map((s, i) => (
@@ -254,13 +256,16 @@ export default function HomePage() {
             <p className="section-subtitle">{t("Find properties in all major Maharashtra cities", "सर्व प्रमुख महाराष्ट्र शहरांमध्ये मालमत्ता शोधा", "सभी प्रमुख महाराष्ट्र शहरों में प्रॉपर्टी खोजें")}</p>
           </div>
           <div className="cities-grid">
-            {MAHARASHTRA_CITIES.map((city) => (
-              <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} className="city-card card card-hover">
-                <div className="city-name">{city.name}</div>
-                <div className="city-name-local">{lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : city.name}</div>
-                <div className="city-count">{city.count.toLocaleString("en-IN")}+ {t("listings", "यादी", "लिस्टिंग")}</div>
-              </Link>
-            ))}
+            {MAHARASHTRA_CITIES.map((city) => {
+              const count = stats.cityCounts[city.name] || 0;
+              return (
+                <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} className="city-card card card-hover">
+                  <div className="city-name">{city.name}</div>
+                  <div className="city-name-local">{lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : city.name}</div>
+                  <div className="city-count">{count > 0 ? `${count}+ ` : ""}{t("listings", "यादी", "लिस्टिंग")}</div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
