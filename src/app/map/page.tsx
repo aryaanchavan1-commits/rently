@@ -6,7 +6,6 @@ import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
-import AIChat from "@/components/AIChat";
 import { useLang } from "@/lib/lang-context";
 
 const PropertyMap = dynamic(() => import("@/components/PropertyMap"), {
@@ -201,7 +200,6 @@ export default function MapPage() {
         </div>
       </main>
       <Footer />
-      <AIChat />
       <style>{`
         @media (max-width: 900px) {
           .map-layout { grid-template-columns: 1fr !important; }

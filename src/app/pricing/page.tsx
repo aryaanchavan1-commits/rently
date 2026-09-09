@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AIChat from "@/components/AIChat";
 
 export default function PricingPage() {
   return (
@@ -93,7 +92,6 @@ export default function PricingPage() {
         </div>
       </div>
       <Footer />
-      <AIChat />
       <style>{`@media (max-width: 700px) { .compare-row { grid-template-columns: 1fr !important; gap: 4px !important; } .compare-row > div:nth-child(3n+1) { font-weight: 800 !important; padding-top: 14px !important; } }`}</style>
     </div>
   );

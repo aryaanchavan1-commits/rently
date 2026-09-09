@@ -5,7 +5,6 @@ import Link from "next/link";
 import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AIChat from "@/components/AIChat";
 import TrustScoreCard from "@/components/TrustScoreCard";
 import { useAuth } from "@/lib/auth-context";
 
@@ -465,7 +464,6 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
         </div>
       </div>
       <Footer />
-      <AIChat />
       <style>{`@media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr !important; } }`}</style>
     </div>
   );

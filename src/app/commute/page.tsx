@@ -5,7 +5,6 @@ import Link from "next/link";
 import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AIChat from "@/components/AIChat";
 import { useLang } from "@/lib/lang-context";
 
 interface CommuteResult {
@@ -211,7 +210,6 @@ export default function CommutePage() {
         </div>
       </main>
       <Footer />
-      <AIChat />
     </div>
   );
 }

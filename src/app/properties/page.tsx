@@ -7,7 +7,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyMap from "@/components/PropertyMap";
-import AIChat from "@/components/AIChat";
 
 const TYPE_OPTIONS = [
   { value: "", label: "All Types" },
@@ -350,7 +349,6 @@ export default function PropertiesPage() {
       <Navbar />
       <Content />
       <Footer />
-      <AIChat />
     </Suspense>
   );
 }

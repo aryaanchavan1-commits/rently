@@ -8,7 +8,6 @@ import { useLang } from "@/lib/lang-context";
 import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AIChat from "@/components/AIChat";
 import ListingWizard from "@/components/ListingWizard";
 import OwnerAnalytics from "@/components/OwnerAnalytics";
 import type { Property } from "@/lib/properties-store";
@@ -374,7 +373,6 @@ export default function OwnerDashboard() {
           )}
         </div>
       </main>
-      <AIChat />
       <Footer />
     </div>
   );

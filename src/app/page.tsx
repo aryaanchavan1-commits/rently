@@ -5,7 +5,6 @@ import Link from "next/link";
 import { apiUrl } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AIChat from "@/components/AIChat";
 import { useLang } from "@/lib/lang-context";
 
 interface Stats {
@@ -291,7 +290,6 @@ export default function HomePage() {
       </section>
 
       <Footer />
-      <AIChat />
 
       <style>{`
         .hero-section {
