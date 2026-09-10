@@ -479,7 +479,10 @@ export default function HomePage() {
           .section { padding: 48px 16px; }
           .cities-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
           .city-card { padding: 14px 12px; }
-          .owner-cta-section { padding: 48px 16px; }
+          .owner-cta-section { padding: 48px 16px; overflow: hidden; }
+          .owner-cta-content { padding: 0 8px; }
+          .owner-cta-title { font-size: 24px !important; }
+          .owner-cta-desc { font-size: 14px !important; }
           .owner-cta-buttons { flex-direction: column; }
           .owner-cta-buttons a { width: 100%; text-align: center; }
         }
