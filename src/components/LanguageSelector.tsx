@@ -28,9 +28,9 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
             style={{
               padding: "6px 10px",
               borderRadius: 8,
-              border: lang === l ? "2px solid var(--rently-primary)" : "1px solid var(--rently-border-light)",
-              background: lang === l ? "var(--rently-primary-light)" : "white",
-              color: "var(--rently-text)",
+              border: lang === l ? "2px solid var(--nivasa-primary)" : "1px solid var(--nivasa-border-light)",
+              background: lang === l ? "var(--nivasa-primary-light)" : "white",
+              color: "var(--nivasa-text)",
               fontSize: 12,
               fontWeight: lang === l ? 700 : 500,
               cursor: "pointer",

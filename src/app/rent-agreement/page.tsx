@@ -385,7 +385,7 @@ export default function RentAgreementPage() {
 
               {/* Footer */}
               <div style={{ marginTop: 40, padding: "12px 0", borderTop: "1px solid var(--border)", fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>
-                Generated via Rently by Arynoxtech · {new Date().toLocaleDateString("en-IN")} · This is a template and may need legal review
+                Generated via Nivasa by Arynoxtech · {new Date().toLocaleDateString("en-IN")} · This is a template and may need legal review
               </div>
             </div>
 

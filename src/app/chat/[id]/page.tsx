@@ -121,7 +121,7 @@ export default function ChatPage() {
           <div className="card-cream" style={{ padding: 50, textAlign: "center", maxWidth: 400 }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Sign in to chat</h3>
-            <p style={{ color: "var(--rently-muted)", marginBottom: 18 }}>You need to be logged in to view messages.</p>
+            <p style={{ color: "var(--nivasa-muted)", marginBottom: 18 }}>You need to be logged in to view messages.</p>
             <Link href="/auth/login" className="btn btn-primary">Sign in</Link>
           </div>
         </div>
@@ -133,20 +133,20 @@ export default function ChatPage() {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <Link href="/inbox" className="btn btn-ghost" style={{ padding: "6px 10px" }}>← Back</Link>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, var(--nivasa-primary), var(--nivasa-primary-dark))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
                     {(viewAs === "owner" ? conv.tenantName : conv.ownerName).charAt(0)}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: "var(--rently-text)" }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: "var(--nivasa-text)" }}>
                       {viewAs === "owner" ? conv.tenantName : conv.ownerName}
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--rently-muted)" }}>
+                    <div style={{ fontSize: 12, color: "var(--nivasa-muted)" }}>
                       Re: {conv.propertyTitle}
                     </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 12, color: "var(--rently-muted)", background: "var(--rently-cream-dark)", padding: "4px 10px", borderRadius: 8 }}>
+                  <span style={{ fontSize: 12, color: "var(--nivasa-muted)", background: "var(--nivasa-cream-dark)", padding: "4px 10px", borderRadius: 8 }}>
                     {viewAs === "owner" ? "👤 Owner" : "🏠 Tenant"}
                   </span>
                   <button onClick={() => setViewAs(viewAs === "owner" ? "tenant" : "owner")} className="btn btn-outline" style={{ padding: "6px 10px", fontSize: 12 }}>
@@ -156,10 +156,10 @@ export default function ChatPage() {
               </div>
 
               {viewAs === "owner" && (
-                <div style={{ marginTop: 12, padding: "10px 14px", background: "var(--rently-cream-dark)", borderRadius: 10, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 13 }}>
+                <div style={{ marginTop: 12, padding: "10px 14px", background: "var(--nivasa-cream-dark)", borderRadius: 10, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 13 }}>
                   <span>📧 {conv.tenantEmail}</span>
                   {conv.tenantPhone && <span>📞 {conv.tenantPhone}</span>}
-                  <span style={{ color: conv.status === "new" ? "var(--rently-accent)" : "var(--rently-success)" }}>
+                  <span style={{ color: conv.status === "new" ? "var(--nivasa-accent)" : "var(--nivasa-success)" }}>
                     {conv.status === "new" ? "● New" : "● Replied"}
                   </span>
                 </div>
@@ -170,14 +170,14 @@ export default function ChatPage() {
           {/* Messages */}
           <div ref={listRef} style={{ flex: 1, overflowY: "auto", padding: "20px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
             {messages.length === 0 && (
-              <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--rently-muted)" }}>
+              <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--nivasa-muted)" }}>
                 <div style={{ fontSize: 40, marginBottom: 10 }}>💬</div>
                 <p style={{ fontSize: 14 }}>No messages yet. Start the conversation!</p>
               </div>
             )}
             {messages.map((m) => (
               <div key={m.id} className="fade-in" style={{ display: "flex", flexDirection: "column", alignItems: m.sender === viewAs ? "flex-end" : "flex-start", padding: "0 16px" }}>
-                <div style={{ fontSize: 11, color: "var(--rently-muted)", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ fontSize: 11, color: "var(--nivasa-muted)", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
                   <span>{m.senderName}</span>
                   <span>·</span>
                   <span>{timeAgo(m.createdAt)}</span>

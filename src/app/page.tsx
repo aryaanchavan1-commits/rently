@@ -155,7 +155,7 @@ export default function HomePage() {
       <section className="section">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-title">{t("Why Rently?", "रेंटली का?", "Rently क्यों?")}</h2>
+            <h2 className="section-title">{t("Why Nivasa?", "निवासा का?", "Nivasa क्यों?")}</h2>
             <p className="section-subtitle">{t("Built for Maharashtra, designed for you.", "महाराष्ट्रासाठी बनवले, तुमच्यासाठी डिझाइन केले.", "महाराष्ट्र के लिए बनाया, आपके लिए डिज़ाइन किया।")}</p>
           </div>
           <div className="features-grid">
@@ -277,9 +277,9 @@ export default function HomePage() {
             <h2 className="owner-cta-title">{t("Own a Property?", "मालक आहात?", "प्रॉपर्टी के मालिक हैं?")}</h2>
             <p className="owner-cta-desc">
               {t(
-                "List on Rently by Arynoxtech. Reach thousands of verified tenants. AI handles contracts. Zero brokerage.",
-                "Rently (आर्यनॉक्सटेक) वर यादी करा. हजारो पडताळलेल्या भाडेदारांपर्यंत पोहोचा. AI करार हाताळतो. शून्य ब्रोकरेज.",
-                "Rently (Arynoxtech) पर लिस्ट करें। हजारो सत्यापित किरायेदारों तक पहुंचें। AI समझौते संभालता है। ज़ीरो ब्रोकरेज।"
+                "List on Nivasa by Arynoxtech. Reach thousands of verified tenants. AI handles contracts. Zero brokerage.",
+                "Nivasa (आर्यनॉक्सटेक) वर यादी करा. हजारो पडताळलेल्या भाडेदारांपर्यंत पोहोचा. AI करार हाताळतो. शून्य ब्रोकरेज.",
+                "Nivasa (Arynoxtech) पर लिस्ट करें। हजारो सत्यापित किरायेदारों तक पहुंचें। AI समझौते संभालता है। ज़ीरो ब्रोकरेज।"
               )}
             </p>
             <div className="owner-cta-buttons">

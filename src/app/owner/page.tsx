@@ -109,7 +109,7 @@ export default function OwnerPage() {
         <div className="container-app">
           <div style={{ textAlign: "center", marginBottom: 30 }}>
             <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 800, color: "#0b1437" }}>
-              {l === "mr" ? "रेंटली (आर्यनॉक्सटेक) का वापर का?" : l === "hi" ? "रेंटली (Arynoxtech) ही क्यों?" : "Why Rently by Arynoxtech for owners?"}
+              {l === "mr" ? "निवासा (आर्यनॉक्सटेक) का वापर का?" : l === "hi" ? "निवासा (Arynoxtech) ही क्यों?" : "Why Nivasa by Arynoxtech for owners?"}
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>

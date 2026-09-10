@@ -1,4 +1,4 @@
-# Rently by Arynoxtech — Investor Deck
+# Nivasa by Arynoxtech — Investor Deck
 
 > **Zero brokerage. AI-powered. Maharashtra-first.**
 > A rental platform built for 130M+ Indians who rent.
@@ -7,11 +7,11 @@
 
 ## Executive Summary
 
-**Rently** is a zero-brokerage rental property platform connecting tenants directly with verified owners across Maharashtra, India. Built by **Arynoxtech**, Rently combines AI-powered search, legally binding e-contracts with Aadhaar eSign, Trust Score verification, and secure payments — all in a mobile-first experience.
+**Nivasa** is a zero-brokerage rental property platform connecting tenants directly with verified owners across Maharashtra, India. Built by **Arynoxtech**, Nivasa combines AI-powered search, legally binding e-contracts with Aadhaar eSign, Trust Score verification, and secure payments — all in a mobile-first experience.
 
 **The problem**: India's ₹20B+ rental market is plagued by brokers charging 1-2 months' rent as commission, fake listings, deposit disputes, and no legal documentation. 78% of tenants in Maharashtra report negative experiences with brokers (ANAROCK 2024).
 
-**The solution**: Rently eliminates brokers, uses AI to detect scams, generates legally valid contracts, and provides end-to-end rental management — at a fraction of the cost.
+**The solution**: Nivasa eliminates brokers, uses AI to detect scams, generates legally valid contracts, and provides end-to-end rental management — at a fraction of the cost.
 
 **Ask**: ₹2 Cr Seed Round
 **Use of funds**: Product development, Maharashtra expansion, growth marketing
@@ -55,7 +55,7 @@
 
 ### Direct Competitors
 
-| Feature | NoBroker | Housing.com | 99acres | MagicBricks | **Rently** |
+| Feature | NoBroker | Housing.com | 99acres | MagicBricks | **Nivasa** |
 |---------|----------|-------------|---------|-------------|------------|
 | Zero brokerage | ✓ | Partial | ✗ | ✗ | **✓** |
 | AI scam detection | ✗ | ✗ | ✗ | ✗ | **✓** |
@@ -86,7 +86,7 @@
 
 #### 1. E-Contract Service (Live)
 - **Current price**: ₹50 per contract (AI-generated + eSign + PDF)
-- **Rently commission**: ₹5 per contract
+- **Nivasa commission**: ₹5 per contract
 - **Market comparison**: NoBroker charges ₹399-2,000 for the same service
 - **Target**: 10,000 contracts/month by Year 2 = **₹50K/month direct + ₹500K/month at scale**
 
@@ -421,12 +421,12 @@
 ## Contact
 
 **Arynoxtech**
-- Website: [rently-green.vercel.app](https://rently-green.vercel.app)
+- Website: [nivasa-green.vercel.app](https://nivasa-green.vercel.app)
 - Email: support@arynoxtech.com
-- GitHub: [aryaanchavan1-commits/rently](https://github.com/aryaanchavan1-commits/rently)
+- GitHub: [aryaanchavan1-commits/Nivasa](https://github.com/aryaanchavan1-commits/Nivasa)
 
 ---
 
-*Rently — Because every Indian deserves a broker-free, scam-free, legally protected rental experience.*
+*Nivasa — Because every Indian deserves a broker-free, scam-free, legally protected rental experience.*
 
 **Built in Maharashtra. Made for India.**

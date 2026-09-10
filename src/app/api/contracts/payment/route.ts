@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getContract, updateContract } from "@/lib/contracts-store";
 
-const RENTLY_ECONTRACT_PRICE = 50;
-const RENTLY_COMMISSION = 5;
+const Nivasa_ECONTRACT_PRICE = 50;
+const Nivasa_COMMISSION = 5;
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,17 +23,17 @@ export async function POST(request: NextRequest) {
 
       updateContract(contractId, {
         status: "pending_payment",
-        paymentAmount: RENTLY_ECONTRACT_PRICE,
+        paymentAmount: Nivasa_ECONTRACT_PRICE,
         paymentId: orderId,
       });
 
       return NextResponse.json({
         success: true,
         orderId,
-        amount: RENTLY_ECONTRACT_PRICE,
+        amount: Nivasa_ECONTRACT_PRICE,
         currency: "INR",
         key: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
-        name: "Rently by Arynoxtech",
+        name: "Nivasa by Arynoxtech",
         description: `E-Contract for ${contract.propertyTitle}`,
         prefill: {
           name: contract.ownerName,
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         },
         notes: {
           contractId,
-          commission: RENTLY_COMMISSION,
+          commission: Nivasa_COMMISSION,
         },
       });
     }

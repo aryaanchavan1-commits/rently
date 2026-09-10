@@ -5,7 +5,7 @@ export default function ShareButton({ propertyId, title }: { propertyId: string;
     const url = `${typeof window !== "undefined" ? window.location.origin : ""}/properties/${propertyId}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: `Check out: ${title}`, text: `Found on Rently: ${title}`, url });
+        await navigator.share({ title: `Check out: ${title}`, text: `Found on Nivasa: ${title}`, url });
       } catch { /* user cancelled */ }
     } else {
       await navigator.clipboard.writeText(url);

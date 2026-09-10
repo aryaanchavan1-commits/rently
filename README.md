@@ -1,9 +1,9 @@
-# Rently — Maharashtra's Rental Property Platform
+# Nivasa — Maharashtra's Rental Property Platform
 
 > A trusted, zero-brokerage, AI-powered rental platform covering 30+ cities across Maharashtra. Built by **Arynoxtech**.
 
-**Live:** https://rently-green.vercel.app
-**GitHub:** https://github.com/aryaanchavan1-commits/rently.git
+**Live:** https://nivasa-green.vercel.app
+**GitHub:** https://github.com/aryaanchavan1-commits/Nivasa.git
 
 ---
 
@@ -209,8 +209,8 @@ See `.env` in the project root for all required variables with documentation.
 
 ```bash
 # Clone
-git clone https://github.com/aryaanchavan1-commits/rently.git
-cd rently
+git clone https://github.com/aryaanchavan1-commits/Nivasa.git
+cd Nivasa
 
 # Install
 npm install
@@ -239,8 +239,8 @@ Auto-deploys to Vercel on push to `main`.
 
 | Role | Email | Password |
 |------|-------|----------|
-| Tenant | `demo@rently.in` | `demo1234` |
-| Owner | `owner@rently.in` | `demo1234` |
+| Tenant | `demo@nivasa.in` | `demo1234` |
+| Owner | `owner@nivasa.in` | `demo1234` |
 
 ---
 
@@ -280,7 +280,7 @@ Auto-deploys to Vercel on push to `main`.
 ## Project Structure
 
 ```
-rently/
+Nivasa/
 ├── .env                          # Environment variables (NOT in git)
 ├── package.json                  # Dependencies
 ├── next.config.ts                # Next.js config (security headers)

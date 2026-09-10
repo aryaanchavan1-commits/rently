@@ -114,8 +114,8 @@ export function detectScams(p: Property, allProperties: Property[]): ScamWarning
       id: "unverified-owner",
       severity: "medium",
       type: "Owner Verification",
-      message: "Owner identity has not been verified by Rently",
-      detail: "This owner has not completed Rently's verification process. We recommend meeting the owner in person and verifying property ownership documents before proceeding.",
+      message: "Owner identity has not been verified by Nivasa",
+      detail: "This owner has not completed Nivasa's verification process. We recommend meeting the owner in person and verifying property ownership documents before proceeding.",
     });
   }
 

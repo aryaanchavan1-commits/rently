@@ -70,7 +70,7 @@ export default function InboxPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div>
             <h1 className="text-royal" style={{ fontSize: 26, fontWeight: 800 }}>Inbox</h1>
-            <p style={{ fontSize: 14, color: "var(--rently-muted)", marginTop: 4 }}>
+            <p style={{ fontSize: 14, color: "var(--nivasa-muted)", marginTop: 4 }}>
               {conversations.length} conversations · {newCount} new
             </p>
           </div>
@@ -94,7 +94,7 @@ export default function InboxPage() {
           <div className="card-cream" style={{ padding: 50, textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Sign in to view your inbox</h3>
-            <p style={{ color: "var(--rently-muted)", marginBottom: 18 }}>You need to be logged in to access conversations.</p>
+            <p style={{ color: "var(--nivasa-muted)", marginBottom: 18 }}>You need to be logged in to access conversations.</p>
             <Link href="/auth/login" className="btn btn-primary">Sign in</Link>
           </div>
         ) : loading ? (
@@ -105,13 +105,13 @@ export default function InboxPage() {
           <div className="card-cream" style={{ padding: 50, textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{error}</h3>
-            <p style={{ color: "var(--rently-muted)" }}>Please try refreshing the page.</p>
+            <p style={{ color: "var(--nivasa-muted)" }}>Please try refreshing the page.</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="card-cream" style={{ padding: 50, textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No inquiries yet</h3>
-            <p style={{ color: "var(--rently-muted)" }}>When tenants contact you, their inquiries will appear here.</p>
+            <p style={{ color: "var(--nivasa-muted)" }}>When tenants contact you, their inquiries will appear here.</p>
           </div>
         ) : (
           <div style={{ display: "grid", gap: 10 }}>
@@ -123,7 +123,7 @@ export default function InboxPage() {
                 style={{
                   display: "block",
                   padding: "18px 20px",
-                  borderLeft: conv.unread > 0 ? "4px solid var(--rently-accent)" : "4px solid transparent",
+                  borderLeft: conv.unread > 0 ? "4px solid var(--nivasa-accent)" : "4px solid transparent",
                   textDecoration: "none",
                   color: "inherit",
                 }}
@@ -131,8 +131,8 @@ export default function InboxPage() {
                 <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                   <div style={{
                     width: 48, height: 48, borderRadius: "50%",
-                    background: conv.unread > 0 ? "linear-gradient(135deg, var(--rently-primary), var(--rently-primary-dark))" : "var(--rently-cream-dark)",
-                    color: conv.unread > 0 ? "white" : "var(--rently-text)",
+                    background: conv.unread > 0 ? "linear-gradient(135deg, var(--nivasa-primary), var(--nivasa-primary-dark))" : "var(--nivasa-cream-dark)",
+                    color: conv.unread > 0 ? "white" : "var(--nivasa-text)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontWeight: 800, fontSize: 18, flexShrink: 0,
                   }}>
@@ -141,20 +141,20 @@ export default function InboxPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: conv.unread > 0 ? 800 : 600, color: "var(--rently-text)" }}>{conv.tenantName}</span>
+                        <span style={{ fontSize: 15, fontWeight: conv.unread > 0 ? 800 : 600, color: "var(--nivasa-text)" }}>{conv.tenantName}</span>
                         {conv.status === "new" && <span className="badge badge-accent">NEW</span>}
                       </div>
-                      <span style={{ fontSize: 12, color: "var(--rently-muted)" }}>{timeAgo(conv.lastMessageAt)}</span>
+                      <span style={{ fontSize: 12, color: "var(--nivasa-muted)" }}>{timeAgo(conv.lastMessageAt)}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--rently-muted)", marginBottom: 4 }}>
+                    <div style={{ fontSize: 12, color: "var(--nivasa-muted)", marginBottom: 4 }}>
                       Re: {conv.propertyTitle}
                     </div>
-                    <p style={{ fontSize: 14, color: conv.unread > 0 ? "var(--rently-text)" : "var(--rently-muted)", fontWeight: conv.unread > 0 ? 600 : 400, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: 14, color: conv.unread > 0 ? "var(--nivasa-text)" : "var(--nivasa-muted)", fontWeight: conv.unread > 0 ? 600 : 400, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {conv.lastMessage}
                     </p>
                   </div>
                   {conv.unread > 0 && (
-                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--rently-accent)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{conv.unread}</div>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--nivasa-accent)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{conv.unread}</div>
                   )}
                 </div>
               </Link>

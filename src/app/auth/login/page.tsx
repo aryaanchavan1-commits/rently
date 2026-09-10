@@ -41,10 +41,10 @@ export default function LoginPage() {
 
   function fillDemo(type: "tenant" | "owner") {
     if (type === "tenant") {
-      setEmail("demo@rently.in");
+      setEmail("demo@nivasa.in");
       setPassword("demo1234");
     } else {
-      setEmail("owner@rently.in");
+      setEmail("owner@nivasa.in");
       setPassword("demo1234");
     }
   }
@@ -56,14 +56,14 @@ export default function LoginPage() {
         <div className="login-card fade-in">
           {/* Logo */}
           <div className="login-logo">
-            <div className="login-logo-icon">R</div>
+            <div className="login-logo-icon">N</div>
             <div>
-              <span className="login-logo-text">Rent<span style={{ color: "var(--primary)" }}>ly</span></span>
+              <span className="login-logo-text">Ni<span style={{ color: "var(--primary)" }}>vasa</span></span>
               <span className="login-logo-byline">by Arynoxtech</span>
             </div>
           </div>
 
-          <h1 className="login-title">{t.auth.welcomeBack} <span style={{ color: "var(--primary)", fontWeight: 800 }}>Rently</span></h1>
+          <h1 className="login-title">{t.auth.welcomeBack} <span style={{ color: "var(--primary)", fontWeight: 800 }}>Nivasa</span></h1>
           <p className="login-subtitle">{t.auth.loginSubtitle}</p>
 
           {error && (
@@ -139,7 +139,7 @@ export default function LoginPage() {
                 </span>
                 <div className="login-demo-info">
                   <span className="login-demo-name">{t.auth.tenant}</span>
-                  <span className="login-demo-email">demo@rently.in</span>
+                  <span className="login-demo-email">demo@nivasa.in</span>
                 </div>
                 <span className="login-demo-tap">Tap to fill</span>
               </button>
@@ -149,7 +149,7 @@ export default function LoginPage() {
                 </span>
                 <div className="login-demo-info">
                   <span className="login-demo-name">{t.auth.owner}</span>
-                  <span className="login-demo-email">owner@rently.in</span>
+                  <span className="login-demo-email">owner@nivasa.in</span>
                 </div>
                 <span className="login-demo-tap">Tap to fill</span>
               </button>

@@ -5,14 +5,14 @@ export default function FavoriteButton({ propertyId }: { propertyId: string }) {
   const [isFav, setIsFav] = useState(false);
 
   useEffect(() => {
-    const favs = JSON.parse(localStorage.getItem("rently_favorites") || "[]");
+    const favs = JSON.parse(localStorage.getItem("nivasa_favorites") || "[]");
     setIsFav(favs.includes(propertyId));
   }, [propertyId]);
 
   function toggle() {
-    const favs = JSON.parse(localStorage.getItem("rently_favorites") || "[]");
+    const favs = JSON.parse(localStorage.getItem("nivasa_favorites") || "[]");
     const updated = isFav ? favs.filter((id: string) => id !== propertyId) : [...favs, propertyId];
-    localStorage.setItem("rently_favorites", JSON.stringify(updated));
+    localStorage.setItem("nivasa_favorites", JSON.stringify(updated));
     setIsFav(!isFav);
   }
 

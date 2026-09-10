@@ -48,14 +48,14 @@ export default function SignupPage() {
       <div className="login-container">
         <div className="login-card fade-in">
           <div className="login-logo">
-            <div className="login-logo-icon">R</div>
+            <div className="login-logo-icon">N</div>
             <div>
-              <span className="login-logo-text">Rent<span style={{ color: "var(--primary)" }}>ly</span></span>
+              <span className="login-logo-text">Ni<span style={{ color: "var(--primary)" }}>vasa</span></span>
               <span className="login-logo-byline">by Arynoxtech</span>
             </div>
           </div>
 
-          <h1 className="login-title">{t.auth.createTitle} <span style={{ color: "var(--primary)", fontWeight: 800 }}>Rently</span></h1>
+          <h1 className="login-title">{t.auth.createTitle} <span style={{ color: "var(--primary)", fontWeight: 800 }}>Nivasa</span></h1>
           <p className="login-subtitle">{t.auth.signupSubtitle}</p>
 
           {success && (

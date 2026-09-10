@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { calculateTrustScore } from "@/lib/trust-score";
 
-const g = globalThis as unknown as { __rentlyProperties?: any[] };
+const g = globalThis as unknown as { __NivasaProperties?: any[] };
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "propertyId required" }, { status: 400 });
   }
 
-  const properties = g.__rentlyProperties || [];
+  const properties = g.__NivasaProperties || [];
   const property = properties.find((p: any) => p.id === propertyId);
 
   if (!property) {

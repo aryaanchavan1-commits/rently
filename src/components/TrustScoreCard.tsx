@@ -112,7 +112,7 @@ export default function TrustScoreCard({ propertyId }: { propertyId: string }) {
             <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{data.gradeLabel}</span>
           </div>
           <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
-            Rently Trust Score based on owner verification, deposit compliance, listing quality, and scam analysis
+            Nivasa Trust Score based on owner verification, deposit compliance, listing quality, and scam analysis
           </div>
         </div>
       </div>

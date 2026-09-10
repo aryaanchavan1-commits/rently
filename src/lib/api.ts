@@ -2,7 +2,7 @@
 // In web mode: relative URLs work (empty base)
 // In Capacitor: needs full Vercel URL since there's no local server
 
-const PROD_URL = "https://rently-green.vercel.app";
+const PROD_URL = "https://nivasa-green.vercel.app";
 
 export function apiUrl(path: string): string {
   if (typeof window === "undefined") return path;

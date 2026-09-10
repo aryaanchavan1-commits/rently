@@ -9,9 +9,9 @@ export default function Footer() {
           <div className="footer-grid">
             <div className="footer-brand">
               <Link href="/" className="footer-logo">
-                <div className="footer-logo-icon">R</div>
+                <div className="footer-logo-icon">N</div>
                 <div>
-                  <span className="footer-logo-text">Rent<span className="footer-logo-accent">ly</span></span>
+                  <span className="footer-logo-text">Ni<span className="footer-logo-accent">vasa</span></span>
                   <span className="footer-logo-byline">by Arynoxtech</span>
                 </div>
               </Link>
@@ -48,7 +48,7 @@ export default function Footer() {
 
           <div className="footer-bottom">
             <div className="footer-copyright">
-              &copy; {new Date().getFullYear()} <strong>Arynoxtech</strong>. All rights reserved. | Rently is a product of Arynoxtech.
+              &copy; {new Date().getFullYear()} <strong>Arynoxtech</strong>. All rights reserved. | Nivasa is a product of Arynoxtech.
             </div>
             <div className="footer-made">Made in Maharashtra, India</div>
           </div>
@@ -104,7 +104,7 @@ export default function Footer() {
       <div className="mobile-footer">
         <div className="mobile-footer-brand">
           <div className="mobile-footer-logo">R</div>
-          <span>Rently</span>
+          <span>Nivasa</span>
           <span className="mobile-footer-copy">&copy; 2026 Arynoxtech</span>
         </div>
         <div className="mobile-footer-links">

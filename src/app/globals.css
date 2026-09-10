@@ -44,18 +44,18 @@
   --radius-full: 9999px;
 
   /* Legacy aliases (used by older components) */
-  --rently-primary: var(--primary);
-  --rently-primary-dark: var(--primary-hover);
-  --rently-primary-light: var(--primary-light);
-  --rently-accent: var(--accent);
-  --rently-success: var(--success);
-  --rently-text: var(--text);
-  --rently-muted: var(--text-muted);
-  --rently-border: var(--border);
-  --rently-border-light: var(--border-light);
-  --rently-card: var(--surface);
-  --rently-cream: var(--bg);
-  --rently-cream-dark: var(--surface-hover);
+  --nivasa-primary: var(--primary);
+  --nivasa-primary-dark: var(--primary-hover);
+  --nivasa-primary-light: var(--primary-light);
+  --nivasa-accent: var(--accent);
+  --nivasa-success: var(--success);
+  --nivasa-text: var(--text);
+  --nivasa-muted: var(--text-muted);
+  --nivasa-border: var(--border);
+  --nivasa-border-light: var(--border-light);
+  --nivasa-card: var(--surface);
+  --nivasa-cream: var(--bg);
+  --nivasa-cream-dark: var(--surface-hover);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -678,8 +678,15 @@ textarea.input { resize: vertical; min-height: 90px; }
   .mobile-menu { display: none !important; }
   .footer { display: none !important; }
 
-  /* Bottom nav clearance for main content */
-  main { padding-bottom: 80px !important; }
+  /* Bottom nav clearance for ALL content */
+  main, body > div, .page-enter, [class*="page"] {
+    padding-bottom: 80px !important;
+  }
+  /* Ensure children of ClientLayout get clearance */
+  .error-boundary + div > div > main,
+  .error-boundary + div > div > div {
+    padding-bottom: 80px !important;
+  }
 
   /* Touch-friendly targets */
   .btn { min-height: 44px; }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rently-v1';
+const CACHE_NAME = 'nivasa-v1';
 const STATIC_ASSETS = ['/', '/properties', '/dashboard', '/inbox', '/commute', '/map'];
 
 self.addEventListener('install', (e) => {

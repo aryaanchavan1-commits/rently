@@ -9,7 +9,7 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const favIds = JSON.parse(localStorage.getItem("rently_favorites") || "[]");
+    const favIds = JSON.parse(localStorage.getItem("nivasa_favorites") || "[]");
     if (favIds.length === 0) { setLoading(false); return; }
     fetch("/api/properties")
       .then(r => r.json())
@@ -22,8 +22,8 @@ export default function FavoritesPage() {
   }, []);
 
   function removeFav(id: string) {
-    const favIds = JSON.parse(localStorage.getItem("rently_favorites") || "[]");
-    localStorage.setItem("rently_favorites", JSON.stringify(favIds.filter((i: string) => i !== id)));
+    const favIds = JSON.parse(localStorage.getItem("nivasa_favorites") || "[]");
+    localStorage.setItem("nivasa_favorites", JSON.stringify(favIds.filter((i: string) => i !== id)));
     setFavorites(prev => prev.filter(p => p.id !== id));
   }
 

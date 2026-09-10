@@ -664,9 +664,13 @@ export default function AIChat() {
           0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
           40% { transform: scale(1); opacity: 1; }
         }
+        @media (max-width: 768px) {
+          .ai-fab { bottom: 76px !important; right: 16px !important; }
+          .ai-chat-window { bottom: 140px !important; right: 8px !important; width: calc(100vw - 16px) !important; height: calc(100vh - 220px) !important; }
+        }
         @media (max-width: 480px) {
-          .ai-chat-window { width: calc(100vw - 16px) !important; right: 8px !important; bottom: 80px !important; height: calc(100vh - 120px) !important; }
-          .ai-fab { bottom: 16px !important; right: 16px !important; }
+          .ai-chat-window { width: calc(100vw - 16px) !important; right: 8px !important; bottom: 140px !important; height: calc(100vh - 220px) !important; }
+          .ai-fab { bottom: 76px !important; right: 16px !important; }
         }
       `}</style>
     </>

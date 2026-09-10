@@ -125,7 +125,7 @@ export function useNotifications(userId?: string) {
 
   useEffect(() => {
     if (!userId) return;
-    const stored = localStorage.getItem(`rently_notifications_${userId}`);
+    const stored = localStorage.getItem(`nivasa_notifications_${userId}`);
     if (stored) {
       try { setNotifications(JSON.parse(stored)); } catch { /* ignore */ }
     }
@@ -142,7 +142,7 @@ export function useNotifications(userId?: string) {
     };
     setNotifications(prev => {
       const updated = [newNotif, ...prev].slice(0, 50);
-      if (userId) localStorage.setItem(`rently_notifications_${userId}`, JSON.stringify(updated));
+      if (userId) localStorage.setItem(`nivasa_notifications_${userId}`, JSON.stringify(updated));
       return updated;
     });
   }, [userId]);
@@ -150,7 +150,7 @@ export function useNotifications(userId?: string) {
   const markRead = useCallback((id: string) => {
     setNotifications(prev => {
       const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
-      if (userId) localStorage.setItem(`rently_notifications_${userId}`, JSON.stringify(updated));
+      if (userId) localStorage.setItem(`nivasa_notifications_${userId}`, JSON.stringify(updated));
       return updated;
     });
   }, [userId]);
@@ -158,7 +158,7 @@ export function useNotifications(userId?: string) {
   const markAllRead = useCallback(() => {
     setNotifications(prev => {
       const updated = prev.map(n => ({ ...n, read: true }));
-      if (userId) localStorage.setItem(`rently_notifications_${userId}`, JSON.stringify(updated));
+      if (userId) localStorage.setItem(`nivasa_notifications_${userId}`, JSON.stringify(updated));
       return updated;
     });
   }, [userId]);

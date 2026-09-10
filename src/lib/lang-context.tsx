@@ -24,7 +24,7 @@ export function LangProvider({ children, defaultLang }: { children: ReactNode; d
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("rently-lang") as LangKey;
+    const saved = localStorage.getItem("nivasa-lang") as LangKey;
     if (saved && (saved === "en" || saved === "mr" || saved === "hi")) {
       setLangState(saved);
     }
@@ -33,7 +33,7 @@ export function LangProvider({ children, defaultLang }: { children: ReactNode; d
 
   const setLang = useCallback((l: LangKey) => {
     setLangState(l);
-    localStorage.setItem("rently-lang", l);
+    localStorage.setItem("nivasa-lang", l);
   }, []);
 
   return (

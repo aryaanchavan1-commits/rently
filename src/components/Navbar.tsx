@@ -24,9 +24,9 @@ export default function Navbar() {
         <div className="container-app navbar-inner">
           {/* Logo */}
           <Link href="/" className="navbar-logo">
-            <div className="navbar-logo-icon">R</div>
+            <div className="navbar-logo-icon">N</div>
             <div className="navbar-logo-text">
-              <span className="navbar-brand">Rent<span className="navbar-brand-accent">ly</span></span>
+              <span className="navbar-brand">Ni<span className="navbar-brand-accent">vasa</span></span>
               <span className="navbar-byline">by Arynoxtech</span>
             </div>
           </Link>

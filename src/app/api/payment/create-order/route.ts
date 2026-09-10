@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       amount: amount * 100,
       currency: "INR",
       key: RAZORPAY_KEY_ID,
-      description: description || "Rently by Arynoxtech Payment",
+      description: description || "Nivasa by Arynoxtech Payment",
     });
   } catch (error) {
     console.error("Payment order error:", error);

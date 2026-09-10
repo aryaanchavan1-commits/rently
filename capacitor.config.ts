@@ -1,11 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'in.arynoxtech.rently',
-  appName: 'Rently',
+  appId: 'in.arynoxtech.nivasa',
+  appName: 'nivasa',
   webDir: 'out',
   server: {
-    url: 'https://rently-green.vercel.app',
+    url: 'https://nivasa-green.vercel.app',
     cleartext: true,
     androidScheme: 'https',
   },
