@@ -103,7 +103,7 @@ export default function Footer() {
       {/* Mobile Compact Footer */}
       <div className="mobile-footer">
         <div className="mobile-footer-brand">
-          <div className="mobile-footer-logo">R</div>
+          <div className="mobile-footer-logo">N</div>
           <span>Nivasa</span>
           <span className="mobile-footer-copy">&copy; 2026 Arynoxtech</span>
         </div>

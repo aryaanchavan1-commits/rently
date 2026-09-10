@@ -258,10 +258,11 @@ export default function HomePage() {
           <div className="cities-grid">
             {MAHARASHTRA_CITIES.map((city) => {
               const count = stats.cityCounts[city.name] || 0;
+              const localName = lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : "";
               return (
                 <Link key={city.name} href={`/properties?type=rent&q=${city.name}`} className="city-card card card-hover">
                   <div className="city-name">{city.name}</div>
-                  <div className="city-name-local">{lang === "mr" ? city.nameMr : lang === "hi" ? city.nameHi : city.name}</div>
+                  {localName && <div className="city-name-local">{localName}</div>}
                   <div className="city-count">{count > 0 ? `${count}+ ` : ""}{t("listings", "यादी", "लिस्टिंग")}</div>
                 </Link>
               );

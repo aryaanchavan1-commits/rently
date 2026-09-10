@@ -71,6 +71,7 @@ export default function Navbar() {
             className="navbar-hamburger"
             onClick={() => setOpen(!open)}
             aria-label="Menu"
+            style={{ display: "none" }}
           >
             <span className="hamburger-line" style={open ? { transform: "rotate(45deg) translate(5px, 5px)" } : {}} />
             <span className="hamburger-line" style={open ? { opacity: 0 } : {}} />
