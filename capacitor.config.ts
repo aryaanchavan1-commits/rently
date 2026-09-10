@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'nivasa',
   webDir: 'out',
   server: {
-    url: 'https://nivasa-green.vercel.app',
+    url: 'https://rently-green.vercel.app',
     cleartext: true,
     androidScheme: 'https',
   },
