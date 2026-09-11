@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { translations, type LangKey } from "@/lib/translations";
 
-type AnyTranslation = typeof translations["en"] | typeof translations["mr"] | typeof translations["hi"];
+type AnyTranslation = typeof translations["en"];
 
 interface LangCtx {
   lang: LangKey;
@@ -25,7 +25,7 @@ export function LangProvider({ children, defaultLang }: { children: ReactNode; d
 
   useEffect(() => {
     const saved = localStorage.getItem("nivasa-lang") as LangKey;
-    if (saved && (saved === "en" || saved === "mr" || saved === "hi")) {
+    if (saved && saved in translations) {
       setLangState(saved);
     }
     setMounted(true);

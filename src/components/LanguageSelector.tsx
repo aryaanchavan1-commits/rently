@@ -1,27 +1,44 @@
 "use client";
 
 import { useLang } from "@/lib/lang-context";
+import type { LangKey } from "@/lib/translations";
 
-const flags: Record<string, string> = {
-  en: "🇬🇧",
-  mr: "🇮🇳",
-  hi: "🇮🇳",
+const langMeta: Record<string, { flag: string; label: string; name: string }> = {
+  en: { flag: "🇬🇧", label: "EN", name: "English" },
+  mr: { flag: "🇮🇳", label: "MR", name: "मराठी" },
+  hi: { flag: "🇮🇳", label: "HI", name: "हिन्दी" },
+  bn: { flag: "🇮🇳", label: "BN", name: "বাংলা" },
+  ta: { flag: "🇮🇳", label: "TA", name: "தமிழ்" },
+  te: { flag: "🇮🇳", label: "TE", name: "తెలుగు" },
+  kn: { flag: "🇮🇳", label: "KN", name: "ಕನ್ನಡ" },
+  gu: { flag: "🇮🇳", label: "GU", name: "ગુજરાતી" },
+  ml: { flag: "🇮🇳", label: "ML", name: "മലയാളം" },
+  pa: { flag: "🇮🇳", label: "PA", name: "ਪੰਜਾਬੀ" },
+  ur: { flag: "🇵🇰", label: "UR", name: "اردو" },
+  or: { flag: "🇮🇳", label: "OR", name: "ଓଡ଼ିଆ" },
+  as: { flag: "🇮🇳", label: "AS", name: "অসমীয়া" },
 };
 
-const labels: Record<string, string> = {
-  en: "EN",
-  mr: "MR",
-  hi: "HI",
-};
+const allLangs = Object.keys(langMeta) as LangKey[];
+
+const groups = [
+  { label: "English", langs: ["en"] as LangKey[] },
+  { label: "Hindi Belt", langs: ["hi", "mr", "pa"] as LangKey[] },
+  { label: "South India", langs: ["ta", "te", "kn", "ml"] as LangKey[] },
+  { label: "East India", langs: ["bn", "or", "as"] as LangKey[] },
+  { label: "West India", langs: ["gu"] as LangKey[] },
+  { label: "Other", langs: ["ur"] as LangKey[] },
+];
 
 export default function LanguageSelector({ inline = false }: { inline?: boolean }) {
   const { lang, setLang, mounted } = useLang();
-  const options = ["en", "mr", "hi"] as const;
+
+  if (!mounted) return null;
 
   if (inline) {
     return (
-      <div style={{ display: "flex", gap: 4 }}>
-        {options.map((l) => (
+      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+        {allLangs.map((l) => (
           <button
             key={l}
             onClick={() => setLang(l)}
@@ -37,7 +54,7 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
               transition: "all 0.15s",
             }}
           >
-            {flags[l]} {labels[l]}
+            {langMeta[l].flag} {langMeta[l].label}
           </button>
         ))}
       </div>
@@ -47,7 +64,7 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
   return (
     <select
       value={lang}
-      onChange={(e) => setLang(e.target.value as "en" | "mr" | "hi")}
+      onChange={(e) => setLang(e.target.value as LangKey)}
       className="input"
       style={{
         width: "auto",
@@ -56,13 +73,17 @@ export default function LanguageSelector({ inline = false }: { inline?: boolean 
         borderRadius: 8,
         cursor: "pointer",
         background: "white",
-        minWidth: 100,
+        minWidth: 120,
       }}
     >
-      {options.map((l) => (
-        <option key={l} value={l}>
-          {flags[l]} {l === "en" ? "English" : l === "mr" ? "मराठी" : "हिन्दी"}
-        </option>
+      {groups.map((g) => (
+        <optgroup key={g.label} label={g.label}>
+          {g.langs.map((l) => (
+            <option key={l} value={l}>
+              {langMeta[l].flag} {langMeta[l].name}
+            </option>
+          ))}
+        </optgroup>
       ))}
     </select>
   );
